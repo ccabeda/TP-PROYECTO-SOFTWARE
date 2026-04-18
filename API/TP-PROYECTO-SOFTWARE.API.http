@@ -1,0 +1,6 @@
+@TP_PROYECTO_SOFTWARE.API_HostAddress = http://localhost:5216
+
+GET {{TP_PROYECTO_SOFTWARE.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

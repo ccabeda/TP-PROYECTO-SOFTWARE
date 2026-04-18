@@ -1,0 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace TP_PROYECTO_SOFTWARE.Domain.Models;
+
+public class AUDIT_LOG
+{
+    [Key]
+    public Guid Id { get; set; }
+    public int? UserId { get; set; }
+    public string Action { get; set; } = string.Empty;
+    public string EntityType { get; set; } = string.Empty;
+    public string EntityId { get; set; } = string.Empty;
+    public string Details { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+
+    public USER? User { get; set; }
+}
