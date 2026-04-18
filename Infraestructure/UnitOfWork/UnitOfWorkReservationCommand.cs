@@ -4,7 +4,7 @@ using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 
 namespace TP_PROYECTO_SOFTWARE.Infraestructure.UnitOfWork
 {
-    public class UnitOfWorkReservationCommand : IUnitOfWorkReservationCommand
+    public class UnitOfWorkReservationCommand : IUnitOfWorkReservationCommand //junto los metodos para hacer reservacion, asi en los usecase no llamo a los 3 repositorys
     {
         private readonly AplicationDbContext _context;
 
