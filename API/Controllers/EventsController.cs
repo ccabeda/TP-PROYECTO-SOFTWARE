@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers;
+using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Queries;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
@@ -14,13 +11,11 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     [Tags("Events")]
     public class EventsController : ControllerBase
     {
-        private readonly GetEventsHandler _handler;
-        private readonly GetSeatsByEventHandler _getSeatsByEventHandler;
+        private readonly IGetEventsHandler _handler;
 
-        public EventsController(GetEventsHandler handler, GetSeatsByEventHandler getSeatsByEventHandler)
+        public EventsController(IGetEventsHandler handler)
         {
             _handler = handler;
-            _getSeatsByEventHandler = getSeatsByEventHandler;
         }
 
         [HttpGet]
@@ -30,16 +25,6 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         public async Task<IActionResult> GetEvents()
         {
             var result = await _handler.Handle(new GetEventsQuery());
-            return Ok(result);
-        }
-
-        [HttpGet("{eventId}/seats")]
-        [SwaggerOperation(Summary = "Listado de asientos por evento")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(List<SeatGetDTO>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetSeatsByEvent([FromRoute] int eventId)
-        {
-            var result = await _getSeatsByEventHandler.Handle(new GetSeatsByEventQuery { EventId = eventId });
             return Ok(result);
         }
     }

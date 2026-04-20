@@ -1,18 +1,21 @@
 using AutoMapper;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
+using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 {
-    public class CreateReservationHandler
+    public class CreateReservationHandler : ICreateReservationHandler
     {
         private readonly IRepositorySeatQuery _repositorySeatQuery;
         private readonly IRepositoryReservationQuery _repositoryReservationQuery;
         private readonly IRepositoryUserQuery _repositoryUserQuery;
         private readonly IUnitOfWorkReservationCommand _unitOfWorkReservationCommand;
+        private readonly ICreateAuditLogHandler _createAuditLogHandler;
         private readonly IMapper _mapper;
 
         public CreateReservationHandler(
@@ -20,12 +23,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             IRepositoryReservationQuery repositoryReservationQuery,
             IRepositoryUserQuery repositoryUserQuery,
             IUnitOfWorkReservationCommand unitOfWorkReservationCommand,
+            ICreateAuditLogHandler createAuditLogHandler,
             IMapper mapper)
         {
             _repositorySeatQuery = repositorySeatQuery;
             _repositoryReservationQuery = repositoryReservationQuery;
             _repositoryUserQuery = repositoryUserQuery;
             _unitOfWorkReservationCommand = unitOfWorkReservationCommand;
+            _createAuditLogHandler = createAuditLogHandler;
             _mapper = mapper;
         }
 
@@ -53,22 +58,19 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 SeatId = seat.Id,
                 Status = "Pending",
                 ReservedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+                ExpiresAt = DateTime.UtcNow.AddMinutes(5) //para la entrega dos
             };
 
-            var auditLog = new AUDIT_LOG
+            await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+            await _unitOfWorkReservationCommand.RepositoryReservationCommand.Create(reservation);
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = user.Id,
                 Action = "CreateReservation",
                 EntityType = "RESERVATION",
                 EntityId = reservation.Id.ToString(),
-                Details = $"Reserva creada para la butaca {seat.Id}",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
-            await _unitOfWorkReservationCommand.RepositoryReservationCommand.Create(reservation);
-            await _unitOfWorkReservationCommand.RepositoryAuditLogCommand.Create(auditLog);
+                Details = $"Reserva creada. SeatId={seat.Id}, UserId={user.Id}, Status={reservation.Status}, ExpiresAt={reservation.ExpiresAt:O}"
+            });
             await _unitOfWorkReservationCommand.Save();
 
             return _mapper.Map<ReservationGetDTO>(reservation);

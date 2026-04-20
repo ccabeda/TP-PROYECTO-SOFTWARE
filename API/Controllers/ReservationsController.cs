@@ -2,8 +2,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
+using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
@@ -12,13 +13,26 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     [Tags("Reservations")]
     public class ReservationsController : ControllerBase
     {
-        private readonly CreateReservationHandler _handler;
+        private readonly ICreateReservationHandler _handler;
+        private readonly IGetReservationByIdHandler _getReservationByIdHandler;
         private readonly IMapper _mapper;
 
-        public ReservationsController(CreateReservationHandler handler, IMapper mapper)
+        public ReservationsController(ICreateReservationHandler handler, IGetReservationByIdHandler getReservationByIdHandler, IMapper mapper)
         {
             _handler = handler;
+            _getReservationByIdHandler = getReservationByIdHandler;
             _mapper = mapper;
+        }
+
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Obtiene una reserva por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetReservationById([FromRoute] Guid id)
+        {
+            var result = await _getReservationByIdHandler.Handle(new GetReservationByIdQuery { Id = id });
+            return Ok(result);
         }
 
         [HttpPost]
@@ -34,7 +48,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             var command = _mapper.Map<CreateReservationCommand>(reservationCreateDTO);
             var result = await _handler.Handle(command);
 
-            return CreatedAtAction(nameof(CreateReservation), new { id = result.Id }, result);
+            return CreatedAtAction(nameof(GetReservationById), new { id = result.Id }, result);
         }
     }
 }

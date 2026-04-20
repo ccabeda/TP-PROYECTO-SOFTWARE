@@ -14,6 +14,10 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
+        public async Task<List<USER>> GetAll() => await _context.USER.ToListAsync();
+
         public async Task<USER?> GetById(int id) => await _context.USER.FirstOrDefaultAsync(u => u.Id == id);
+
+        public async Task<USER?> GetByEmail(string email) => await _context.USER.FirstOrDefaultAsync(u => u.Email == email);
     }
 }

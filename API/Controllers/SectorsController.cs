@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers;
+using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
@@ -11,9 +11,9 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     [Tags("Sectors")]
     public class SectorsController : ControllerBase
     {
-        private readonly GetSectorsByEventHandler _handler;
+        private readonly IGetSectorsByEventHandler _handler;
 
-        public SectorsController(GetSectorsByEventHandler handler)
+        public SectorsController(IGetSectorsByEventHandler handler)
         {
             _handler = handler;
         }

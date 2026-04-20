@@ -11,18 +11,15 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.UnitOfWork
         public UnitOfWorkReservationCommand(
             AplicationDbContext context,
             IRepositoryReservationCommand repositoryReservationCommand,
-            IRepositorySeatCommand repositorySeatCommand,
-            IRepositoryAuditLogCommand repositoryAuditLogCommand)
+            IRepositorySeatCommand repositorySeatCommand)
         {
             _context = context;
             RepositoryReservationCommand = repositoryReservationCommand;
             RepositorySeatCommand = repositorySeatCommand;
-            RepositoryAuditLogCommand = repositoryAuditLogCommand;
         }
 
         public IRepositoryReservationCommand RepositoryReservationCommand { get; }
         public IRepositorySeatCommand RepositorySeatCommand { get; }
-        public IRepositoryAuditLogCommand RepositoryAuditLogCommand { get; }
 
         public async Task Save() => await _context.SaveChangesAsync();
     }

@@ -25,6 +25,10 @@ namespace TP_PROYECTO_SOFTWARE.API.Middleware
             {
                 await HandleExceptionAsync(context, StatusCodes.Status409Conflict, ex.Message);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                await HandleExceptionAsync(context, StatusCodes.Status401Unauthorized, ex.Message);
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, StatusCodes.Status500InternalServerError, ex.Message);

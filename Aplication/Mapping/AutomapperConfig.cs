@@ -3,7 +3,9 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
+using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.Mapping
@@ -17,6 +19,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Mapping
             CreateMap<SEAT, SeatGetDTO>().ReverseMap();
             CreateMap<ReservationCreateDTO, CreateReservationCommand>().ReverseMap();
             CreateMap<RESERVATION, ReservationGetDTO>().ReverseMap();
+            CreateMap<USER, UserGetDTO>().ReverseMap();
+            CreateMap<UserCreateDTO, CreateUserCommand>().ReverseMap();
+            CreateMap<UserLoginDTO, LoginUserCommand>().ReverseMap();
         }
     }
 }

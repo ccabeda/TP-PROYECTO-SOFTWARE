@@ -6,7 +6,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork
     {
         IRepositoryReservationCommand RepositoryReservationCommand { get; }
         IRepositorySeatCommand RepositorySeatCommand { get; }
-        IRepositoryAuditLogCommand RepositoryAuditLogCommand { get; }
         Task Save();
     }
 }
