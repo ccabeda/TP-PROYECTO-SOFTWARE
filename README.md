@@ -102,6 +102,9 @@ dotnet run --project API\TP-PROYECTO-SOFTWARE.API.csproj
 ### Eventos y catalogo
 
 - `GET /api/v1/events`
+- `GET /api/v1/events?name=rock`
+- `GET /api/v1/events?eventDate=2026-07-15`
+- `GET /api/v1/events?name=rock&eventDate=2026-07-15`
 - `GET /api/v1/events/{eventId}/sectors`
 - `GET /api/v1/events/{eventId}/seats`
 - `GET /api/v1/sectors/{sectorId}/seats`
