@@ -22,9 +22,13 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [SwaggerOperation(Summary = "Listado de eventos")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [ProducesResponseType(typeof(List<EventGetDTO>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetEvents()
+        public async Task<IActionResult> GetEvents([FromQuery] string? name, [FromQuery] DateTime? eventDate)
         {
-            var result = await _handler.Handle(new GetEventsQuery());
+            var result = await _handler.Handle(new GetEventsQuery
+            {
+                Name = name,
+                EventDate = eventDate
+            });
             return Ok(result);
         }
     }

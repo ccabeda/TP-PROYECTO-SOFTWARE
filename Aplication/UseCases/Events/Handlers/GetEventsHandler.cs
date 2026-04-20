@@ -19,7 +19,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 
         public async Task<List<EventGetDTO>> Handle(GetEventsQuery query)
         {
-            var events = await _repositoryEventQuery.GetAll();
+            var events = await _repositoryEventQuery.GetAll(query);
             return _mapper.Map<List<EventGetDTO>>(events);
         }
     }
