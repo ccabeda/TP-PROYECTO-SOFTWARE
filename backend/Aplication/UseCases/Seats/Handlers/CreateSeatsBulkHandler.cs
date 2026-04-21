@@ -12,7 +12,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
     public class CreateSeatsBulkHandler : ICreateSeatsBulkHandler
     {
         private const int MaxSeatsPerRow = 10;
-        private const int MaxSeatsPerRequest = 50;
 
         private readonly IRepositorySectorQuery _repositorySectorQuery;
         private readonly IRepositorySeatQuery _repositorySeatQuery;
@@ -58,13 +57,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 throw new InvalidOperationException("La cantidad de asientos por fila debe estar entre 1 y 10.");
             }
 
-            var totalSeatsToCreate = normalizedRows.Count * command.SeatsPerRow;
-            if (totalSeatsToCreate > MaxSeatsPerRequest)
-            {
-                throw new InvalidOperationException("No se pueden crear más de 50 asientos por operación.");
-            }
-
             var existingSeats = await _repositorySeatQuery.GetBySectorId(command.SectorId);
+            var totalSeatsToCreate = normalizedRows.Count * command.SeatsPerRow;
             if (existingSeats.Count + totalSeatsToCreate > sector.Capacity)
             {
                 throw new InvalidOperationException("La operación supera la capacidad máxima del sector.");

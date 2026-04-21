@@ -10,15 +10,15 @@ Integrantes:
 
 API REST para un sistema de ticketing de eventos. El proyecto permite:
 
-- listar eventos
-- crear y eliminar eventos, sectores y asientos con usuario administrador
-- listar sectores por evento
-- listar asientos por evento o por sector
-- crear usuarios
-- hacer login con JWT
-- crear reservas de asientos
-- confirmar pago simulado de reservas
-- consultar reservas por id
+- Listar eventos
+- Crear y eliminar eventos, sectores y asientos con usuario administrador
+- Listar sectores por evento
+- Listar asientos por evento o por sector
+- Crear usuarios
+- Hacer login con JWT
+- Crear reservas de asientos
+- Confirmar pago simulado de reservas
+- Consultar reservas por id
 
 La solucion sigue una arquitectura por capas dentro de `backend`:
 
@@ -94,16 +94,6 @@ Notas:
 - el usuario cuyo mail este en `AdminEmails` recibe rol `Admin`
 - los endpoints administrativos requieren token JWT con rol `Admin`
 - `POST /api/v1/users/login` devuelve el token
-
-### Swagger y JWT
-
-Para probar endpoints protegidos desde Swagger:
-
-1. crear usuario o usar uno existente
-2. hacer `POST /api/v1/users/login`
-3. copiar el valor `token` de la respuesta
-4. usar el boton `Authorize` de Swagger
-5. pegar `Bearer <token>`
 
 ## Restaurar y compilar
 
@@ -184,10 +174,16 @@ Notas:
 - un evento no puede tener mas de `5` sectores
 - `Capacity` del sector debe ser mayor a `0` y menor o igual a `100`
 - no se pueden crear mas asientos que la `Capacity` del sector
-- el endpoint bulk de asientos permite crear hasta `50` asientos por operacion
-- en bulk, la cantidad de filas no puede superar `5`
+- el endpoint bulk de asientos permite crear asientos hasta completar la capacidad disponible del sector
+- en bulk, la cantidad de filas no puede superar `10`
 - en bulk, la cantidad de asientos por fila debe estar entre `1` y `10`
 - en bulk, no se permiten filas repetidas ni butacas duplicadas
+
+Explicacion de reglas de asientos:
+
+- Evento -> hasta 5 sectores
+- Sector -> capacidad entre 1 y 100
+- Asientos del sector -> no pueden superar esa capacidad
 
 ## Estado actual
 

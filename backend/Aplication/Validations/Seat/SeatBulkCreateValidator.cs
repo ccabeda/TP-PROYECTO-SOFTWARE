@@ -8,7 +8,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Validations.Seat
         public SeatBulkCreateValidator()
         {
             RuleFor(x => x.Rows).NotEmpty();
-            RuleFor(x => x.Rows.Count).LessThanOrEqualTo(5);
+            RuleFor(x => x.Rows.Count).LessThanOrEqualTo(10);
             RuleForEach(x => x.Rows).NotEmpty().MaximumLength(10);
             RuleFor(x => x.SeatsPerRow).GreaterThan(0).LessThanOrEqualTo(10);
         }
