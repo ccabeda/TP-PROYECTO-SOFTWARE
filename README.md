@@ -11,19 +11,21 @@ Integrantes:
 API REST para un sistema de ticketing de eventos. El proyecto permite:
 
 - listar eventos
+- crear y eliminar eventos, sectores y asientos con usuario administrador
 - listar sectores por evento
 - listar asientos por evento o por sector
 - crear usuarios
-- hacer login simple de usuarios
+- hacer login con JWT
 - crear reservas de asientos
+- confirmar pago simulado de reservas
 - consultar reservas por id
 
-La solucion sigue una arquitectura por capas:
+La solucion sigue una arquitectura por capas dentro de `backend`:
 
-- `Domain`
-- `Aplication`
-- `Infraestructure`
-- `API`
+- `backend/Domain`
+- `backend/Aplication`
+- `backend/Infraestructure`
+- `backend/API`
 
 ## Stack
 
@@ -33,14 +35,15 @@ La solucion sigue una arquitectura por capas:
 - SQL Server
 - AutoMapper
 - FluentValidation
+- JWT Bearer Authentication
 - Swagger / OpenAPI
 
 ## Estructura
 
-- `Domain`: entidades del sistema
-- `Aplication`: DTOs, interfaces, validaciones y casos de uso
-- `Infraestructure`: DbContext, migraciones, seeds y repositorios
-- `API`: controllers, configuracion, middleware y Swagger
+- `backend/Domain`: entidades del sistema
+- `backend/Aplication`: DTOs, interfaces, validaciones y casos de uso
+- `backend/Infraestructure`: DbContext, migraciones, seeds y repositorios
+- `backend/API`: controllers, configuracion, middleware y Swagger
 
 ## Requisitos
 
@@ -52,7 +55,7 @@ Antes de levantar el proyecto, tener instalado:
 
 ## Configuracion de base de datos
 
-La API toma la cadena de conexion desde [API/appsettings.json](API/appsettings.json).
+La API toma la cadena de conexion desde [backend/API/appsettings.json](backend/API/appsettings.json).
 
 Valor actual:
 
@@ -65,6 +68,42 @@ Valor actual:
 ```
 
 Si el servidor local es distinto, cambiar `Server=...` por la instancia correcta.
+
+## Configuracion JWT y roles
+
+La API usa JWT para autenticacion y roles.
+
+Valores actuales en `backend/API/appsettings.json`:
+
+```json
+{
+  "Jwt": {
+    "Key": "TP-Proyecto-Software-Jwt-Key-2026-SuperSeguro",
+    "Issuer": "TP_PROYECTO_SOFTWARE.API",
+    "Audience": "TP_PROYECTO_SOFTWARE.Client"
+  },
+  "AuthorizationSettings": {
+    "AdminEmails": [ "agustin@test.com" ]
+  }
+}
+```
+
+Notas:
+
+- cualquier usuario puede registrarse y hacer login
+- el usuario cuyo mail este en `AdminEmails` recibe rol `Admin`
+- los endpoints administrativos requieren token JWT con rol `Admin`
+- `POST /api/v1/users/login` devuelve el token
+
+### Swagger y JWT
+
+Para probar endpoints protegidos desde Swagger:
+
+1. crear usuario o usar uno existente
+2. hacer `POST /api/v1/users/login`
+3. copiar el valor `token` de la respuesta
+4. usar el boton `Authorize` de Swagger
+5. pegar `Bearer <token>`
 
 ## Restaurar y compilar
 
@@ -80,12 +119,12 @@ dotnet build TP-PROYECTO-SOFTWARE.sln
 Para aplicar las migraciones existentes:
 
 ```powershell
-dotnet ef database update --project Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
 Notas:
 
-- las migraciones ya estan creadas en `Infraestructure\Migrations`
+- las migraciones ya estan creadas en `backend\Infraestructure\Migrations`
 - el proyecto incluye seeds para:
   - 1 evento
   - 2 sectores
@@ -94,7 +133,7 @@ Notas:
 ## Ejecutar la API
 
 ```powershell
-dotnet run --project API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
 ## Endpoints principales
@@ -105,25 +144,54 @@ dotnet run --project API\TP-PROYECTO-SOFTWARE.API.csproj
 - `GET /api/v1/events?name=rock`
 - `GET /api/v1/events?eventDate=2026-07-15`
 - `GET /api/v1/events?name=rock&eventDate=2026-07-15`
+- `POST /api/v1/events` `Admin`
+- `DELETE /api/v1/events/{id}` `Admin`
 - `GET /api/v1/events/{eventId}/sectors`
+- `POST /api/v1/events/{eventId}/sectors` `Admin`
+- `DELETE /api/v1/events/{eventId}/sectors/{sectorId}` `Admin`
 - `GET /api/v1/events/{eventId}/seats`
 - `GET /api/v1/sectors/{sectorId}/seats`
+- `POST /api/v1/sectors/{sectorId}/seats` `Admin`
+- `POST /api/v1/sectors/{sectorId}/seats/bulk` `Admin`
+- `DELETE /api/v1/sectors/{sectorId}/seats/{seatId}` `Admin`
 
 ### Usuarios
 
-- `GET /api/v1/users`
-- `GET /api/v1/users/{id}`
 - `POST /api/v1/users`
 - `POST /api/v1/users/login`
+- `GET /api/v1/users` `Admin`
+- `GET /api/v1/users/{id}` `Admin`
+
+Notas:
+
+- las contraseñas se almacenan hasheadas con `PasswordHasher`
+- el login devuelve `id`, `name`, `email`, `role` y `token`
 
 ### Reservas
 
 - `POST /api/v1/reservations`
 - `GET /api/v1/reservations/{id}`
+- `POST /api/v1/reservations/{id}/payment`
+
+Notas:
+
+- al reservar, la butaca pasa a `Reserved` y la reserva a `Pending`
+- al confirmar el pago, la butaca pasa a `Sold` y la reserva a `Paid`
+- si un evento, sector o asiento tiene reservas asociadas, no se permite su eliminacion
+
+### Reglas de catalogo admin
+
+- un evento no puede tener mas de `5` sectores
+- `Capacity` del sector debe ser mayor a `0` y menor o igual a `100`
+- no se pueden crear mas asientos que la `Capacity` del sector
+- el endpoint bulk de asientos permite crear hasta `50` asientos por operacion
+- en bulk, la cantidad de filas no puede superar `5`
+- en bulk, la cantidad de asientos por fila debe estar entre `1` y `10`
+- en bulk, no se permiten filas repetidas ni butacas duplicadas
 
 ## Estado actual
 
-Backend de Entrega 1 implementado y probado.
+Backend de Entrega 1 implementado y extendido con autenticacion JWT, roles de administrador y operaciones administrativas sobre catalogo.
 
 Pendiente:
 

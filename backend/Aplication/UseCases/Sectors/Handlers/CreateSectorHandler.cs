@@ -1,0 +1,68 @@
+using AutoMapper;
+using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
+using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
+using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
+using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Models;
+
+namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
+{
+    public class CreateSectorHandler : ICreateSectorHandler
+    {
+        private const int MaxSectorsPerEvent = 5;
+        private readonly IRepositoryEventQuery _repositoryEventQuery;
+        private readonly IRepositorySectorQuery _repositorySectorQuery;
+        private readonly IRepositorySectorCommand _repositorySectorCommand;
+        private readonly ICreateAuditLogHandler _createAuditLogHandler;
+        private readonly IMapper _mapper;
+
+        public CreateSectorHandler(
+            IRepositoryEventQuery repositoryEventQuery,
+            IRepositorySectorQuery repositorySectorQuery,
+            IRepositorySectorCommand repositorySectorCommand,
+            ICreateAuditLogHandler createAuditLogHandler,
+            IMapper mapper)
+        {
+            _repositoryEventQuery = repositoryEventQuery;
+            _repositorySectorQuery = repositorySectorQuery;
+            _repositorySectorCommand = repositorySectorCommand;
+            _createAuditLogHandler = createAuditLogHandler;
+            _mapper = mapper;
+        }
+
+        public async Task<SectorGetDTO> Handle(CreateSectorCommand command)
+        {
+            var eventEntity = await _repositoryEventQuery.GetById(command.EventId)
+                ?? throw new KeyNotFoundException("Evento no encontrado.");
+
+            var existingSectors = await _repositorySectorQuery.GetByEventId(command.EventId);
+            if (existingSectors.Count >= MaxSectorsPerEvent)
+            {
+                throw new InvalidOperationException("Un evento no puede tener más de 5 sectores.");
+            }
+
+            var sector = new SECTOR
+            {
+                EventId = eventEntity.Id,
+                Name = command.Name,
+                Price = command.Price,
+                Capacity = command.Capacity
+            };
+
+            await _repositorySectorCommand.Create(sector);
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = command.UserId,
+                Action = "CreateSector",
+                EntityType = "SECTOR",
+                EntityId = sector.Id.ToString(),
+                Details = $"Sector creado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}"
+            });
+            await _repositorySectorCommand.Save();
+
+            return _mapper.Map<SectorGetDTO>(sector);
+        }
+    }
+}
