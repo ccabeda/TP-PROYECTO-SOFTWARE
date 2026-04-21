@@ -78,7 +78,7 @@ Valores actuales en `backend/API/appsettings.json`:
 ```json
 {
   "Jwt": {
-    "Key": "TP-Proyecto-Software-Jwt-Key-2026-SuperSeguro",
+    "Key": "TP-Proyecto-Software-Jwt-Key-2026-segura",
     "Issuer": "TP_PROYECTO_SOFTWARE.API",
     "Audience": "TP_PROYECTO_SOFTWARE.Client"
   },
