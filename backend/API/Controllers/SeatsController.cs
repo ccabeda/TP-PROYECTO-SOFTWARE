@@ -17,6 +17,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     {
         private readonly IGetSeatsByEventHandler _getSeatsByEventHandler;
         private readonly IGetSeatsBySectorHandler _getSeatsBySectorHandler;
+        private readonly IGetSeatByIdHandler _getSeatByIdHandler;
         private readonly ICreateSeatHandler _createSeatHandler;
         private readonly ICreateSeatsBulkHandler _createSeatsBulkHandler;
         private readonly IDeleteSeatHandler _deleteSeatHandler;
@@ -25,6 +26,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         public SeatsController(
             IGetSeatsByEventHandler getSeatsByEventHandler,
             IGetSeatsBySectorHandler getSeatsBySectorHandler,
+            IGetSeatByIdHandler getSeatByIdHandler,
             ICreateSeatHandler createSeatHandler,
             ICreateSeatsBulkHandler createSeatsBulkHandler,
             IDeleteSeatHandler deleteSeatHandler,
@@ -32,6 +34,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         {
             _getSeatsByEventHandler = getSeatsByEventHandler;
             _getSeatsBySectorHandler = getSeatsBySectorHandler;
+            _getSeatByIdHandler = getSeatByIdHandler;
             _createSeatHandler = createSeatHandler;
             _createSeatsBulkHandler = createSeatsBulkHandler;
             _deleteSeatHandler = deleteSeatHandler;
@@ -60,6 +63,21 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("sectors/{sectorId}/seats/{seatId}")]
+        [SwaggerOperation(Summary = "Obtiene una butaca por id dentro de un sector")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [ProducesResponseType(typeof(SeatGetDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSeatById([FromRoute] int sectorId, [FromRoute] Guid seatId)
+        {
+            var result = await _getSeatByIdHandler.Handle(new GetSeatByIdQuery
+            {
+                SectorId = sectorId,
+                SeatId = seatId
+            });
+            return Ok(result);
+        }
+
         [HttpPost("sectors/{sectorId}/seats")]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Crea un asiento para un sector")]
@@ -74,7 +92,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
 
             var result = await _createSeatHandler.Handle(command);
 
-            return CreatedAtAction(nameof(GetSeatsBySector), new { sectorId }, result);
+            return CreatedAtAction(nameof(GetSeatById), new { sectorId, seatId = result.Id }, result);
         }
 
         [HttpPost("sectors/{sectorId}/seats/bulk")]

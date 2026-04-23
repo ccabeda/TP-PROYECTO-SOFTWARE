@@ -16,17 +16,20 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IGetEventsHandler _getEventsHandler;
+        private readonly IGetEventByIdHandler _getEventByIdHandler;
         private readonly ICreateEventHandler _createEventHandler;
         private readonly IDeleteEventHandler _deleteEventHandler;
         private readonly IMapper _mapper;
 
         public EventsController(
             IGetEventsHandler getEventsHandler,
+            IGetEventByIdHandler getEventByIdHandler,
             ICreateEventHandler createEventHandler,
             IDeleteEventHandler deleteEventHandler,
             IMapper mapper)
         {
             _getEventsHandler = getEventsHandler;
+            _getEventByIdHandler = getEventByIdHandler;
             _createEventHandler = createEventHandler;
             _deleteEventHandler = deleteEventHandler;
             _mapper = mapper;
@@ -46,6 +49,17 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Obtiene un evento por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [ProducesResponseType(typeof(EventGetDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEventById([FromRoute] int id)
+        {
+            var result = await _getEventByIdHandler.Handle(new GetEventByIdQuery { Id = id });
+            return Ok(result);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Crea un evento")]
@@ -57,7 +71,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             command.UserId = UserClaimsHelper.GetCurrentUserId(User);
             var result = await _createEventHandler.Handle(command);
 
-            return CreatedAtAction(nameof(GetEvents), new { id = result.Id }, result);
+            return CreatedAtAction(nameof(GetEventById), new { id = result.Id }, result);
         }
 
         [HttpDelete("{id}")]

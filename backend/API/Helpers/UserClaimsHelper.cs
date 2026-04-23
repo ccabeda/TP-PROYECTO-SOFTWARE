@@ -9,5 +9,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Helpers
             var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.TryParse(claimValue, out var userId) ? userId : null;
         }
+
+        public static bool IsAdmin(ClaimsPrincipal user) => user.IsInRole("Admin");
     }
 }

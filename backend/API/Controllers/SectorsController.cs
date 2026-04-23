@@ -16,17 +16,20 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     public class SectorsController : ControllerBase
     {
         private readonly IGetSectorsByEventHandler _getSectorsByEventHandler;
+        private readonly IGetSectorByIdHandler _getSectorByIdHandler;
         private readonly ICreateSectorHandler _createSectorHandler;
         private readonly IDeleteSectorHandler _deleteSectorHandler;
         private readonly IMapper _mapper;
 
         public SectorsController(
             IGetSectorsByEventHandler getSectorsByEventHandler,
+            IGetSectorByIdHandler getSectorByIdHandler,
             ICreateSectorHandler createSectorHandler,
             IDeleteSectorHandler deleteSectorHandler,
             IMapper mapper)
         {
             _getSectorsByEventHandler = getSectorsByEventHandler;
+            _getSectorByIdHandler = getSectorByIdHandler;
             _createSectorHandler = createSectorHandler;
             _deleteSectorHandler = deleteSectorHandler;
             _mapper = mapper;
@@ -39,6 +42,21 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         public async Task<IActionResult> GetSectorsByEvent([FromRoute] int eventId)
         {
             var result = await _getSectorsByEventHandler.Handle(new GetSectorsByEventQuery { EventId = eventId });
+            return Ok(result);
+        }
+
+        [HttpGet("{sectorId}")]
+        [SwaggerOperation(Summary = "Obtiene un sector por id dentro de un evento")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [ProducesResponseType(typeof(SectorGetDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSectorById([FromRoute] int eventId, [FromRoute] int sectorId)
+        {
+            var result = await _getSectorByIdHandler.Handle(new GetSectorByIdQuery
+            {
+                EventId = eventId,
+                SectorId = sectorId
+            });
             return Ok(result);
         }
 
@@ -56,7 +74,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
 
             var result = await _createSectorHandler.Handle(command);
 
-            return CreatedAtAction(nameof(GetSectorsByEvent), new { eventId }, result);
+            return CreatedAtAction(nameof(GetSectorById), new { eventId, sectorId = result.Id }, result);
         }
 
         [HttpDelete("{sectorId}")]

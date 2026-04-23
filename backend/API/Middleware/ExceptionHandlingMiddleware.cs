@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using TP_PROYECTO_SOFTWARE.Aplication.Exceptions;
 
 namespace TP_PROYECTO_SOFTWARE.API.Middleware
 {
@@ -28,6 +30,14 @@ namespace TP_PROYECTO_SOFTWARE.API.Middleware
             catch (UnauthorizedAccessException ex)
             {
                 await HandleExceptionAsync(context, StatusCodes.Status401Unauthorized, ex.Message);
+            }
+            catch (ForbiddenAccessException ex)
+            {
+                await HandleExceptionAsync(context, StatusCodes.Status403Forbidden, ex.Message);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await HandleExceptionAsync(context, StatusCodes.Status409Conflict, "El recurso fue modificado por otra operación. Intente nuevamente.");
             }
             catch (Exception ex)
             {

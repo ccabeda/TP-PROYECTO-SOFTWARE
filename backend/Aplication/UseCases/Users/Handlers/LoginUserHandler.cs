@@ -36,7 +36,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             }
 
             var response = _mapper.Map<UserLoginResponseDTO>(user);
-            response.Role = user.Email.Equals("agustin@test.com", StringComparison.OrdinalIgnoreCase) ? "Admin" : "User";
+            response.Role = _jwtTokenGenerator.ResolveRole(user.Email);
             response.Token = _jwtTokenGenerator.GenerateToken(user);
 
             return response;

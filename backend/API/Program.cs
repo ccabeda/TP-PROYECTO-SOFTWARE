@@ -1,5 +1,4 @@
 using System.Text;
-using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +8,7 @@ using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Reflection;
 using TP_PROYECTO_SOFTWARE.API.Middleware;
 using TP_PROYECTO_SOFTWARE.API.Security;
+using TP_PROYECTO_SOFTWARE.Aplication.Configuration;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
@@ -16,7 +16,6 @@ using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.Mapping;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Event;
-using TP_PROYECTO_SOFTWARE.Aplication.Validations.Reservation;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Seat;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Sector;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.User;
@@ -103,8 +102,12 @@ builder.Services.AddDbContext<AplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Connection"));
 });
 
+builder.Services.Configure<TicketingRulesOptions>( //reglas dinamicas pidio profe
+    builder.Configuration.GetSection(TicketingRulesOptions.SectionName));
+
 builder.Services.AddAutoMapper(_ => { }, typeof(AutomapperConfig).Assembly); //automapper
 builder.Services.AddScoped<IRepositoryEventQuery, RepositoryEventQuery>();
+builder.Services.AddScoped<IRepositoryAuditLogQuery, RepositoryAuditLogQuery>();
 builder.Services.AddScoped<IRepositorySectorQuery, RepositorySectorQuery>();
 builder.Services.AddScoped<IRepositorySeatQuery, RepositorySeatQuery>();
 builder.Services.AddScoped<IRepositoryReservationQuery, RepositoryReservationQuery>();
@@ -118,17 +121,22 @@ builder.Services.AddScoped<IRepositoryUserCommand, RepositoryUserCommand>();
 builder.Services.AddScoped<IUnitOfWorkReservationCommand, UnitOfWorkReservationCommand>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IGetEventsHandler, GetEventsHandler>();
+builder.Services.AddScoped<IGetAuditLogsHandler, GetAuditLogsHandler>();
+builder.Services.AddScoped<IGetEventByIdHandler, GetEventByIdHandler>();
 builder.Services.AddScoped<ICreateEventHandler, CreateEventHandler>();
 builder.Services.AddScoped<IDeleteEventHandler, DeleteEventHandler>();
 builder.Services.AddScoped<IGetSectorsByEventHandler, GetSectorsByEventHandler>();
+builder.Services.AddScoped<IGetSectorByIdHandler, GetSectorByIdHandler>();
 builder.Services.AddScoped<ICreateSectorHandler, CreateSectorHandler>();
 builder.Services.AddScoped<IDeleteSectorHandler, DeleteSectorHandler>();
 builder.Services.AddScoped<IGetSeatsByEventHandler, GetSeatsByEventHandler>();
 builder.Services.AddScoped<IGetSeatsBySectorHandler, GetSeatsBySectorHandler>();
+builder.Services.AddScoped<IGetSeatByIdHandler, GetSeatByIdHandler>();
 builder.Services.AddScoped<ICreateSeatHandler, CreateSeatHandler>();
 builder.Services.AddScoped<ICreateSeatsBulkHandler, CreateSeatsBulkHandler>();
 builder.Services.AddScoped<IDeleteSeatHandler, DeleteSeatHandler>();
 builder.Services.AddScoped<IGetUsersHandler, GetUsersHandler>();
+builder.Services.AddScoped<IGetCurrentUserHandler, GetCurrentUserHandler>();
 builder.Services.AddScoped<IGetUserByIdHandler, GetUserByIdHandler>();
 builder.Services.AddScoped<ICreateUserHandler, CreateUserHandler>();
 builder.Services.AddScoped<ILoginUserHandler, LoginUserHandler>();

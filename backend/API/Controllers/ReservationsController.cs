@@ -1,6 +1,8 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using TP_PROYECTO_SOFTWARE.API.Helpers;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
@@ -14,34 +16,42 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     public class ReservationsController : ControllerBase
     {
         private readonly ICreateReservationHandler _handler;
-        private readonly IConfirmReservationPaymentHandler _confirmReservationPaymentHandler;
         private readonly IGetReservationByIdHandler _getReservationByIdHandler;
         private readonly IMapper _mapper;
 
         public ReservationsController(
             ICreateReservationHandler handler,
-            IConfirmReservationPaymentHandler confirmReservationPaymentHandler,
             IGetReservationByIdHandler getReservationByIdHandler,
             IMapper mapper)
         {
             _handler = handler;
-            _confirmReservationPaymentHandler = confirmReservationPaymentHandler;
             _getReservationByIdHandler = getReservationByIdHandler;
             _mapper = mapper;
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         [SwaggerOperation(Summary = "Obtiene una reserva por id")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "Forbidden")]
         [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetReservationById([FromRoute] Guid id)
         {
-            var result = await _getReservationByIdHandler.Handle(new GetReservationByIdQuery { Id = id });
+            var currentUserId = UserClaimsHelper.GetCurrentUserId(User)
+                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
+
+            var result = await _getReservationByIdHandler.Handle(new GetReservationByIdQuery
+            {
+                Id = id,
+                CurrentUserId = currentUserId,
+                IsAdmin = UserClaimsHelper.IsAdmin(User)
+            });
             return Ok(result);
         }
 
         [HttpPost]
+        [Authorize]
         [SwaggerOperation(Summary = "Intento básico de reserva")]
         [SwaggerResponse(StatusCodes.Status201Created, "Created")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
@@ -51,26 +61,14 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateReservation([FromBody] ReservationCreateDTO reservationCreateDTO)
         {
+            var currentUserId = UserClaimsHelper.GetCurrentUserId(User)
+                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
+
             var command = _mapper.Map<CreateReservationCommand>(reservationCreateDTO);
+            command.CurrentUserId = currentUserId;
             var result = await _handler.Handle(command);
 
             return CreatedAtAction(nameof(GetReservationById), new { id = result.Id }, result);
-        }
-
-        [HttpPost("{id}/payment")]
-        [SwaggerOperation(Summary = "Confirma el pago simulado de una reserva")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
-        [SwaggerResponse(StatusCodes.Status409Conflict, "Conflict")]
-        [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ConfirmReservationPayment([FromRoute] Guid id)
-        {
-            var result = await _confirmReservationPaymentHandler.Handle(new ConfirmReservationPaymentCommand
-            {
-                ReservationId = id
-            });
-
-            return Ok(result);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IGetUsersHandler _getUsersHandler;
+        private readonly IGetCurrentUserHandler _getCurrentUserHandler;
         private readonly IGetUserByIdHandler _getUserByIdHandler;
         private readonly ICreateUserHandler _createUserHandler;
         private readonly ILoginUserHandler _loginUserHandler;
@@ -22,12 +23,14 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
 
         public UsersController(
             IGetUsersHandler getUsersHandler,
+            IGetCurrentUserHandler getCurrentUserHandler,
             IGetUserByIdHandler getUserByIdHandler,
             ICreateUserHandler createUserHandler,
             ILoginUserHandler loginUserHandler,
             IMapper mapper)
         {
             _getUsersHandler = getUsersHandler;
+            _getCurrentUserHandler = getCurrentUserHandler;
             _getUserByIdHandler = getUserByIdHandler;
             _createUserHandler = createUserHandler;
             _loginUserHandler = loginUserHandler;
@@ -42,6 +45,26 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         public async Task<IActionResult> GetUsers()
         {
             var result = await _getUsersHandler.Handle(new GetUsersQuery());
+            return Ok(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        [SwaggerOperation(Summary = "Obtiene el usuario autenticado")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Unauthorized")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
+        [ProducesResponseType(typeof(UserGetDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var currentUserId = API.Helpers.UserClaimsHelper.GetCurrentUserId(User)
+                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
+
+            var result = await _getCurrentUserHandler.Handle(new GetCurrentUserQuery
+            {
+                UserId = currentUserId
+            });
+
             return Ok(result);
         }
 
@@ -67,7 +90,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         {
             var command = _mapper.Map<CreateUserCommand>(userCreateDTO);
             var result = await _createUserHandler.Handle(command);
-            return CreatedAtAction(nameof(GetUserById), new { id = result.Id }, result);
+            return StatusCode(StatusCodes.Status201Created, result);
         }
 
         [HttpPost("login")]

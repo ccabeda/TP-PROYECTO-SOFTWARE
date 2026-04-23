@@ -1,4 +1,5 @@
 using AutoMapper;
+using TP_PROYECTO_SOFTWARE.Aplication.Exceptions;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
@@ -21,6 +22,11 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         {
             var reservation = await _repositoryReservationQuery.GetById(query.Id)
                 ?? throw new KeyNotFoundException("Reserva no encontrada.");
+
+            if (!query.IsAdmin && reservation.UserId != query.CurrentUserId)
+            {
+                throw new ForbiddenAccessException("No tiene permisos para ver esta reserva.");
+            }
 
             return _mapper.Map<ReservationGetDTO>(reservation);
         }

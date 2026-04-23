@@ -42,10 +42,20 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 throw new InvalidOperationException("El sector ya alcanzó su capacidad máxima de asientos.");
             }
 
+            var normalizedRowIdentifier = command.RowIdentifier.Trim().ToUpperInvariant();
+            var duplicatedSeat = existingSeats.Any(s =>
+                s.RowIdentifier.Equals(normalizedRowIdentifier, StringComparison.OrdinalIgnoreCase) &&
+                s.SeatNumber == command.SeatNumber);
+
+            if (duplicatedSeat)
+            {
+                throw new InvalidOperationException($"Ya existe la butaca {normalizedRowIdentifier}{command.SeatNumber} en el sector.");
+            }
+
             var seat = new SEAT
             {
                 SectorId = sector.Id,
-                RowIdentifier = command.RowIdentifier,
+                RowIdentifier = normalizedRowIdentifier,
                 SeatNumber = command.SeatNumber,
                 Status = "Available",
                 Version = 1

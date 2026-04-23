@@ -1,4 +1,6 @@
 using AutoMapper;
+using Microsoft.Extensions.Options;
+using TP_PROYECTO_SOFTWARE.Aplication.Configuration;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
@@ -11,8 +13,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 {
     public class CreateSeatsBulkHandler : ICreateSeatsBulkHandler
     {
-        private const int MaxSeatsPerRow = 10;
-
+        private readonly TicketingRulesOptions _ticketingRules;
         private readonly IRepositorySectorQuery _repositorySectorQuery;
         private readonly IRepositorySeatQuery _repositorySeatQuery;
         private readonly IRepositorySeatCommand _repositorySeatCommand;
@@ -20,12 +21,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
         private readonly IMapper _mapper;
 
         public CreateSeatsBulkHandler(
+            IOptions<TicketingRulesOptions> ticketingRules,
             IRepositorySectorQuery repositorySectorQuery,
             IRepositorySeatQuery repositorySeatQuery,
             IRepositorySeatCommand repositorySeatCommand,
             ICreateAuditLogHandler createAuditLogHandler,
             IMapper mapper)
         {
+            _ticketingRules = ticketingRules.Value;
             _repositorySectorQuery = repositorySectorQuery;
             _repositorySeatQuery = repositorySeatQuery;
             _repositorySeatCommand = repositorySeatCommand;
@@ -52,9 +55,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 throw new InvalidOperationException("No se permiten filas repetidas.");
             }
 
-            if (command.SeatsPerRow <= 0 || command.SeatsPerRow > MaxSeatsPerRow)
+            if (command.SeatsPerRow <= 0 || command.SeatsPerRow > _ticketingRules.MaxSeatsPerRow)
             {
-                throw new InvalidOperationException("La cantidad de asientos por fila debe estar entre 1 y 10.");
+                throw new InvalidOperationException($"La cantidad de asientos por fila debe estar entre 1 y {_ticketingRules.MaxSeatsPerRow}.");
             }
 
             var existingSeats = await _repositorySeatQuery.GetBySectorId(command.SectorId);

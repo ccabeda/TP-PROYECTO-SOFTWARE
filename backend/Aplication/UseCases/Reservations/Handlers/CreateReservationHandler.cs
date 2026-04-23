@@ -36,7 +36,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         public async Task<ReservationGetDTO> Handle(CreateReservationCommand command)
         {
-            var user = await _repositoryUserQuery.GetById(command.UserId)
+            var user = await _repositoryUserQuery.GetById(command.CurrentUserId)
                 ?? throw new KeyNotFoundException("Usuario no encontrado.");
 
             var seat = await _repositorySeatQuery.GetById(command.SeatId)

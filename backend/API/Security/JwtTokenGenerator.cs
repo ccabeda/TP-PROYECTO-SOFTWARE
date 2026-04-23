@@ -49,7 +49,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Security
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private string ResolveRole(string email)
+        public string ResolveRole(string email)
         {
             var adminEmails = _configuration.GetSection("AuthorizationSettings:AdminEmails").Get<string[]>() ?? Array.Empty<string>();
 

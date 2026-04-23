@@ -1,4 +1,6 @@
 using AutoMapper;
+using Microsoft.Extensions.Options;
+using TP_PROYECTO_SOFTWARE.Aplication.Configuration;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
@@ -11,7 +13,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
 {
     public class CreateSectorHandler : ICreateSectorHandler
     {
-        private const int MaxSectorsPerEvent = 5;
+        private readonly TicketingRulesOptions _ticketingRules;
         private readonly IRepositoryEventQuery _repositoryEventQuery;
         private readonly IRepositorySectorQuery _repositorySectorQuery;
         private readonly IRepositorySectorCommand _repositorySectorCommand;
@@ -19,12 +21,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
         private readonly IMapper _mapper;
 
         public CreateSectorHandler(
+            IOptions<TicketingRulesOptions> ticketingRules,
             IRepositoryEventQuery repositoryEventQuery,
             IRepositorySectorQuery repositorySectorQuery,
             IRepositorySectorCommand repositorySectorCommand,
             ICreateAuditLogHandler createAuditLogHandler,
             IMapper mapper)
         {
+            _ticketingRules = ticketingRules.Value;
             _repositoryEventQuery = repositoryEventQuery;
             _repositorySectorQuery = repositorySectorQuery;
             _repositorySectorCommand = repositorySectorCommand;
@@ -38,9 +42,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
                 ?? throw new KeyNotFoundException("Evento no encontrado.");
 
             var existingSectors = await _repositorySectorQuery.GetByEventId(command.EventId);
-            if (existingSectors.Count >= MaxSectorsPerEvent)
+            if (existingSectors.Count >= _ticketingRules.MaxSectorsPerEvent)
             {
-                throw new InvalidOperationException("Un evento no puede tener más de 5 sectores.");
+                throw new InvalidOperationException($"Un evento no puede tener más de {_ticketingRules.MaxSectorsPerEvent} sectores.");
             }
 
             var sector = new SECTOR

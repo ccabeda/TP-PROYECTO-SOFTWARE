@@ -1,5 +1,7 @@
 using AutoMapper;
+using TP_PROYECTO_SOFTWARE.Aplication.DTOs.AuditLogDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs;
+using TP_PROYECTO_SOFTWARE.Aplication.DTOs.PaymentDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
@@ -17,6 +19,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Mapping
     {
         public AutomapperConfig()
         {
+            CreateMap<AUDIT_LOG, AuditLogGetDTO>()
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User != null ? src.User.Email : null));
             CreateMap<EVENT, EventGetDTO>().ReverseMap();
             CreateMap<EventCreateDTO, CreateEventCommand>().ReverseMap();
             CreateMap<SECTOR, SectorGetDTO>().ReverseMap();
@@ -24,6 +28,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Mapping
             CreateMap<SEAT, SeatGetDTO>().ReverseMap();
             CreateMap<SeatCreateDTO, CreateSeatCommand>().ReverseMap();
             CreateMap<SeatBulkCreateDTO, CreateSeatsBulkCommand>().ReverseMap();
+            CreateMap<PaymentCreateDTO, ConfirmReservationPaymentCommand>().ReverseMap();
             CreateMap<ReservationCreateDTO, CreateReservationCommand>().ReverseMap();
             CreateMap<RESERVATION, ReservationGetDTO>().ReverseMap();
             CreateMap<USER, UserGetDTO>().ReverseMap();

@@ -91,6 +91,8 @@ Valores actuales en `backend/API/appsettings.json`:
 Notas:
 
 - cualquier usuario puede registrarse y hacer login
+- el catalogo de eventos, sectores y asientos es publico
+- las reservas y los pagos requieren usuario autenticado
 - el usuario cuyo mail este en `AdminEmails` recibe rol `Admin`
 - los endpoints administrativos requieren token JWT con rol `Admin`
 - `POST /api/v1/users/login` devuelve el token
@@ -128,27 +130,60 @@ dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 
 ## Endpoints principales
 
+### Acceso
+
+- Publicos:
+  - `POST /api/v1/users`
+  - `POST /api/v1/users/login`
+  - `GET /api/v1/events`
+  - `GET /api/v1/events/{id}`
+  - `GET /api/v1/events/{eventId}/sectors`
+  - `GET /api/v1/events/{eventId}/sectors/{sectorId}`
+  - `GET /api/v1/events/{eventId}/seats`
+  - `GET /api/v1/sectors/{sectorId}/seats`
+  - `GET /api/v1/sectors/{sectorId}/seats/{seatId}`
+- Requieren autenticacion:
+  - `GET /api/v1/users/me`
+  - `POST /api/v1/reservations`
+  - `GET /api/v1/reservations/{id}`
+  - `POST /api/v1/payments`
+- Solo `Admin`:
+  - `POST /api/v1/events`
+  - `DELETE /api/v1/events/{id}`
+  - `POST /api/v1/events/{eventId}/sectors`
+  - `DELETE /api/v1/events/{eventId}/sectors/{sectorId}`
+  - `POST /api/v1/sectors/{sectorId}/seats`
+  - `POST /api/v1/sectors/{sectorId}/seats/bulk`
+  - `DELETE /api/v1/sectors/{sectorId}/seats/{seatId}`
+  - `GET /api/v1/audit-logs`
+  - `GET /api/v1/users`
+  - `GET /api/v1/users/{id}`
+
 ### Eventos y catalogo
 
 - `GET /api/v1/events`
+- `GET /api/v1/events/{id}`
 - `GET /api/v1/events?name=rock`
 - `GET /api/v1/events?eventDate=2026-07-15`
 - `GET /api/v1/events?name=rock&eventDate=2026-07-15`
 - `POST /api/v1/events` `Admin`
 - `DELETE /api/v1/events/{id}` `Admin`
 - `GET /api/v1/events/{eventId}/sectors`
+- `GET /api/v1/events/{eventId}/sectors/{sectorId}`
 - `POST /api/v1/events/{eventId}/sectors` `Admin`
 - `DELETE /api/v1/events/{eventId}/sectors/{sectorId}` `Admin`
 - `GET /api/v1/events/{eventId}/seats`
 - `GET /api/v1/sectors/{sectorId}/seats`
+- `GET /api/v1/sectors/{sectorId}/seats/{seatId}`
 - `POST /api/v1/sectors/{sectorId}/seats` `Admin`
 - `POST /api/v1/sectors/{sectorId}/seats/bulk` `Admin`
 - `DELETE /api/v1/sectors/{sectorId}/seats/{seatId}` `Admin`
 
 ### Usuarios
 
-- `POST /api/v1/users`
-- `POST /api/v1/users/login`
+- `POST /api/v1/users` `Publico`
+- `POST /api/v1/users/login` `Publico`
+- `GET /api/v1/users/me` `Autenticado`
 - `GET /api/v1/users` `Admin`
 - `GET /api/v1/users/{id}` `Admin`
 
@@ -159,15 +194,35 @@ Notas:
 
 ### Reservas
 
-- `POST /api/v1/reservations`
-- `GET /api/v1/reservations/{id}`
-- `POST /api/v1/reservations/{id}/payment`
+- `POST /api/v1/reservations` `Autenticado`
+- `GET /api/v1/reservations/{id}` `Autenticado`
+- `POST /api/v1/payments` `Autenticado`
 
 Notas:
 
 - al reservar, la butaca pasa a `Reserved` y la reserva a `Pending`
 - al confirmar el pago, la butaca pasa a `Sold` y la reserva a `Paid`
+- `POST /api/v1/payments` recibe `reservationId` en el body
 - si un evento, sector o asiento tiene reservas asociadas, no se permite su eliminacion
+
+### Auditoria
+
+- `GET /api/v1/audit-logs` `Admin`
+
+Notas:
+
+- el listado y los filtros usan el mismo endpoint `GET /api/v1/audit-logs`
+- los filtros se envian por query string
+- `date` filtra un dia exacto
+- `date` no se combina con `dateFrom` ni `dateTo`
+
+Ejemplos:
+
+- `GET /api/v1/audit-logs?userId=3`
+- `GET /api/v1/audit-logs?date=2026-05-24`
+- `GET /api/v1/audit-logs?dateFrom=2026-04-01&dateTo=2026-04-23`
+- `GET /api/v1/audit-logs?userId=3&date=2026-05-24`
+- `GET /api/v1/audit-logs?userId=3&dateFrom=2026-04-01&dateTo=2026-04-23`
 
 ### Reglas de catalogo admin
 
