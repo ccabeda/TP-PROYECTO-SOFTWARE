@@ -36,44 +36,67 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         public async Task<ReservationGetDTO> Handle(CreateReservationCommand command)
         {
-            var user = await _repositoryUserQuery.GetById(command.CurrentUserId)
-                ?? throw new KeyNotFoundException("Usuario no encontrado.");
+            var user = await GetUserOrThrow(command.CurrentUserId);
+            var seat = await GetSeatOrThrow(command.SeatId);
 
-            var seat = await _repositorySeatQuery.GetById(command.SeatId)
-                ?? throw new KeyNotFoundException("Butaca no encontrada.");
+            await EnsureSeatIsAvailable(command.SeatId, seat);
 
-            var activeReservation = await _repositoryReservationQuery.GetActiveBySeatId(command.SeatId);
+            MarkSeatAsReserved(seat);
+            var reservation = BuildReservation(user.Id, seat.Id);
 
+            await PersistReservation(seat, reservation);
+            await CreateAuditLog(user.Id, seat.Id, reservation);
+            await _unitOfWorkReservationCommand.Save();
+
+            return _mapper.Map<ReservationGetDTO>(reservation);
+        }
+
+        private async Task<USER> GetUserOrThrow(int userId) => await _repositoryUserQuery.GetById(userId)
+            ?? throw new KeyNotFoundException("Usuario no encontrado.");
+
+        private async Task<SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+            ?? throw new KeyNotFoundException("Butaca no encontrada.");
+
+        private async Task EnsureSeatIsAvailable(Guid seatId, SEAT seat)
+        {
+            var activeReservation = await _repositoryReservationQuery.GetActiveBySeatId(seatId);
             if (seat.Status != "Available" || activeReservation is not null)
             {
                 throw new InvalidOperationException("La butaca no se encuentra disponible.");
             }
+        }
 
+        private static void MarkSeatAsReserved(SEAT seat)
+        {
             seat.Status = "Reserved";
-            seat.Version += 1; //version es para que cada vez que se modifique se le sume 1 tengo entendido
+            seat.Version += 1;
+        }
 
-            var reservation = new RESERVATION
-            {
-                UserId = user.Id,
-                SeatId = seat.Id,
-                Status = "Pending",
-                ReservedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(5) //para la entrega dos
-            };
+        private static RESERVATION BuildReservation(int userId, Guid seatId) => new()
+        {
+            UserId = userId,
+            SeatId = seatId,
+            Status = "Pending",
+            ReservedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+        };
 
+        private async Task PersistReservation(SEAT seat, RESERVATION reservation)
+        {
             await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
             await _unitOfWorkReservationCommand.RepositoryReservationCommand.Create(reservation);
+        }
+
+        private async Task CreateAuditLog(int userId, Guid seatId, RESERVATION reservation)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = user.Id,
+                UserId = userId,
                 Action = "CreateReservation",
                 EntityType = "RESERVATION",
                 EntityId = reservation.Id.ToString(),
-                Details = $"Reserva creada. SeatId={seat.Id}, UserId={user.Id}, Status={reservation.Status}, ExpiresAt={reservation.ExpiresAt:O}"
+                Details = $"Reserva creada. SeatId={seatId}, UserId={userId}, Status={reservation.Status}, ExpiresAt={reservation.ExpiresAt:O}"
             });
-            await _unitOfWorkReservationCommand.Save();
-
-            return _mapper.Map<ReservationGetDTO>(reservation);
         }
     }
 }

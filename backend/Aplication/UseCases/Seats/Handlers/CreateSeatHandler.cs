@@ -1,8 +1,11 @@
 using AutoMapper;
+using Microsoft.Extensions.Options;
+using TP_PROYECTO_SOFTWARE.Aplication.Configuration;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
@@ -11,20 +14,20 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 {
     public class CreateSeatHandler : ICreateSeatHandler
     {
-        private readonly IRepositorySectorQuery _repositorySectorQuery;
+        private readonly ISeatRulesService _seatRulesService;
         private readonly IRepositorySeatQuery _repositorySeatQuery;
         private readonly IRepositorySeatCommand _repositorySeatCommand;
         private readonly ICreateAuditLogHandler _createAuditLogHandler;
         private readonly IMapper _mapper;
 
         public CreateSeatHandler(
-            IRepositorySectorQuery repositorySectorQuery,
+            ISeatRulesService seatRulesService,
             IRepositorySeatQuery repositorySeatQuery,
             IRepositorySeatCommand repositorySeatCommand,
             ICreateAuditLogHandler createAuditLogHandler,
             IMapper mapper)
         {
-            _repositorySectorQuery = repositorySectorQuery;
+            _seatRulesService = seatRulesService;
             _repositorySeatQuery = repositorySeatQuery;
             _repositorySeatCommand = repositorySeatCommand;
             _createAuditLogHandler = createAuditLogHandler;
@@ -33,19 +36,18 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 
         public async Task<SeatGetDTO> Handle(CreateSeatCommand command)
         {
-            var sector = await _repositorySectorQuery.GetById(command.SectorId)
-                ?? throw new KeyNotFoundException("Sector no encontrado.");
+            var sector = await _seatRulesService.GetSectorOrThrow(command.SectorId);
 
-            var existingSeats = await _repositorySeatQuery.GetBySectorId(command.SectorId);
-            if (existingSeats.Count >= sector.Capacity)
-            {
-                throw new InvalidOperationException("El sector ya alcanzó su capacidad máxima de asientos.");
-            }
+            await _seatRulesService.ValidateSectorCapacity(command.SectorId, sector.Capacity, 1);
 
-            var normalizedRowIdentifier = command.RowIdentifier.Trim().ToUpperInvariant();
-            var duplicatedSeat = existingSeats.Any(s =>
-                s.RowIdentifier.Equals(normalizedRowIdentifier, StringComparison.OrdinalIgnoreCase) &&
-                s.SeatNumber == command.SeatNumber);
+            var normalizedRowIdentifier = _seatRulesService.NormalizeAndValidateRow(command.RowIdentifier);
+
+            _seatRulesService.ValidateSeatNumber(command.SeatNumber);
+
+            var duplicatedSeat = await _repositorySeatQuery.ExistsInSector(
+                command.SectorId,
+                normalizedRowIdentifier,
+                command.SeatNumber);
 
             if (duplicatedSeat)
             {

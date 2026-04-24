@@ -15,6 +15,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.Mapping;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Event;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Seat;
 using TP_PROYECTO_SOFTWARE.Aplication.Validations.Sector;
@@ -102,8 +103,22 @@ builder.Services.AddDbContext<AplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Connection"));
 });
 
-builder.Services.Configure<TicketingRulesOptions>( //reglas dinamicas pidio profe
-    builder.Configuration.GetSection(TicketingRulesOptions.SectionName));
+builder.Services.AddOptions<TicketingRulesOptions>() //reglas dinamicas pidio profe
+    .Bind(builder.Configuration.GetSection(TicketingRulesOptions.SectionName))
+    .Validate(options => options.MaxSectorsPerEvent > 0, "MaxSectorsPerEvent debe ser mayor a 0.")
+    .Validate(options => options.MaxSectorCapacity > 0, "MaxSectorCapacity debe ser mayor a 0.")
+    .Validate(options => options.MaxRowsPerBulkCreate > 0, "MaxRowsPerBulkCreate debe ser mayor a 0.")
+    .Validate(options => options.MaxSeatsPerRow > 0, "MaxSeatsPerRow debe ser mayor a 0.")
+    .Validate(options => options.RowLabels.Count >= options.MaxRowsPerBulkCreate,
+        "RowLabels debe tener al menos la misma cantidad de filas que MaxRowsPerBulkCreate.")
+    .Validate(options => options.RowLabels
+        .Take(options.MaxRowsPerBulkCreate)
+        .Select(row => row.Trim().ToUpperInvariant())
+        .Where(row => !string.IsNullOrWhiteSpace(row))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .Count() == options.MaxRowsPerBulkCreate,
+        "Las filas configuradas en RowLabels deben ser únicas y no vacías.")
+    .ValidateOnStart();
 
 builder.Services.AddAutoMapper(_ => { }, typeof(AutomapperConfig).Assembly); //automapper
 builder.Services.AddScoped<IRepositoryEventQuery, RepositoryEventQuery>();
@@ -120,6 +135,7 @@ builder.Services.AddScoped<IRepositoryAuditLogCommand, RepositoryAuditLogCommand
 builder.Services.AddScoped<IRepositoryUserCommand, RepositoryUserCommand>();
 builder.Services.AddScoped<IUnitOfWorkReservationCommand, UnitOfWorkReservationCommand>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<ISeatRulesService, SeatRulesService>();
 builder.Services.AddScoped<IGetEventsHandler, GetEventsHandler>();
 builder.Services.AddScoped<IGetAuditLogsHandler, GetAuditLogsHandler>();
 builder.Services.AddScoped<IGetEventByIdHandler, GetEventByIdHandler>();

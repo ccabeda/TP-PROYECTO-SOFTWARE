@@ -27,30 +27,46 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 
         public async Task Handle(DeleteSeatCommand command)
         {
-            var seat = await _repositorySeatQuery.GetById(command.SeatId)
-                ?? throw new KeyNotFoundException("Butaca no encontrada.");
+            var seat = await GetSeatOrThrow(command.SeatId);
 
-            if (seat.SectorId != command.SectorId)
+            ValidateSeatBelongsToSector(seat, command.SectorId);
+            await EnsureSeatHasNoReservations(seat.Id);
+            await CreateDeleteAuditLog(command.UserId, seat);
+
+            await _repositorySeatCommand.Delete(seat);
+            await _repositorySeatCommand.Save();
+        }
+
+        private async Task<Domain.Models.SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+            ?? throw new KeyNotFoundException("Butaca no encontrada.");
+
+        private static void ValidateSeatBelongsToSector(Domain.Models.SEAT seat, int sectorId)
+        {
+            if (seat.SectorId != sectorId)
             {
                 throw new KeyNotFoundException("Butaca no encontrada para el sector indicado.");
             }
+        }
 
-            var reservations = await _repositoryReservationQuery.GetBySeatIds(new List<Guid> { seat.Id });
-            if (reservations.Count > 0)
+        private async Task EnsureSeatHasNoReservations(Guid seatId)
+        {
+            var hasReservations = await _repositoryReservationQuery.AnyBySeatId(seatId);
+            if (hasReservations)
             {
                 throw new InvalidOperationException("No se puede eliminar la butaca porque tiene reservas asociadas.");
             }
+        }
 
+        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.SEAT seat)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = command.UserId,
+                UserId = userId,
                 Action = "DeleteSeat",
                 EntityType = "SEAT",
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca eliminada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });
-            await _repositorySeatCommand.Delete(seat);
-            await _repositorySeatCommand.Save();
         }
     }
 }

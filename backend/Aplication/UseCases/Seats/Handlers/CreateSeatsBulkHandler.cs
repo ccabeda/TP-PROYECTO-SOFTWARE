@@ -5,6 +5,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
@@ -13,23 +14,20 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 {
     public class CreateSeatsBulkHandler : ICreateSeatsBulkHandler
     {
-        private readonly TicketingRulesOptions _ticketingRules;
-        private readonly IRepositorySectorQuery _repositorySectorQuery;
+        private readonly ISeatRulesService _seatRulesService;
         private readonly IRepositorySeatQuery _repositorySeatQuery;
         private readonly IRepositorySeatCommand _repositorySeatCommand;
         private readonly ICreateAuditLogHandler _createAuditLogHandler;
         private readonly IMapper _mapper;
 
         public CreateSeatsBulkHandler(
-            IOptions<TicketingRulesOptions> ticketingRules,
-            IRepositorySectorQuery repositorySectorQuery,
+            ISeatRulesService seatRulesService,
             IRepositorySeatQuery repositorySeatQuery,
             IRepositorySeatCommand repositorySeatCommand,
             ICreateAuditLogHandler createAuditLogHandler,
             IMapper mapper)
         {
-            _ticketingRules = ticketingRules.Value;
-            _repositorySectorQuery = repositorySectorQuery;
+            _seatRulesService = seatRulesService;
             _repositorySeatQuery = repositorySeatQuery;
             _repositorySeatCommand = repositorySeatCommand;
             _createAuditLogHandler = createAuditLogHandler;
@@ -38,44 +36,39 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 
         public async Task<List<SeatGetDTO>> Handle(CreateSeatsBulkCommand command)
         {
-            var sector = await _repositorySectorQuery.GetById(command.SectorId)
-                ?? throw new KeyNotFoundException("Sector no encontrado.");
+            var sector = await _seatRulesService.GetSectorOrThrow(command.SectorId);
+            var generatedRows = _seatRulesService.GetGeneratedRows(command.RowCount);
 
-            var normalizedRows = command.Rows
-                .Select(row => row.Trim().ToUpperInvariant())
-                .ToList();
+            _seatRulesService.ValidateSeatNumber(command.SeatsPerRow);
+            await _seatRulesService.ValidateSectorCapacity(command.SectorId, sector.Capacity, generatedRows.Count * command.SeatsPerRow);
 
-            if (normalizedRows.Count == 0)
-            {
-                throw new InvalidOperationException("Debe indicar al menos una fila.");
-            }
+            var existingSeatKeys = await GetExistingSeatKeys(command.SectorId, generatedRows, command.SeatsPerRow);
+            var seatsToCreate = BuildSeatsToCreate(sector.Id, generatedRows, command.SeatsPerRow, existingSeatKeys);
 
-            if (normalizedRows.Distinct().Count() != normalizedRows.Count)
-            {
-                throw new InvalidOperationException("No se permiten filas repetidas.");
-            }
+            await PersistSeats(seatsToCreate, command, sector.Id, generatedRows);
 
-            if (command.SeatsPerRow <= 0 || command.SeatsPerRow > _ticketingRules.MaxSeatsPerRow)
-            {
-                throw new InvalidOperationException($"La cantidad de asientos por fila debe estar entre 1 y {_ticketingRules.MaxSeatsPerRow}.");
-            }
+            return _mapper.Map<List<SeatGetDTO>>(seatsToCreate);
+        }
 
-            var existingSeats = await _repositorySeatQuery.GetBySectorId(command.SectorId);
-            var totalSeatsToCreate = normalizedRows.Count * command.SeatsPerRow;
-            if (existingSeats.Count + totalSeatsToCreate > sector.Capacity)
-            {
-                throw new InvalidOperationException("La operación supera la capacidad máxima del sector.");
-            }
+        private async Task<HashSet<string>> GetExistingSeatKeys(int sectorId, List<string> generatedRows, int seatsPerRow)
+        {
+            var existingSeats = await _repositorySeatQuery.GetExistingInSector(
+                sectorId,
+                generatedRows,
+                seatsPerRow);
 
-            var existingSeatKeys = existingSeats
+            return existingSeats
                 .Select(s => $"{s.RowIdentifier.ToUpperInvariant()}-{s.SeatNumber}")
                 .ToHashSet();
+        }
 
+        private static List<SEAT> BuildSeatsToCreate(int sectorId, List<string> generatedRows, int seatsPerRow, HashSet<string> existingSeatKeys)
+        {
             var seatsToCreate = new List<SEAT>();
 
-            foreach (var row in normalizedRows)
+            foreach (var row in generatedRows)
             {
-                for (var seatNumber = 1; seatNumber <= command.SeatsPerRow; seatNumber++)
+                for (var seatNumber = 1; seatNumber <= seatsPerRow; seatNumber++)
                 {
                     var seatKey = $"{row}-{seatNumber}";
                     if (existingSeatKeys.Contains(seatKey))
@@ -85,7 +78,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 
                     seatsToCreate.Add(new SEAT
                     {
-                        SectorId = sector.Id,
+                        SectorId = sectorId,
                         RowIdentifier = row,
                         SeatNumber = seatNumber,
                         Status = "Available",
@@ -94,6 +87,11 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 }
             }
 
+            return seatsToCreate;
+        }
+
+        private async Task PersistSeats(List<SEAT> seatsToCreate, CreateSeatsBulkCommand command, int sectorId, List<string> generatedRows)
+        {
             foreach (var seat in seatsToCreate)
             {
                 await _repositorySeatCommand.Create(seat);
@@ -105,12 +103,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 Action = "CreateSeatsBulk",
                 EntityType = "SEAT",
                 EntityId = command.SectorId.ToString(),
-                Details = $"Creación masiva de butacas. SectorId={sector.Id}, Rows={string.Join(",", normalizedRows)}, SeatsPerRow={command.SeatsPerRow}, TotalCreated={seatsToCreate.Count}"
+                Details = $"Creación masiva de butacas. SectorId={sectorId}, RowCount={command.RowCount}, GeneratedRows={string.Join(",", generatedRows)}, SeatsPerRow={command.SeatsPerRow}, TotalCreated={seatsToCreate.Count}"
             });
 
             await _repositorySeatCommand.Save();
-
-            return _mapper.Map<List<SeatGetDTO>>(seatsToCreate);
         }
     }
 }

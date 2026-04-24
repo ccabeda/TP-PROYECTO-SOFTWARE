@@ -33,33 +33,73 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         public async Task<ReservationGetDTO> Handle(ConfirmReservationPaymentCommand command)
         {
-            var reservation = await _repositoryReservationQuery.GetById(command.ReservationId)
-                ?? throw new KeyNotFoundException("Reserva no encontrada.");
+            var reservation = await GetReservationOrThrow(command.ReservationId);
 
+            ValidateUserCanPayReservation(command, reservation);
+            ValidateReservationIsPending(reservation);
+
+            var seat = await GetSeatOrThrow(reservation.SeatId);
+            ValidateSeatIsReserved(seat);
+
+            MarkReservationAsPaid(reservation);
+            MarkSeatAsSold(seat);
+
+            await PersistPaymentConfirmation(reservation, seat);
+            await CreateAuditLog(reservation, seat);
+            await _unitOfWorkReservationCommand.Save();
+
+            return _mapper.Map<ReservationGetDTO>(reservation);
+        }
+
+        private async Task<Domain.Models.RESERVATION> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
+            ?? throw new KeyNotFoundException("Reserva no encontrada.");
+
+        private static void ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.RESERVATION reservation)
+        {
             if (!command.IsAdmin && reservation.UserId != command.CurrentUserId)
             {
                 throw new ForbiddenAccessException("No tiene permisos para pagar esta reserva.");
             }
+        }
 
+        private static void ValidateReservationIsPending(Domain.Models.RESERVATION reservation)
+        {
             if (reservation.Status != "Pending")
             {
                 throw new InvalidOperationException("La reserva no se encuentra pendiente de pago.");
             }
+        }
 
-            var seat = await _repositorySeatQuery.GetById(reservation.SeatId)
-                ?? throw new KeyNotFoundException("Butaca no encontrada.");
+        private async Task<Domain.Models.SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+            ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
+        private static void ValidateSeatIsReserved(Domain.Models.SEAT seat)
+        {
             if (seat.Status != "Reserved")
             {
                 throw new InvalidOperationException("La butaca no se encuentra reservada.");
             }
+        }
 
+        private static void MarkReservationAsPaid(Domain.Models.RESERVATION reservation)
+        {
             reservation.Status = "Paid";
+        }
+
+        private static void MarkSeatAsSold(Domain.Models.SEAT seat)
+        {
             seat.Status = "Sold";
             seat.Version += 1;
+        }
 
+        private async Task PersistPaymentConfirmation(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
+        {
             await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
             await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+        }
+
+        private async Task CreateAuditLog(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = reservation.UserId,
@@ -68,9 +108,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 EntityId = reservation.Id.ToString(),
                 Details = $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}"
             });
-            await _unitOfWorkReservationCommand.Save();
-
-            return _mapper.Map<ReservationGetDTO>(reservation);
         }
     }
 }

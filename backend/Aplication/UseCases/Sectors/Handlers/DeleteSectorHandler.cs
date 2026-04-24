@@ -33,36 +33,59 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
 
         public async Task Handle(DeleteSectorCommand command)
         {
-            var sector = await _repositorySectorQuery.GetById(command.SectorId)
-                ?? throw new KeyNotFoundException("Sector no encontrado.");
+            var sector = await GetSectorOrThrow(command.SectorId);
 
-            if (sector.EventId != command.EventId)
+            ValidateSectorBelongsToEvent(sector, command.EventId);
+            await EnsureSectorHasNoReservations(sector.Id);
+
+            var seats = await GetSeatsBySector(sector.Id);
+            await DeleteSeatsIfAny(seats);
+            await CreateDeleteAuditLog(command.UserId, sector, seats.Count);
+
+            await _repositorySectorCommand.Delete(sector);
+            await _repositorySectorCommand.Save();
+        }
+
+        private async Task<Domain.Models.SECTOR> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)
+            ?? throw new KeyNotFoundException("Sector no encontrado.");
+
+        private static void ValidateSectorBelongsToEvent(Domain.Models.SECTOR sector, int eventId)
+        {
+            if (sector.EventId != eventId)
             {
                 throw new KeyNotFoundException("Sector no encontrado para el evento indicado.");
             }
+        }
 
-            var seats = await _repositorySeatQuery.GetBySectorId(sector.Id);
-            var reservations = await _repositoryReservationQuery.GetBySeatIds(seats.Select(s => s.Id).ToList());
-            if (reservations.Count > 0)
+        private async Task EnsureSectorHasNoReservations(int sectorId)
+        {
+            var hasReservations = await _repositoryReservationQuery.AnyBySectorId(sectorId);
+            if (hasReservations)
             {
                 throw new InvalidOperationException("No se puede eliminar el sector porque tiene reservas asociadas.");
             }
+        }
 
+        private async Task<List<Domain.Models.SEAT>> GetSeatsBySector(int sectorId) => await _repositorySeatQuery.GetBySectorId(sectorId);
+
+        private async Task DeleteSeatsIfAny(List<Domain.Models.SEAT> seats)
+        {
             if (seats.Count > 0)
             {
                 await _repositorySeatCommand.DeleteRange(seats);
             }
+        }
 
+        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.SECTOR sector, int deletedSeatsCount)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = command.UserId,
+                UserId = userId,
                 Action = "DeleteSector",
                 EntityType = "SECTOR",
                 EntityId = sector.Id.ToString(),
-                Details = $"Sector eliminado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}, DeletedSeats={seats.Count}"
+                Details = $"Sector eliminado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}, DeletedSeats={deletedSeatsCount}"
             });
-            await _repositorySectorCommand.Delete(sector);
-            await _repositorySectorCommand.Save();
         }
     }
 }

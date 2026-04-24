@@ -38,35 +38,49 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
 
         public async Task<SectorGetDTO> Handle(CreateSectorCommand command)
         {
-            var eventEntity = await _repositoryEventQuery.GetById(command.EventId)
-                ?? throw new KeyNotFoundException("Evento no encontrado.");
+            var eventEntity = await GetEventOrThrow(command.EventId);
 
-            var existingSectors = await _repositorySectorQuery.GetByEventId(command.EventId);
-            if (existingSectors.Count >= _ticketingRules.MaxSectorsPerEvent)
+            await ValidateMaxSectorsPerEvent(command.EventId);
+
+            var sector = BuildSector(command, eventEntity.Id);
+
+            await _repositorySectorCommand.Create(sector);
+            await CreateAuditLog(command.UserId, sector);
+            await _repositorySectorCommand.Save();
+
+            return _mapper.Map<SectorGetDTO>(sector);
+        }
+
+        private async Task<Domain.Models.EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
+            ?? throw new KeyNotFoundException("Evento no encontrado.");
+
+        private async Task ValidateMaxSectorsPerEvent(int eventId)
+        {
+            var sectorsCount = await _repositorySectorQuery.CountByEventId(eventId);
+            if (sectorsCount >= _ticketingRules.MaxSectorsPerEvent)
             {
                 throw new InvalidOperationException($"Un evento no puede tener más de {_ticketingRules.MaxSectorsPerEvent} sectores.");
             }
+        }
 
-            var sector = new SECTOR
-            {
-                EventId = eventEntity.Id,
-                Name = command.Name,
-                Price = command.Price,
-                Capacity = command.Capacity
-            };
+        private static SECTOR BuildSector(CreateSectorCommand command, int eventId) => new()
+        {
+            EventId = eventId,
+            Name = command.Name,
+            Price = command.Price,
+            Capacity = command.Capacity
+        };
 
-            await _repositorySectorCommand.Create(sector);
+        private async Task CreateAuditLog(int? userId, SECTOR sector)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = command.UserId,
+                UserId = userId,
                 Action = "CreateSector",
                 EntityType = "SECTOR",
                 EntityId = sector.Id.ToString(),
                 Details = $"Sector creado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}"
             });
-            await _repositorySectorCommand.Save();
-
-            return _mapper.Map<SectorGetDTO>(sector);
         }
     }
 }

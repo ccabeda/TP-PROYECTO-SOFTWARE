@@ -6,6 +6,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
     {
         Task<RESERVATION?> GetById(Guid id);
         Task<RESERVATION?> GetActiveBySeatId(Guid seatId);
+        Task<bool> AnyByEventId(int eventId);
+        Task<bool> AnyBySectorId(int sectorId);
+        Task<bool> AnyBySeatId(Guid seatId);
         Task<List<RESERVATION>> GetBySeatIds(List<Guid> seatIds);
     }
 }

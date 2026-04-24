@@ -23,26 +23,33 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 
         public async Task<EventGetDTO> Handle(CreateEventCommand command)
         {
-            var eventEntity = new EVENT
-            {
-                Name = command.Name,
-                EventDate = command.EventDate,
-                Venue = command.Venue,
-                Status = command.Status
-            };
+            var eventEntity = BuildEvent(command);
 
             await _repositoryEventCommand.Create(eventEntity);
+            await CreateAuditLog(command.UserId, eventEntity);
+            await _repositoryEventCommand.Save();
+
+            return _mapper.Map<EventGetDTO>(eventEntity);
+        }
+
+        private static EVENT BuildEvent(CreateEventCommand command) => new()
+        {
+            Name = command.Name,
+            EventDate = command.EventDate,
+            Venue = command.Venue,
+            Status = command.Status
+        };
+
+        private async Task CreateAuditLog(int? userId, EVENT eventEntity)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = command.UserId,
+                UserId = userId,
                 Action = "CreateEvent",
                 EntityType = "EVENT",
                 EntityId = eventEntity.Id.ToString(),
                 Details = $"Evento creado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, Status={eventEntity.Status}"
             });
-            await _repositoryEventCommand.Save();
-
-            return _mapper.Map<EventGetDTO>(eventEntity);
         }
     }
 }

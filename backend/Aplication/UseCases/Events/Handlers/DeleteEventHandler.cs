@@ -39,44 +39,63 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 
         public async Task Handle(DeleteEventCommand command)
         {
-            var eventEntity = await _repositoryEventQuery.GetById(command.EventId)
-                ?? throw new KeyNotFoundException("Evento no encontrado.");
+            var eventEntity = await GetEventOrThrow(command.EventId);
 
-            var sectors = await _repositorySectorQuery.GetByEventId(command.EventId);
-            var seats = new List<Domain.Models.SEAT>();
+            await EnsureEventHasNoReservations(command.EventId);
 
-            foreach (var sector in sectors)
-            {
-                var sectorSeats = await _repositorySeatQuery.GetBySectorId(sector.Id);
-                seats.AddRange(sectorSeats);
-            }
+            var sectors = await GetSectorsByEvent(command.EventId);
+            var seats = await GetSeatsByEvent(command.EventId);
 
-            var reservations = await _repositoryReservationQuery.GetBySeatIds(seats.Select(s => s.Id).ToList());
-            if (reservations.Count > 0)
+            await DeleteSeatsIfAny(seats);
+            await DeleteSectorsIfAny(sectors);
+            await CreateDeleteAuditLog(command.UserId, eventEntity, sectors.Count, seats.Count);
+
+            await _repositoryEventCommand.Delete(eventEntity);
+            await _repositoryEventCommand.Save();
+        }
+
+        private async Task<Domain.Models.EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
+            ?? throw new KeyNotFoundException("Evento no encontrado.");
+
+        private async Task EnsureEventHasNoReservations(int eventId)
+        {
+            var hasReservations = await _repositoryReservationQuery.AnyByEventId(eventId);
+            if (hasReservations)
             {
                 throw new InvalidOperationException("No se puede eliminar el evento porque tiene reservas asociadas.");
             }
+        }
 
+        private async Task<List<Domain.Models.SECTOR>> GetSectorsByEvent(int eventId) => await _repositorySectorQuery.GetByEventId(eventId);
+
+        private async Task<List<Domain.Models.SEAT>> GetSeatsByEvent(int eventId) => await _repositorySeatQuery.GetByEventId(eventId);
+
+        private async Task DeleteSeatsIfAny(List<Domain.Models.SEAT> seats)
+        {
             if (seats.Count > 0)
             {
                 await _repositorySeatCommand.DeleteRange(seats);
             }
+        }
 
+        private async Task DeleteSectorsIfAny(List<Domain.Models.SECTOR> sectors)
+        {
             if (sectors.Count > 0)
             {
                 await _repositorySectorCommand.DeleteRange(sectors);
             }
+        }
 
+        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.EVENT eventEntity, int deletedSectorsCount, int deletedSeatsCount)
+        {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
-                UserId = command.UserId,
+                UserId = userId,
                 Action = "DeleteEvent",
                 EntityType = "EVENT",
                 EntityId = eventEntity.Id.ToString(),
-                Details = $"Evento eliminado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, DeletedSectors={sectors.Count}, DeletedSeats={seats.Count}"
+                Details = $"Evento eliminado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, DeletedSectors={deletedSectorsCount}, DeletedSeats={deletedSeatsCount}"
             });
-            await _repositoryEventCommand.Delete(eventEntity);
-            await _repositoryEventCommand.Save();
         }
     }
 }
