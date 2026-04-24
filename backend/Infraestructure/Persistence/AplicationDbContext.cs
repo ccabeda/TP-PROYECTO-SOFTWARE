@@ -58,7 +58,7 @@ public class AplicationDbContext : DbContext
 
             entity.Property(s => s.RowIdentifier).IsRequired().HasMaxLength(10);
             entity.Property(s => s.Status).IsRequired().HasMaxLength(50);
-            entity.Property(s => s.Version).IsConcurrencyToken();
+            entity.Property(s => s.Version); //poner concurrence token para luego manejar concurrencia (entrega 2)
 
             entity.HasIndex(s => new { s.SectorId, s.RowIdentifier, s.SeatNumber }).IsUnique();
 

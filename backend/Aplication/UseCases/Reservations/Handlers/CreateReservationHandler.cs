@@ -39,6 +39,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             var user = await GetUserOrThrow(command.CurrentUserId);
             var seat = await GetSeatOrThrow(command.SeatId);
 
+            EnsureEventHasNotStarted(seat);
             await EnsureSeatIsAvailable(user.Id, command.SeatId, seat);
 
             MarkSeatAsReserved(seat);
@@ -56,6 +57,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private async Task<SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
+
+        private static void EnsureEventHasNotStarted(SEAT seat)
+        {
+            if (seat.Sector.Event.EventDate < DateTime.UtcNow)
+            {
+                throw new InvalidOperationException("No se pueden reservar butacas de eventos ya finalizados.");
+            }
+        }
 
         private async Task EnsureSeatIsAvailable(int userId, Guid seatId, SEAT seat)
         {

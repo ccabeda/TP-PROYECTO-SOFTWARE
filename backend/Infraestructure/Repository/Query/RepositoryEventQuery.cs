@@ -19,6 +19,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
         {
             var query = _context.EVENT
                 .AsNoTracking()
+                .Where(e => e.EventDate >= DateTime.UtcNow)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filters.Name))

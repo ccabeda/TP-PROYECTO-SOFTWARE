@@ -45,6 +45,8 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<SEAT?> GetById(Guid id) => await _context.SEAT
             .AsNoTracking()
+            .Include(s => s.Sector)
+            .ThenInclude(sector => sector.Event)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 }
