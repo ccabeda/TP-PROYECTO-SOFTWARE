@@ -87,10 +87,10 @@ Ejemplo de configuracion en `backend/API/appsettings.json`:
   },
   "TicketingRules": {
     "MaxSectorsPerEvent": 5,
-    "MaxSectorCapacity": 100,
-    "MaxRowsPerBulkCreate": 10,
+    "MaxSectorCapacity": 50,
+    "MaxRowsPerBulkCreate": 5,
     "MaxSeatsPerRow": 10,
-    "RowLabels": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" ]
+    "RowLabels": [ "A", "B", "C", "D", "E" ]
   }
 }
 ```
@@ -248,6 +248,7 @@ Explicacion de reglas de asientos:
 - Evento -> hasta 5 sectores
 - Sector -> capacidad segun `TicketingRules.MaxSectorCapacity`
 - Asientos del sector -> no pueden superar esa capacidad
+- Configuracion actual -> 5 filas maximas (`A` a `E`) x 10 asientos maximos por fila = 50 asientos por sector
 - Filas validas -> segun `TicketingRules.RowLabels`
 
 ## Estado actual
