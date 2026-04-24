@@ -57,7 +57,7 @@ Antes de levantar el proyecto, tener instalado:
 
 La API toma la cadena de conexion desde [backend/API/appsettings.json](backend/API/appsettings.json).
 
-Valor actual:
+Ejemplo:
 
 ```json
 {
@@ -69,11 +69,11 @@ Valor actual:
 
 Si el servidor local es distinto, cambiar `Server=...` por la instancia correcta.
 
-## Configuracion JWT y roles
+## Configuracion JWT, roles y reglas
 
-La API usa JWT para autenticacion y roles.
+La API usa JWT para autenticacion, roles y reglas configurables del catalogo.
 
-Valores actuales en `backend/API/appsettings.json`:
+Ejemplo de configuracion en `backend/API/appsettings.json`:
 
 ```json
 {
@@ -84,6 +84,13 @@ Valores actuales en `backend/API/appsettings.json`:
   },
   "AuthorizationSettings": {
     "AdminEmails": [ "agustin@test.com" ]
+  },
+  "TicketingRules": {
+    "MaxSectorsPerEvent": 5,
+    "MaxSectorCapacity": 100,
+    "MaxRowsPerBulkCreate": 10,
+    "MaxSeatsPerRow": 10,
+    "RowLabels": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" ]
   }
 }
 ```
@@ -96,6 +103,7 @@ Notas:
 - el usuario cuyo mail este en `AdminEmails` recibe rol `Admin`
 - los endpoints administrativos requieren token JWT con rol `Admin`
 - `POST /api/v1/users/login` devuelve el token
+- las reglas de sectores y asientos se leen desde `TicketingRules`
 
 ## Restaurar y compilar
 
@@ -226,19 +234,21 @@ Ejemplos:
 
 ### Reglas de catalogo admin
 
-- un evento no puede tener mas de `5` sectores
-- `Capacity` del sector debe ser mayor a `0` y menor o igual a `100`
+- un evento no puede tener mas sectores que `TicketingRules.MaxSectorsPerEvent`
+- `Capacity` del sector debe ser mayor a `0` y menor o igual a `TicketingRules.MaxSectorCapacity`
 - no se pueden crear mas asientos que la `Capacity` del sector
 - el endpoint bulk de asientos permite crear asientos hasta completar la capacidad disponible del sector
-- en bulk, la cantidad de filas no puede superar `10`
-- en bulk, la cantidad de asientos por fila debe estar entre `1` y `10`
-- en bulk, no se permiten filas repetidas ni butacas duplicadas
+- en bulk, la cantidad de filas no puede superar `TicketingRules.MaxRowsPerBulkCreate`
+- en bulk, la cantidad de asientos por fila debe estar entre `1` y `TicketingRules.MaxSeatsPerRow`
+- las filas validas para asientos individuales y bulk salen de `TicketingRules.RowLabels`
+- no se permiten butacas duplicadas dentro del sector
 
 Explicacion de reglas de asientos:
 
 - Evento -> hasta 5 sectores
-- Sector -> capacidad entre 1 y 100
+- Sector -> capacidad segun `TicketingRules.MaxSectorCapacity`
 - Asientos del sector -> no pueden superar esa capacidad
+- Filas validas -> segun `TicketingRules.RowLabels`
 
 ## Estado actual
 
@@ -247,4 +257,4 @@ Backend de Entrega 1 implementado y extendido con autenticacion JWT, roles de ad
 Pendiente:
 
 - frontend
-- mejoras de Entrega 2 como concurrencia fuerte, confirmación de pago y liberación automática de reservas vencidas
+- mejoras de Entrega 2 como concurrencia fuerte y liberación automática de reservas vencidas
