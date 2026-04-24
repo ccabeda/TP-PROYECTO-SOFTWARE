@@ -35,11 +35,11 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         {
             var reservation = await GetReservationOrThrow(command.ReservationId);
 
-            ValidateUserCanPayReservation(command, reservation);
-            ValidateReservationIsPending(reservation);
+            await ValidateUserCanPayReservation(command, reservation);
+            await ValidateReservationIsPending(reservation);
 
             var seat = await GetSeatOrThrow(reservation.SeatId);
-            ValidateSeatIsReserved(seat);
+            await ValidateSeatIsReserved(reservation, seat);
 
             MarkReservationAsPaid(reservation);
             MarkSeatAsSold(seat);
@@ -54,18 +54,26 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private async Task<Domain.Models.RESERVATION> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
             ?? throw new KeyNotFoundException("Reserva no encontrada.");
 
-        private static void ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.RESERVATION reservation)
+        private async Task ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.RESERVATION reservation)
         {
             if (!command.IsAdmin && reservation.UserId != command.CurrentUserId)
             {
+                await CreateRejectedPaymentAuditLog(
+                    reservation.UserId,
+                    reservation.Id.ToString(),
+                    $"Intento de pago rechazado por permisos. ReservationId={reservation.Id}, CurrentUserId={command.CurrentUserId}, ReservationUserId={reservation.UserId}");
                 throw new ForbiddenAccessException("No tiene permisos para pagar esta reserva.");
             }
         }
 
-        private static void ValidateReservationIsPending(Domain.Models.RESERVATION reservation)
+        private async Task ValidateReservationIsPending(Domain.Models.RESERVATION reservation)
         {
             if (reservation.Status != "Pending")
             {
+                await CreateRejectedPaymentAuditLog(
+                    reservation.UserId,
+                    reservation.Id.ToString(),
+                    $"Intento de pago rechazado por estado de reserva. ReservationId={reservation.Id}, ReservationStatus={reservation.Status}");
                 throw new InvalidOperationException("La reserva no se encuentra pendiente de pago.");
             }
         }
@@ -73,10 +81,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private async Task<Domain.Models.SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private static void ValidateSeatIsReserved(Domain.Models.SEAT seat)
+        private async Task ValidateSeatIsReserved(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
         {
             if (seat.Status != "Reserved")
             {
+                await CreateRejectedPaymentAuditLog(
+                    reservation.UserId,
+                    reservation.Id.ToString(),
+                    $"Intento de pago rechazado por estado de butaca. ReservationId={reservation.Id}, SeatId={seat.Id}, SeatStatus={seat.Status}");
                 throw new InvalidOperationException("La butaca no se encuentra reservada.");
             }
         }
@@ -107,6 +119,18 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 EntityType = "RESERVATION",
                 EntityId = reservation.Id.ToString(),
                 Details = $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}"
+            });
+        }
+
+        private async Task CreateRejectedPaymentAuditLog(int userId, string reservationId, string details)
+        {
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = userId,
+                Action = "ConfirmReservationPaymentRejected",
+                EntityType = "RESERVATION",
+                EntityId = reservationId,
+                Details = details
             });
         }
     }

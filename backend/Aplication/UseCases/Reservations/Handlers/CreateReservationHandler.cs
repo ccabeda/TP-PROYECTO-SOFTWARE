@@ -39,7 +39,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             var user = await GetUserOrThrow(command.CurrentUserId);
             var seat = await GetSeatOrThrow(command.SeatId);
 
-            await EnsureSeatIsAvailable(command.SeatId, seat);
+            await EnsureSeatIsAvailable(user.Id, command.SeatId, seat);
 
             MarkSeatAsReserved(seat);
             var reservation = BuildReservation(user.Id, seat.Id);
@@ -57,11 +57,12 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private async Task<SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private async Task EnsureSeatIsAvailable(Guid seatId, SEAT seat)
+        private async Task EnsureSeatIsAvailable(int userId, Guid seatId, SEAT seat)
         {
             var activeReservation = await _repositoryReservationQuery.GetActiveBySeatId(seatId);
             if (seat.Status != "Available" || activeReservation is not null)
             {
+                await CreateRejectedReservationAuditLog(userId, seat, activeReservation is not null);
                 throw new InvalidOperationException("La butaca no se encuentra disponible.");
             }
         }
@@ -96,6 +97,18 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 EntityType = "RESERVATION",
                 EntityId = reservation.Id.ToString(),
                 Details = $"Reserva creada. SeatId={seatId}, UserId={userId}, Status={reservation.Status}, ExpiresAt={reservation.ExpiresAt:O}"
+            });
+        }
+
+        private async Task CreateRejectedReservationAuditLog(int userId, SEAT seat, bool hasActiveReservation)
+        {
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = userId,
+                Action = "CreateReservationRejected",
+                EntityType = "SEAT",
+                EntityId = seat.Id.ToString(),
+                Details = $"Intento de reserva rechazado. UserId={userId}, SeatId={seat.Id}, Status={seat.Status}, HasActiveReservation={hasActiveReservation}"
             });
         }
     }

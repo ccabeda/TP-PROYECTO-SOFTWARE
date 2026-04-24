@@ -4,6 +4,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
+using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
@@ -14,12 +15,18 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
         private static readonly PasswordHasher<USER> PasswordHasher = new();
         private readonly IRepositoryUserQuery _repositoryUserQuery;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly ICreateAuditLogHandler _createAuditLogHandler;
         private readonly IMapper _mapper;
 
-        public LoginUserHandler(IRepositoryUserQuery repositoryUserQuery, IJwtTokenGenerator jwtTokenGenerator, IMapper mapper)
+        public LoginUserHandler(
+            IRepositoryUserQuery repositoryUserQuery,
+            IJwtTokenGenerator jwtTokenGenerator,
+            ICreateAuditLogHandler createAuditLogHandler,
+            IMapper mapper)
         {
             _repositoryUserQuery = repositoryUserQuery;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _createAuditLogHandler = createAuditLogHandler;
             _mapper = mapper;
         }
 
@@ -38,6 +45,15 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             var response = _mapper.Map<UserLoginResponseDTO>(user);
             response.Role = _jwtTokenGenerator.ResolveRole(user.Email);
             response.Token = _jwtTokenGenerator.GenerateToken(user);
+
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = user.Id,
+                Action = "LoginUser",
+                EntityType = "USER",
+                EntityId = user.Id.ToString(),
+                Details = $"Login exitoso. UserId={user.Id}, Email={user.Email}, Role={response.Role}"
+            });
 
             return response;
         }
