@@ -4,7 +4,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands
     {
         public int? UserId { get; set; }
         public int SectorId { get; set; }
-        public List<string> Rows { get; set; } = new();
+        public int RowCount { get; set; }
         public int SeatsPerRow { get; set; }
     }
 }

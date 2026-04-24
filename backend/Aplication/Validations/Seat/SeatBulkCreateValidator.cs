@@ -11,11 +11,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Validations.Seat
         {
             var rules = ticketingRules.Value;
 
-            RuleFor(x => x.Rows).NotEmpty();
-            RuleFor(x => x.Rows.Count)
+            RuleFor(x => x.RowCount)
+                .GreaterThan(0)
                 .LessThanOrEqualTo(rules.MaxRowsPerBulkCreate)
                 .WithMessage($"La cantidad de filas no puede superar {rules.MaxRowsPerBulkCreate}.");
-            RuleForEach(x => x.Rows).NotEmpty().MaximumLength(10);
             RuleFor(x => x.SeatsPerRow)
                 .GreaterThan(0)
                 .LessThanOrEqualTo(rules.MaxSeatsPerRow)

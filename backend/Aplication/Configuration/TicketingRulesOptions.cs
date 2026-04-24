@@ -8,5 +8,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Configuration
         public int MaxSectorCapacity { get; set; }
         public int MaxRowsPerBulkCreate { get; set; }
         public int MaxSeatsPerRow { get; set; }
+        public List<string> RowLabels { get; set; } = new();
     }
 }

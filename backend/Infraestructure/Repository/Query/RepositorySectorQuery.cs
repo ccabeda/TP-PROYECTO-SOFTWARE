@@ -15,9 +15,15 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
         }
 
         public async Task<List<SECTOR>> GetByEventId(int eventId) => await _context.SECTOR
+            .AsNoTracking()
             .Where(s => s.EventId == eventId)
             .ToListAsync();
 
-        public async Task<SECTOR?> GetById(int id) => await _context.SECTOR.FirstOrDefaultAsync(s => s.Id == id);
+        public async Task<int> CountByEventId(int eventId) => await _context.SECTOR
+            .CountAsync(s => s.EventId == eventId);
+
+        public async Task<SECTOR?> GetById(int id) => await _context.SECTOR
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == id);
     }
 }

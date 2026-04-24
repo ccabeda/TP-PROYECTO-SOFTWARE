@@ -17,7 +17,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<List<EVENT>> GetAll(GetEventsQuery filters)
         {
-            var query = _context.EVENT.AsQueryable();
+            var query = _context.EVENT
+                .AsNoTracking()
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filters.Name))
             {
@@ -34,6 +36,8 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             return await query.ToListAsync();
         }
 
-        public async Task<EVENT?> GetById(int id) => await _context.EVENT.FirstOrDefaultAsync(e => e.Id == id);
+        public async Task<EVENT?> GetById(int id) => await _context.EVENT
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 }
