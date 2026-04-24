@@ -66,7 +66,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private async Task ValidateReservationIsPending(Domain.Models.RESERVATION reservation)
+        private async Task ValidateReservationIsPending(Domain.Models.RESERVATION reservation)  //esto es mas para la segunda entrega, ya que aun no se implemento la expiracion de reservas.
         {
             if (reservation.Status != "Pending")
             {

@@ -51,7 +51,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             return _mapper.Map<SectorGetDTO>(sector);
         }
 
-        private async Task<Domain.Models.EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
+        private async Task<EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
             ?? throw new KeyNotFoundException("Evento no encontrado.");
 
         private async Task ValidateMaxSectorsPerEvent(int eventId)

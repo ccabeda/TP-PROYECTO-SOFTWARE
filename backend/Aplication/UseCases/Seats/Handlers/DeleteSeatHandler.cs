@@ -3,6 +3,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 {
@@ -37,10 +38,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             await _repositorySeatCommand.Save();
         }
 
-        private async Task<Domain.Models.SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+        private async Task<SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private static void ValidateSeatBelongsToSector(Domain.Models.SEAT seat, int sectorId)
+        private static void ValidateSeatBelongsToSector(SEAT seat, int sectorId)
         {
             if (seat.SectorId != sectorId)
             {
@@ -57,7 +58,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             }
         }
 
-        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.SEAT seat)
+        private async Task CreateDeleteAuditLog(int? userId, SEAT seat)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
