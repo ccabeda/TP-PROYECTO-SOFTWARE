@@ -83,6 +83,27 @@ builder.Services.AddSwaggerGen(c => //simplemente decoracion para que se vea mej
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer no configurado.");
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience no configurado.");
+var localFrontendOrigins = new[]
+{
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "http://127.0.0.1:5501",
+    "http://localhost:5501",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000"
+};
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDevPolicy", policy =>
+    {
+        policy.WithOrigins(localFrontendOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -229,6 +250,8 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>(); //middleware para manejar las excepciones de forma global y devolver respuestas consistentes
 
 app.UseHttpsRedirection();
+
+app.UseCors("FrontendDevPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();

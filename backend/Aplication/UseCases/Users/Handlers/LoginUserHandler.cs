@@ -43,7 +43,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
         private async Task<User> GetUserOrThrow(string email)
         {
             return await _userManager.FindByEmailAsync(email)
-                ?? throw new KeyNotFoundException("Usuario no encontrado.");
+                ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos. Verifica los datos e intenta de nuevo.");
         }
 
         private async Task ValidatePasswordOrThrow(User user, string password)
@@ -51,7 +51,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
             if (!isPasswordValid)
             {
-                throw new UnauthorizedAccessException("Credenciales invalidas.");
+                throw new UnauthorizedAccessException("Email o contraseña incorrectos. Verifica los datos e intenta de nuevo.");
             }
         }
 

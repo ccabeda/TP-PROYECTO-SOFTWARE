@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticketing</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/home.css">
+</head>
+<body data-i18n-title="page.index.title">
+    <button class="theme-toggle" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Cambiar tema"></button>
+    <main class="simple-page">
+        <h1 data-i18n="index.title">Frontend en construcción</h1>
+        <p data-i18n="index.subtitle">Base inicial para integrar login, registro y catalogo.</p>
+        <p id="session-message" data-i18n="index.noSession">No hay una sesion iniciada.</p>
+        <p class="simple-actions">
+            <a id="login-link" href="./login.html" data-i18n="index.login">Ir a login</a>
+            <a id="register-link" href="./register.html" data-i18n="index.register">Ir a registro</a>
+            <button id="logout-button" type="button" data-i18n="index.logout">Cerrar sesion</button>
+        </p>
+    </main>
+
+    <script type="module" src="../js/auth/index-session.js"></script>
+</body>
+</html>

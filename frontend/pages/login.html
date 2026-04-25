@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Ticketing</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body data-i18n-title="page.login.title">
+    <button class="theme-toggle" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Cambiar tema"></button>
+    <main class="auth-page">
+        <section class="auth-card">
+            <p class="auth-eyebrow" data-i18n="auth.login.eyebrow">Bienvenido</p>
+            <h1 class="auth-title" data-i18n="auth.login.title">Iniciar sesión</h1>
+            <p class="auth-subtitle" data-i18n="auth.login.subtitle">Accede a tu cuenta para seguir con tus reservas.</p>
+
+            <form id="login-form" class="auth-form" novalidate>
+                <div class="auth-field">
+                    <label for="email" data-i18n="field.email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required autofocus>
+                </div>
+
+                <div class="auth-field">
+                    <label for="password" data-i18n="field.password">Contraseña</label>
+                    <div class="password-field">
+                        <input id="password" name="password" type="password" autocomplete="current-password" required>
+                        <button id="toggle-login-password" class="password-toggle" type="button" data-i18n-aria-label="auth.showPassword" aria-label="Mostrar contraseña">
+                            <span class="eye-icon eye-open" aria-hidden="true">
+                                <img src="../img/eye-open.svg" alt="">
+                            </span>
+                            <span class="eye-icon eye-closed" aria-hidden="true">
+                                <img src="../img/eye-closed.svg" alt="">
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="auth-checkbox">
+                    <input id="rememberMe" name="rememberMe" type="checkbox">
+                    <span data-i18n="field.rememberMe">Recordarme</span>
+                </label>
+
+                <button id="login-submit" class="auth-button" type="submit">
+                    <span class="button-label" data-i18n="button.login">Ingresar</span>
+                    <span class="button-spinner" aria-hidden="true"></span>
+                </button>
+            </form>
+
+            <p id="login-message" class="auth-message" aria-live="polite"></p>
+
+            <nav class="auth-links" aria-label="Navegación de autenticación" data-i18n-aria-label="nav.auth">
+                <a href="./register.html" data-i18n="link.createAccount">Crear cuenta</a>
+                <a href="./index.html" data-i18n="link.backHome">Volver al inicio</a>
+            </nav>
+        </section>
+
+        <div class="language-picker" aria-label="Language selector">
+            <button class="language-option" type="button" data-language-option="en" data-i18n="lang.english">ENGLISH (US)</button>
+            <span class="language-separator">|</span>
+            <button class="language-option" type="button" data-language-option="es" data-i18n="lang.spanish">Español</button>
+        </div>
+    </main>
+
+    <script type="module" src="../js/auth/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+:root {
+    --bg: #f4efe6;
+    --panel: #fffaf2;
+    --panel-border: #d6c7ae;
+    --text: #1e1b16;
+    --muted: #6c6255;
+    --accent: #a33b20;
+    --accent-dark: #7f2d17;
+    --input: #fffdf8;
+    --shadow: 0 20px 50px rgba(79, 56, 30, 0.14);
+    --radius: 24px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: Georgia, "Times New Roman", serif;
+    background:
+        radial-gradient(circle at top left, rgba(163, 59, 32, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(110, 85, 49, 0.18), transparent 30%),
+        linear-gradient(160deg, #f8f3ea 0%, var(--bg) 100%);
+}
+
+a {
+    color: inherit;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
