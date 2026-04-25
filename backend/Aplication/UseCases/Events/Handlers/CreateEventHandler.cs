@@ -32,7 +32,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             return _mapper.Map<EventGetDTO>(eventEntity);
         }
 
-        private static EVENT BuildEvent(CreateEventCommand command) => new()
+        private static Event BuildEvent(CreateEventCommand command) => new()
         {
             Name = command.Name,
             EventDate = command.EventDate,
@@ -40,13 +40,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             Status = command.Status
         };
 
-        private async Task CreateAuditLog(int? userId, EVENT eventEntity)
+        private async Task CreateAuditLog(int? userId, Event eventEntity)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
                 Action = "CreateEvent",
-                EntityType = "EVENT",
+                EntityType = "Event",
                 EntityId = eventEntity.Id.ToString(),
                 Details = $"Evento creado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, Status={eventEntity.Status}"
             });

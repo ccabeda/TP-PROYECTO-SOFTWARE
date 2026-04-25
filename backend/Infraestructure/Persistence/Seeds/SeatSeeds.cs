@@ -7,7 +7,7 @@ public static class SeatSeeds
 {
     public static void Seed(ModelBuilder modelBuilder)
     {
-        var seats = new List<SEAT>();
+        var seats = new List<Seat>();
         var rows = new[] { "A", "B", "C", "D", "E" };
 
         foreach (var sectorId in new[] { 1, 2 })
@@ -18,7 +18,7 @@ public static class SeatSeeds
             {
                 for (var seatNumber = 1; seatNumber <= 10; seatNumber++)
                 {
-                    seats.Add(new SEAT
+                    seats.Add(new Seat
                     {
                         Id = BuildGuid(sectorId, sequence),
                         SectorId = sectorId,
@@ -33,7 +33,7 @@ public static class SeatSeeds
             }
         }
 
-        modelBuilder.Entity<SEAT>().HasData(seats);
+        modelBuilder.Entity<Seat>().HasData(seats);
     }
 
     private static Guid BuildGuid(int sectorId, int sequence)

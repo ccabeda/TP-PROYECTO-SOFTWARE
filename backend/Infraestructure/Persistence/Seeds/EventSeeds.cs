@@ -7,8 +7,8 @@ public static class EventSeeds
 {
     public static void Seed(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<EVENT>().HasData(
-            new EVENT
+        modelBuilder.Entity<Event>().HasData(
+            new Event
             {
                 Id = 1,
                 Name = "Concierto de Rock",

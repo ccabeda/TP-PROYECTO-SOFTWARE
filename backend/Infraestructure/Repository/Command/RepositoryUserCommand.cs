@@ -13,8 +13,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
             _context = context;
         }
 
-        public async Task Create(USER user) => await _context.USER.AddAsync(user);
+        public async Task Create(User user) => await _context.Users.AddAsync(user);
 
         public async Task Save() => await _context.SaveChangesAsync();
     }
 }
+

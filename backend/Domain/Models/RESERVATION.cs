@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TP_PROYECTO_SOFTWARE.Domain.Models;
 
-public class RESERVATION
+public class Reservation
 {
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -12,6 +12,6 @@ public class RESERVATION
     public DateTime ReservedAt { get; set; }
     public DateTime ExpiresAt { get; set; }
 
-    public USER User { get; set; } = null!;
-    public SEAT Seat { get; set; } = null!;
+    public User User { get; set; } = null!;
+    public Seat Seat { get; set; } = null!;
 }

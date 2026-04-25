@@ -15,9 +15,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<AUDIT_LOG>> GetAll(GetAuditLogsQuery query)
+        public async Task<List<AuditLog>> GetAll(GetAuditLogsQuery query)
         {
-            var auditLogsQuery = _context.AUDIT_LOG
+            var auditLogsQuery = _context.AuditLogs
                 .AsNoTracking()
                 .Include(a => a.User)
                 .AsQueryable();
@@ -52,3 +52,5 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
         }
     }
 }
+
+

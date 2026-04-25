@@ -14,16 +14,17 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<SECTOR>> GetByEventId(int eventId) => await _context.SECTOR
+        public async Task<List<Sector>> GetByEventId(int eventId) => await _context.Sectors
             .AsNoTracking()
             .Where(s => s.EventId == eventId)
             .ToListAsync();
 
-        public async Task<int> CountByEventId(int eventId) => await _context.SECTOR
+        public async Task<int> CountByEventId(int eventId) => await _context.Sectors
             .CountAsync(s => s.EventId == eventId);
 
-        public async Task<SECTOR?> GetById(int id) => await _context.SECTOR
+        public async Task<Sector?> GetById(int id) => await _context.Sectors
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 }
+

@@ -51,7 +51,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             return _mapper.Map<SectorGetDTO>(sector);
         }
 
-        private async Task<EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
+        private async Task<Event> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
             ?? throw new KeyNotFoundException("Evento no encontrado.");
 
         private async Task ValidateMaxSectorsPerEvent(int eventId)
@@ -63,7 +63,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             }
         }
 
-        private static SECTOR BuildSector(CreateSectorCommand command, int eventId) => new()
+        private static Sector BuildSector(CreateSectorCommand command, int eventId) => new()
         {
             EventId = eventId,
             Name = command.Name,
@@ -71,13 +71,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             Capacity = command.Capacity
         };
 
-        private async Task CreateAuditLog(int? userId, SECTOR sector)
+        private async Task CreateAuditLog(int? userId, Sector sector)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
                 Action = "CreateSector",
-                EntityType = "SECTOR",
+                EntityType = "Sector",
                 EntityId = sector.Id.ToString(),
                 Details = $"Sector creado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}"
             });

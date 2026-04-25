@@ -1,21 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence.Seeds;
 
 namespace TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 
-public class AplicationDbContext : DbContext
+public class AplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {
     public AplicationDbContext(DbContextOptions<AplicationDbContext> options) : base(options)
     {
     }
 
-    public DbSet<EVENT> EVENT { get; set; }
-    public DbSet<SECTOR> SECTOR { get; set; }
-    public DbSet<SEAT> SEAT { get; set; }
-    public DbSet<USER> USER { get; set; }
-    public DbSet<RESERVATION> RESERVATION { get; set; }
-    public DbSet<AUDIT_LOG> AUDIT_LOG { get; set; }
+    public DbSet<Event> Events { get; set; }
+    public DbSet<Sector> Sectors { get; set; }
+    public DbSet<Seat> Seats { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,8 +26,16 @@ public class AplicationDbContext : DbContext
         SectorSeeds.Seed(modelBuilder);
         SeatSeeds.Seed(modelBuilder);
 
-        modelBuilder.Entity<EVENT>(entity =>
+        modelBuilder.Entity<IdentityRole<int>>().ToTable("IDENTITY_ROLE");
+        modelBuilder.Entity<IdentityUserRole<int>>().ToTable("IDENTITY_USER_ROLE");
+        modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("IDENTITY_USER_CLAIM");
+        modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("IDENTITY_USER_LOGIN");
+        modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("IDENTITY_ROLE_CLAIM");
+        modelBuilder.Entity<IdentityUserToken<int>>().ToTable("IDENTITY_USER_TOKEN");
+
+        modelBuilder.Entity<Event>(entity =>
         {
+            entity.ToTable("EVENT");
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
@@ -39,8 +48,9 @@ public class AplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<SECTOR>(entity =>
+        modelBuilder.Entity<Sector>(entity =>
         {
+            entity.ToTable("SECTOR");
             entity.HasKey(s => s.Id);
 
             entity.Property(s => s.Name).IsRequired().HasMaxLength(100);
@@ -52,8 +62,9 @@ public class AplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<SEAT>(entity =>
+        modelBuilder.Entity<Seat>(entity =>
         {
+            entity.ToTable("SEAT");
             entity.HasKey(s => s.Id);
 
             entity.Property(s => s.RowIdentifier).IsRequired().HasMaxLength(10);
@@ -68,13 +79,14 @@ public class AplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<USER>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(u => u.Id);
-
+            entity.ToTable("USER");
             entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
-            entity.Property(u => u.Email).IsRequired().HasMaxLength(150);
-            entity.Property(u => u.PasswordHash).IsRequired().HasMaxLength(255);
+            entity.Property(u => u.Email).HasMaxLength(150);
+            entity.Property(u => u.UserName).HasMaxLength(150);
+            entity.Property(u => u.NormalizedEmail).HasMaxLength(150);
+            entity.Property(u => u.NormalizedUserName).HasMaxLength(150);
 
             entity.HasIndex(u => u.Email).IsUnique();
 
@@ -89,15 +101,17 @@ public class AplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<RESERVATION>(entity =>
+        modelBuilder.Entity<Reservation>(entity =>
         {
+            entity.ToTable("RESERVATION");
             entity.HasKey(r => r.Id);
 
             entity.Property(r => r.Status).IsRequired().HasMaxLength(50);
         });
 
-        modelBuilder.Entity<AUDIT_LOG>(entity =>
+        modelBuilder.Entity<AuditLog>(entity =>
         {
+            entity.ToTable("AUDIT_LOG");
             entity.HasKey(a => a.Id);
 
             entity.Property(a => a.Action).IsRequired().HasMaxLength(100);
@@ -107,3 +121,5 @@ public class AplicationDbContext : DbContext
         });
     }
 }
+
+

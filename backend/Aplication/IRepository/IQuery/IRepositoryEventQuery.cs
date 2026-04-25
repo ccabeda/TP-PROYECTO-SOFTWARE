@@ -5,7 +5,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
 {
     public interface IRepositoryEventQuery
     {
-        Task<EVENT?> GetById(int id);
-        Task<List<EVENT>> GetAll(GetEventsQuery filters);
+        Task<Event?> GetById(int id);
+        Task<List<Event>> GetAll(GetEventsQuery filters);
     }
 }

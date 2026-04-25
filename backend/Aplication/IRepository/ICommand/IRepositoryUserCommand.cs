@@ -4,7 +4,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand
 {
     public interface IRepositoryUserCommand
     {
-        Task Create(USER user);
+        Task Create(User user);
         Task Save();
     }
 }

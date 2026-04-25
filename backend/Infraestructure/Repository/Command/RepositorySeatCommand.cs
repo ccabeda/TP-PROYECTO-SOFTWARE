@@ -13,26 +13,27 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
             _context = context;
         }
 
-        public async Task Create(SEAT seat) => await _context.SEAT.AddAsync(seat);
+        public async Task Create(Seat seat) => await _context.Seats.AddAsync(seat);
 
-        public Task Delete(SEAT seat)
+        public Task Delete(Seat seat)
         {
-            _context.SEAT.Remove(seat);
+            _context.Seats.Remove(seat);
             return Task.CompletedTask;
         }
 
-        public Task DeleteRange(IEnumerable<SEAT> seats)
+        public Task DeleteRange(IEnumerable<Seat> seats)
         {
-            _context.SEAT.RemoveRange(seats);
+            _context.Seats.RemoveRange(seats);
             return Task.CompletedTask;
         }
 
-        public Task Update(SEAT seat)
+        public Task Update(Seat seat)
         {
-            _context.SEAT.Update(seat);
+            _context.Seats.Update(seat);
             return Task.CompletedTask;
         }
 
         public async Task Save() => await _context.SaveChangesAsync();
     }
 }
+

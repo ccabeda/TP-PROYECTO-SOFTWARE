@@ -15,9 +15,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<EVENT>> GetAll(GetEventsQuery filters)
+        public async Task<List<Event>> GetAll(GetEventsQuery filters)
         {
-            var query = _context.EVENT
+            var query = _context.Events
                 .AsNoTracking()
                 .Where(e => e.EventDate >= DateTime.UtcNow)
                 .AsQueryable();
@@ -37,8 +37,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             return await query.ToListAsync();
         }
 
-        public async Task<EVENT?> GetById(int id) => await _context.EVENT
+        public async Task<Event?> GetById(int id) => await _context.Events
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 }
+

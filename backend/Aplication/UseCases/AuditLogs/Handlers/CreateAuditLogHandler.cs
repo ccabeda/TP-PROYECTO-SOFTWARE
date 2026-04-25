@@ -16,7 +16,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers
 
         public async Task Handle(CreateAuditLogCommand command)
         {
-            var auditLog = new AUDIT_LOG
+            var auditLog = new AuditLog
             {
                 UserId = command.UserId,
                 Action = command.Action,
@@ -30,3 +30,4 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers
         }
     }
 }
+

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TP_PROYECTO_SOFTWARE.Domain.Models;
 
-public class AUDIT_LOG
+public class AuditLog
 {
     [Key]
     public Guid Id { get; set; }
@@ -13,5 +13,6 @@ public class AUDIT_LOG
     public string Details { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
-    public USER? User { get; set; }
+    public User? User { get; set; }
 }
+

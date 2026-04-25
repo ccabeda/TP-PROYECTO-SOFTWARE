@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TP_PROYECTO_SOFTWARE.Domain.Models;
 
-public class SEAT
+public class Seat
 {
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -12,6 +12,6 @@ public class SEAT
     public string Status { get; set; } = string.Empty;
     public int Version { get; set; }
 
-    public SECTOR Sector { get; set; } = null!;
-    public ICollection<RESERVATION> Reservations { get; set; } = new List<RESERVATION>();
+    public Sector Sector { get; set; } = null!;
+    public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 }

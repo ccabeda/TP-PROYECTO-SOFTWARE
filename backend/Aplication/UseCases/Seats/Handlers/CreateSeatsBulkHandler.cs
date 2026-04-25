@@ -62,9 +62,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 .ToHashSet();
         }
 
-        private static List<SEAT> BuildSeatsToCreate(int sectorId, List<string> generatedRows, int seatsPerRow, HashSet<string> existingSeatKeys)
+        private static List<Seat> BuildSeatsToCreate(int sectorId, List<string> generatedRows, int seatsPerRow, HashSet<string> existingSeatKeys)
         {
-            var seatsToCreate = new List<SEAT>();
+            var seatsToCreate = new List<Seat>();
 
             foreach (var row in generatedRows)
             {
@@ -76,7 +76,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                         throw new InvalidOperationException($"Ya existe la butaca {row}{seatNumber} en el sector.");
                     }
 
-                    seatsToCreate.Add(new SEAT
+                    seatsToCreate.Add(new Seat
                     {
                         SectorId = sectorId,
                         RowIdentifier = row,
@@ -90,7 +90,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             return seatsToCreate;
         }
 
-        private async Task PersistSeats(List<SEAT> seatsToCreate, CreateSeatsBulkCommand command, int sectorId, List<string> generatedRows)
+        private async Task PersistSeats(List<Seat> seatsToCreate, CreateSeatsBulkCommand command, int sectorId, List<string> generatedRows)
         {
             foreach (var seat in seatsToCreate)
             {
@@ -101,7 +101,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             {
                 UserId = command.UserId,
                 Action = "CreateSeatsBulk",
-                EntityType = "SEAT",
+                EntityType = "Seat",
                 EntityId = command.SectorId.ToString(),
                 Details = $"Creación masiva de butacas. SectorId={sectorId}, RowCount={command.RowCount}, GeneratedRows={string.Join(",", generatedRows)}, SeatsPerRow={command.SeatsPerRow}, TotalCreated={seatsToCreate.Count}"
             });

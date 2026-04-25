@@ -14,12 +14,13 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<USER>> GetAll() => await _context.USER
+        public async Task<List<User>> GetAll() => await _context.Users
             .AsNoTracking()
             .ToListAsync();
 
-        public async Task<USER?> GetById(int id) => await _context.USER.FirstOrDefaultAsync(u => u.Id == id);
+        public async Task<User?> GetById(int id) => await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
-        public async Task<USER?> GetByEmail(string email) => await _context.USER.FirstOrDefaultAsync(u => u.Email == email);
+        public async Task<User?> GetByEmail(string email) => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 }
+

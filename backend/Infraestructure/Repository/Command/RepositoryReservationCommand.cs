@@ -13,12 +13,13 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
             _context = context;
         }
 
-        public async Task Create(RESERVATION reservation) => await _context.RESERVATION.AddAsync(reservation);
+        public async Task Create(Reservation reservation) => await _context.Reservations.AddAsync(reservation);
 
-        public Task Update(RESERVATION reservation)
+        public Task Update(Reservation reservation)
         {
-            _context.RESERVATION.Update(reservation);
+            _context.Reservations.Update(reservation);
             return Task.CompletedTask;
         }
     }
 }
+

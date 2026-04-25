@@ -4,10 +4,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand
 {
     public interface IRepositorySeatCommand
     {
-        Task Create(SEAT seat);
-        Task Delete(SEAT seat);
-        Task DeleteRange(IEnumerable<SEAT> seats);
-        Task Update(SEAT seat);
+        Task Create(Seat seat);
+        Task Delete(Seat seat);
+        Task DeleteRange(IEnumerable<Seat> seats);
+        Task Update(Seat seat);
         Task Save();
     }
 }

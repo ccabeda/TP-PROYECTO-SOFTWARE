@@ -4,7 +4,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand
 {
     public interface IRepositoryReservationCommand
     {
-        Task Create(RESERVATION reservation);
-        Task Update(RESERVATION reservation);
+        Task Create(Reservation reservation);
+        Task Update(Reservation reservation);
     }
 }

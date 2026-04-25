@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,7 +11,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "EVENT",
+                name: "Event",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -23,11 +23,11 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EVENT", x => x.Id);
+                    table.PrimaryKey("PK_Event", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "USER",
+                name: "User",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -38,11 +38,11 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_USER", x => x.Id);
+                    table.PrimaryKey("PK_User", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SECTOR",
+                name: "Sector",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -54,17 +54,17 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SECTOR", x => x.Id);
+                    table.PrimaryKey("PK_Sector", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SECTOR_EVENT_EventId",
+                        name: "FK_Sector_Event_EventId",
                         column: x => x.EventId,
-                        principalTable: "EVENT",
+                        principalTable: "Event",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AUDIT_LOG",
+                name: "AuditLog",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -77,17 +77,17 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AUDIT_LOG", x => x.Id);
+                    table.PrimaryKey("PK_AuditLog", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AUDIT_LOG_USER_UserId",
+                        name: "FK_AuditLog_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "USER",
+                        principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SEAT",
+                name: "Seat",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -99,17 +99,17 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SEAT", x => x.Id);
+                    table.PrimaryKey("PK_Seat", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SEAT_SECTOR_SectorId",
+                        name: "FK_Seat_Sector_SectorId",
                         column: x => x.SectorId,
-                        principalTable: "SECTOR",
+                        principalTable: "Sector",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RESERVATION",
+                name: "Reservation",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -121,50 +121,50 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RESERVATION", x => x.Id);
+                    table.PrimaryKey("PK_Reservation", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RESERVATION_SEAT_SeatId",
+                        name: "FK_Reservation_Seat_SeatId",
                         column: x => x.SeatId,
-                        principalTable: "SEAT",
+                        principalTable: "Seat",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_RESERVATION_USER_UserId",
+                        name: "FK_Reservation_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "USER",
+                        principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AUDIT_LOG_UserId",
-                table: "AUDIT_LOG",
+                name: "IX_AuditLog_UserId",
+                table: "AuditLog",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RESERVATION_SeatId",
-                table: "RESERVATION",
+                name: "IX_Reservation_SeatId",
+                table: "Reservation",
                 column: "SeatId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RESERVATION_UserId",
-                table: "RESERVATION",
+                name: "IX_Reservation_UserId",
+                table: "Reservation",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SEAT_SectorId_RowIdentifier_SeatNumber",
-                table: "SEAT",
+                name: "IX_Seat_SectorId_RowIdentifier_SeatNumber",
+                table: "Seat",
                 columns: new[] { "SectorId", "RowIdentifier", "SeatNumber" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SECTOR_EventId",
-                table: "SECTOR",
+                name: "IX_Sector_EventId",
+                table: "Sector",
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_USER_Email",
-                table: "USER",
+                name: "IX_User_Email",
+                table: "User",
                 column: "Email",
                 unique: true);
         }
@@ -173,22 +173,24 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AUDIT_LOG");
+                name: "AuditLog");
 
             migrationBuilder.DropTable(
-                name: "RESERVATION");
+                name: "Reservation");
 
             migrationBuilder.DropTable(
-                name: "SEAT");
+                name: "Seat");
 
             migrationBuilder.DropTable(
-                name: "USER");
+                name: "User");
 
             migrationBuilder.DropTable(
-                name: "SECTOR");
+                name: "Sector");
 
             migrationBuilder.DropTable(
-                name: "EVENT");
+                name: "Event");
         }
     }
 }
+
+

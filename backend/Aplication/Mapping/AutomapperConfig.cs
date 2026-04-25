@@ -19,22 +19,23 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Mapping
     {
         public AutomapperConfig()
         {
-            CreateMap<AUDIT_LOG, AuditLogGetDTO>()
+            CreateMap<AuditLog, AuditLogGetDTO>()
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User != null ? src.User.Email : null));
-            CreateMap<EVENT, EventGetDTO>().ReverseMap();
+            CreateMap<Event, EventGetDTO>().ReverseMap();
             CreateMap<EventCreateDTO, CreateEventCommand>().ReverseMap();
-            CreateMap<SECTOR, SectorGetDTO>().ReverseMap();
+            CreateMap<Sector, SectorGetDTO>().ReverseMap();
             CreateMap<SectorCreateDTO, CreateSectorCommand>().ReverseMap();
-            CreateMap<SEAT, SeatGetDTO>().ReverseMap();
+            CreateMap<Seat, SeatGetDTO>().ReverseMap();
             CreateMap<SeatCreateDTO, CreateSeatCommand>().ReverseMap();
             CreateMap<SeatBulkCreateDTO, CreateSeatsBulkCommand>().ReverseMap();
             CreateMap<PaymentCreateDTO, ConfirmReservationPaymentCommand>().ReverseMap();
             CreateMap<ReservationCreateDTO, CreateReservationCommand>().ReverseMap();
-            CreateMap<RESERVATION, ReservationGetDTO>().ReverseMap();
-            CreateMap<USER, UserGetDTO>().ReverseMap();
-            CreateMap<USER, UserLoginResponseDTO>().ReverseMap();
+            CreateMap<Reservation, ReservationGetDTO>().ReverseMap();
+            CreateMap<User, UserGetDTO>().ReverseMap();
+            CreateMap<User, UserLoginResponseDTO>().ReverseMap();
             CreateMap<UserCreateDTO, CreateUserCommand>().ReverseMap();
             CreateMap<UserLoginDTO, LoginUserCommand>().ReverseMap();
         }
     }
 }
+

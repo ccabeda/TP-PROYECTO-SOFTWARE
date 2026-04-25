@@ -51,10 +51,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             return _mapper.Map<ReservationGetDTO>(reservation);
         }
 
-        private async Task<Domain.Models.RESERVATION> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
+        private async Task<Domain.Models.Reservation> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
             ?? throw new KeyNotFoundException("Reserva no encontrada.");
 
-        private async Task ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.RESERVATION reservation)
+        private async Task ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.Reservation reservation)
         {
             if (!command.IsAdmin && reservation.UserId != command.CurrentUserId)
             {
@@ -66,7 +66,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private async Task ValidateReservationIsPending(Domain.Models.RESERVATION reservation)  //esto es mas para la segunda entrega, ya que aun no se implemento la expiracion de reservas.
+        private async Task ValidateReservationIsPending(Domain.Models.Reservation reservation)  //esto es mas para la segunda entrega, ya que aun no se implemento la expiracion de reservas.
         {
             if (reservation.Status != "Pending")
             {
@@ -78,10 +78,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private async Task<Domain.Models.SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+        private async Task<Domain.Models.Seat> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private async Task ValidateSeatIsReserved(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
+        private async Task ValidateSeatIsReserved(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
         {
             if (seat.Status != "Reserved")
             {
@@ -93,30 +93,30 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private static void MarkReservationAsPaid(Domain.Models.RESERVATION reservation)
+        private static void MarkReservationAsPaid(Domain.Models.Reservation reservation)
         {
             reservation.Status = "Paid";
         }
 
-        private static void MarkSeatAsSold(Domain.Models.SEAT seat)
+        private static void MarkSeatAsSold(Domain.Models.Seat seat)
         {
             seat.Status = "Sold";
             seat.Version += 1;
         }
 
-        private async Task PersistPaymentConfirmation(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
+        private async Task PersistPaymentConfirmation(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
         {
             await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
             await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
         }
 
-        private async Task CreateAuditLog(Domain.Models.RESERVATION reservation, Domain.Models.SEAT seat)
+        private async Task CreateAuditLog(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = reservation.UserId,
                 Action = "ConfirmReservationPayment",
-                EntityType = "RESERVATION",
+                EntityType = "Reservation",
                 EntityId = reservation.Id.ToString(),
                 Details = $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}"
             });
@@ -128,7 +128,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             {
                 UserId = userId,
                 Action = "ConfirmReservationPaymentRejected",
-                EntityType = "RESERVATION",
+                EntityType = "Reservation",
                 EntityId = reservationId,
                 Details = details
             });

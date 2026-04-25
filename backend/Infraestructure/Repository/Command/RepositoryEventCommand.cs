@@ -13,14 +13,15 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
             _context = context;
         }
 
-        public async Task Create(EVENT eventEntity) => await _context.EVENT.AddAsync(eventEntity);
+        public async Task Create(Event eventEntity) => await _context.Events.AddAsync(eventEntity);
 
-        public Task Delete(EVENT eventEntity)
+        public Task Delete(Event eventEntity)
         {
-            _context.EVENT.Remove(eventEntity);
+            _context.Events.Remove(eventEntity);
             return Task.CompletedTask;
         }
 
         public async Task Save() => await _context.SaveChangesAsync();
     }
 }
+

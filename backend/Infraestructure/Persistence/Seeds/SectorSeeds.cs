@@ -7,8 +7,8 @@ public static class SectorSeeds
 {
     public static void Seed(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SECTOR>().HasData(
-            new SECTOR
+        modelBuilder.Entity<Sector>().HasData(
+            new Sector
             {
                 Id = 1,
                 EventId = 1,
@@ -16,7 +16,7 @@ public static class SectorSeeds
                 Price = 12000m,
                 Capacity = 50
             },
-            new SECTOR
+            new Sector
             {
                 Id = 2,
                 EventId = 1,

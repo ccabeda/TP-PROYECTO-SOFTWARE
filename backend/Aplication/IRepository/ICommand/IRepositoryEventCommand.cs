@@ -4,8 +4,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand
 {
     public interface IRepositoryEventCommand
     {
-        Task Create(EVENT eventEntity);
-        Task Delete(EVENT eventEntity);
+        Task Create(Event eventEntity);
+        Task Delete(Event eventEntity);
         Task Save();
     }
 }

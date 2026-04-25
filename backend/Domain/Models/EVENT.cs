@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TP_PROYECTO_SOFTWARE.Domain.Models;
 
-public class EVENT
+public class Event
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -13,5 +13,6 @@ public class EVENT
     public string Venue { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
 
-    public ICollection<SECTOR> Sectors { get; set; } = new List<SECTOR>();
+    public ICollection<Sector> Sectors { get; set; } = new List<Sector>();
 }
+

@@ -4,6 +4,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand
 {
     public interface IRepositoryAuditLogCommand
     {
-        Task Create(AUDIT_LOG auditLog);
+        Task Create(AuditLog auditLog);
     }
 }
+

@@ -54,7 +54,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             await _repositoryEventCommand.Save();
         }
 
-        private async Task<Domain.Models.EVENT> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
+        private async Task<Domain.Models.Event> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)
             ?? throw new KeyNotFoundException("Evento no encontrado.");
 
         private async Task EnsureEventHasNoReservations(int eventId)
@@ -66,11 +66,11 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             }
         }
 
-        private async Task<List<Domain.Models.SECTOR>> GetSectorsByEvent(int eventId) => await _repositorySectorQuery.GetByEventId(eventId);
+        private async Task<List<Domain.Models.Sector>> GetSectorsByEvent(int eventId) => await _repositorySectorQuery.GetByEventId(eventId);
 
-        private async Task<List<Domain.Models.SEAT>> GetSeatsByEvent(int eventId) => await _repositorySeatQuery.GetByEventId(eventId);
+        private async Task<List<Domain.Models.Seat>> GetSeatsByEvent(int eventId) => await _repositorySeatQuery.GetByEventId(eventId);
 
-        private async Task DeleteSeatsIfAny(List<Domain.Models.SEAT> seats)
+        private async Task DeleteSeatsIfAny(List<Domain.Models.Seat> seats)
         {
             if (seats.Count > 0)
             {
@@ -78,7 +78,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             }
         }
 
-        private async Task DeleteSectorsIfAny(List<Domain.Models.SECTOR> sectors)
+        private async Task DeleteSectorsIfAny(List<Domain.Models.Sector> sectors)
         {
             if (sectors.Count > 0)
             {
@@ -86,13 +86,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             }
         }
 
-        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.EVENT eventEntity, int deletedSectorsCount, int deletedSeatsCount)
+        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.Event eventEntity, int deletedSectorsCount, int deletedSeatsCount)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
                 Action = "DeleteEvent",
-                EntityType = "EVENT",
+                EntityType = "Event",
                 EntityId = eventEntity.Id.ToString(),
                 Details = $"Evento eliminado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, DeletedSectors={deletedSectorsCount}, DeletedSeats={deletedSeatsCount}"
             });

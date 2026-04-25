@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TP_PROYECTO_SOFTWARE.Domain.Models;
 
-public class SECTOR
+public class Sector
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -13,6 +13,6 @@ public class SECTOR
     public decimal Price { get; set; }
     public int Capacity { get; set; }
 
-    public EVENT Event { get; set; } = null!;
-    public ICollection<SEAT> Seats { get; set; } = new List<SEAT>();
+    public Event Event { get; set; } = null!;
+    public ICollection<Seat> Seats { get; set; } = new List<Seat>();
 }

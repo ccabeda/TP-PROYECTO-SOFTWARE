@@ -54,7 +54,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 throw new InvalidOperationException($"Ya existe la butaca {normalizedRowIdentifier}{command.SeatNumber} en el sector.");
             }
 
-            var seat = new SEAT
+            var seat = new Seat
             {
                 SectorId = sector.Id,
                 RowIdentifier = normalizedRowIdentifier,
@@ -68,7 +68,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             {
                 UserId = command.UserId,
                 Action = "CreateSeat",
-                EntityType = "SEAT",
+                EntityType = "Seat",
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca creada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });

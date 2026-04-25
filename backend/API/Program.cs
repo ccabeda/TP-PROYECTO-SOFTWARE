@@ -1,5 +1,6 @@
 using System.Text;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -26,6 +27,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers;
+using TP_PROYECTO_SOFTWARE.Domain.Models;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query;
@@ -103,6 +105,20 @@ builder.Services.AddDbContext<AplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Connection"));
 });
 
+builder.Services
+    .AddIdentityCore<User>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 1;
+    })
+    .AddRoles<IdentityRole<int>>()
+    .AddEntityFrameworkStores<AplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddOptions<TicketingRulesOptions>() //reglas dinamicas pidio profe
     .Bind(builder.Configuration.GetSection(TicketingRulesOptions.SectionName))
     .Validate(options => options.MaxSectorsPerEvent > 0, "MaxSectorsPerEvent debe ser mayor a 0.")
@@ -118,6 +134,10 @@ builder.Services.AddOptions<TicketingRulesOptions>() //reglas dinamicas pidio pr
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .Count() == options.MaxRowsPerBulkCreate,
         "Las filas configuradas en RowLabels deben ser únicas y no vacías.")
+    .ValidateOnStart();
+
+builder.Services.AddOptions<AuthorizationSettingsOptions>()
+    .Bind(builder.Configuration.GetSection(AuthorizationSettingsOptions.SectionName))
     .ValidateOnStart();
 
 builder.Services.AddAutoMapper(_ => { }, typeof(AutomapperConfig).Assembly); //automapper
@@ -168,6 +188,36 @@ builder.Services.AddValidatorsFromAssemblyContaining<SeatBulkCreateValidator>();
 builder.Services.AddFluentValidationAutoValidation(); //validaciones
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var adminEmails = builder.Configuration.GetSection("AuthorizationSettings:AdminEmails").Get<string[]>() ?? Array.Empty<string>();
+
+    foreach (var role in new[] { "Admin", "User" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole<int>(role));
+        }
+    }
+
+    foreach (var adminEmail in adminEmails)
+    {
+        var existingUser = await userManager.FindByEmailAsync(adminEmail);
+        if (existingUser is null)
+        {
+            continue;
+        }
+
+        if (!await userManager.IsInRoleAsync(existingUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(existingUser, "Admin");
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

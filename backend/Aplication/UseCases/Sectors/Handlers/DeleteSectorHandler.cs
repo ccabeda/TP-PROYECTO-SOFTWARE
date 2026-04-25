@@ -46,10 +46,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             await _repositorySectorCommand.Save();
         }
 
-        private async Task<Domain.Models.SECTOR> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)
+        private async Task<Domain.Models.Sector> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)
             ?? throw new KeyNotFoundException("Sector no encontrado.");
 
-        private static void ValidateSectorBelongsToEvent(Domain.Models.SECTOR sector, int eventId)
+        private static void ValidateSectorBelongsToEvent(Domain.Models.Sector sector, int eventId)
         {
             if (sector.EventId != eventId)
             {
@@ -66,9 +66,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             }
         }
 
-        private async Task<List<Domain.Models.SEAT>> GetSeatsBySector(int sectorId) => await _repositorySeatQuery.GetBySectorId(sectorId);
+        private async Task<List<Domain.Models.Seat>> GetSeatsBySector(int sectorId) => await _repositorySeatQuery.GetBySectorId(sectorId);
 
-        private async Task DeleteSeatsIfAny(List<Domain.Models.SEAT> seats)
+        private async Task DeleteSeatsIfAny(List<Domain.Models.Seat> seats)
         {
             if (seats.Count > 0)
             {
@@ -76,13 +76,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             }
         }
 
-        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.SECTOR sector, int deletedSeatsCount)
+        private async Task CreateDeleteAuditLog(int? userId, Domain.Models.Sector sector, int deletedSeatsCount)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
                 Action = "DeleteSector",
-                EntityType = "SECTOR",
+                EntityType = "Sector",
                 EntityId = sector.Id.ToString(),
                 Details = $"Sector eliminado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}, DeletedSeats={deletedSeatsCount}"
             });

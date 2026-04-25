@@ -38,10 +38,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             await _repositorySeatCommand.Save();
         }
 
-        private async Task<SEAT> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+        private async Task<Seat> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private static void ValidateSeatBelongsToSector(SEAT seat, int sectorId)
+        private static void ValidateSeatBelongsToSector(Seat seat, int sectorId)
         {
             if (seat.SectorId != sectorId)
             {
@@ -58,13 +58,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             }
         }
 
-        private async Task CreateDeleteAuditLog(int? userId, SEAT seat)
+        private async Task CreateDeleteAuditLog(int? userId, Seat seat)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
                 Action = "DeleteSeat",
-                EntityType = "SEAT",
+                EntityType = "Seat",
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca eliminada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });

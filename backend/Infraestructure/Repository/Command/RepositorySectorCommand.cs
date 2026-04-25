@@ -13,20 +13,21 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
             _context = context;
         }
 
-        public async Task Create(SECTOR sector) => await _context.SECTOR.AddAsync(sector);
+        public async Task Create(Sector sector) => await _context.Sectors.AddAsync(sector);
 
-        public Task Delete(SECTOR sector)
+        public Task Delete(Sector sector)
         {
-            _context.SECTOR.Remove(sector);
+            _context.Sectors.Remove(sector);
             return Task.CompletedTask;
         }
 
-        public Task DeleteRange(IEnumerable<SECTOR> sectors)
+        public Task DeleteRange(IEnumerable<Sector> sectors)
         {
-            _context.SECTOR.RemoveRange(sectors);
+            _context.Sectors.RemoveRange(sectors);
             return Task.CompletedTask;
         }
 
         public async Task Save() => await _context.SaveChangesAsync();
     }
 }
+

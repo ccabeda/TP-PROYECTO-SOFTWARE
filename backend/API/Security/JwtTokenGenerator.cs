@@ -17,23 +17,23 @@ namespace TP_PROYECTO_SOFTWARE.API.Security
             _configuration = configuration;
         }
 
-        public string GenerateToken(USER user)
+        public string GenerateToken(User user, IEnumerable<string> roles)
         {
             var issuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer no configurado.");
             var audience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience no configurado.");
             var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado.");
-            var role = ResolveRole(user.Email);
 
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new(JwtRegisteredClaimNames.UniqueName, user.Name),
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Name),
-                new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Role, role)
+                new(ClaimTypes.Email, user.Email ?? string.Empty)
             };
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var credentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
@@ -49,11 +49,15 @@ namespace TP_PROYECTO_SOFTWARE.API.Security
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string ResolveRole(string email)
+        public string ResolvePrimaryRole(IEnumerable<string> roles)
         {
-            var adminEmails = _configuration.GetSection("AuthorizationSettings:AdminEmails").Get<string[]>() ?? Array.Empty<string>();
+            var roleList = roles.ToList();
+            if (roleList.Contains("Admin", StringComparer.OrdinalIgnoreCase))
+            {
+                return "Admin";
+            }
 
-            return adminEmails.Contains(email, StringComparer.OrdinalIgnoreCase) ? "Admin" : "User";
+            return roleList.FirstOrDefault() ?? "User";
         }
     }
 }

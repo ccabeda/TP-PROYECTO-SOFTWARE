@@ -33,6 +33,7 @@ La solucion sigue una arquitectura por capas dentro de `backend`:
 - ASP.NET Core Web API
 - Entity Framework Core
 - SQL Server
+- ASP.NET Core Identity
 - AutoMapper
 - FluentValidation
 - JWT Bearer Authentication
@@ -69,9 +70,9 @@ Ejemplo:
 
 Si el servidor local es distinto, cambiar `Server=...` por la instancia correcta.
 
-## Configuracion JWT, roles y reglas
+## Configuracion JWT, Identity, roles y reglas
 
-La API usa JWT para autenticacion, roles y reglas configurables del catalogo.
+La API usa ASP.NET Core Identity para registro, login, hash de contraseñas y gestión de roles. La autenticación de la API sigue siendo con JWT, y además se usan reglas configurables para el catálogo.
 
 Ejemplo de configuracion en `backend/API/appsettings.json`:
 
@@ -83,14 +84,14 @@ Ejemplo de configuracion en `backend/API/appsettings.json`:
     "Audience": "TP_PROYECTO_SOFTWARE.Client"
   },
   "AuthorizationSettings": {
-    "AdminEmails": [ "agustin@test.com" ]
+    "AdminEmails": [ "admintest@test.com" ]
   },
   "TicketingRules": {
     "MaxSectorsPerEvent": 5,
-    "MaxSectorCapacity": 50,
-    "MaxRowsPerBulkCreate": 5,
-    "MaxSeatsPerRow": 10,
-    "RowLabels": [ "A", "B", "C", "D", "E" ]
+    "MaxSectorCapacity": 200,
+    "MaxRowsPerBulkCreate": 10,
+    "MaxSeatsPerRow": 20,
+    "RowLabels": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" ]
   }
 }
 ```
@@ -100,9 +101,10 @@ Notas:
 - cualquier usuario puede registrarse y hacer login
 - el catalogo de eventos, sectores y asientos es publico
 - las reservas y los pagos requieren usuario autenticado
-- el usuario cuyo mail este en `AdminEmails` recibe rol `Admin`
+- Identity guarda usuarios, contraseñas hasheadas y roles en base de datos
+- el usuario cuyo mail este en `AdminEmails` recibe rol `Admin` al registrarse o al iniciar la API si ya existe
 - los endpoints administrativos requieren token JWT con rol `Admin`
-- `POST /api/v1/users/login` devuelve el token
+- `POST /api/v1/users/login` valida credenciales con Identity y devuelve el token
 - las reglas de sectores y asientos se leen desde `TicketingRules`
 
 ## Restaurar y compilar
@@ -128,7 +130,7 @@ Notas:
 - el proyecto incluye seeds para:
   - 1 evento
   - 2 sectores
-  - 50 asientos por sector
+  - 50 asientos por sector en los datos iniciales
 
 ## Ejecutar la API
 
@@ -197,7 +199,8 @@ dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 
 Notas:
 
-- las contraseñas se almacenan hasheadas con `PasswordHasher`
+- las contraseñas se almacenan hasheadas mediante ASP.NET Core Identity
+- los roles `Admin` y `User` se persisten en la base de datos
 - el login devuelve `id`, `name`, `email`, `role` y `token`
 
 ### Reservas
@@ -248,12 +251,12 @@ Explicacion de reglas de asientos:
 - Evento -> hasta 5 sectores
 - Sector -> capacidad segun `TicketingRules.MaxSectorCapacity`
 - Asientos del sector -> no pueden superar esa capacidad
-- Configuracion actual -> 5 filas maximas (`A` a `E`) x 10 asientos maximos por fila = 50 asientos por sector
+- Configuracion actual -> 10 filas maximas (`A` a `J`) x 20 asientos maximos por fila = 200 asientos por sector
 - Filas validas -> segun `TicketingRules.RowLabels`
 
 ## Estado actual
 
-Backend de Entrega 1 implementado y extendido con autenticacion JWT, roles de administrador y operaciones administrativas sobre catalogo.
+Backend de Entrega 1 implementado y extendido con ASP.NET Core Identity, autenticacion JWT, roles de administrador y operaciones administrativas sobre catalogo.
 
 Pendiente:
 

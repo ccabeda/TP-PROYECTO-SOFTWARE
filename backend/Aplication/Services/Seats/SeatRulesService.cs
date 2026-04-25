@@ -21,7 +21,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Seats
             _repositorySeatQuery = repositorySeatQuery;
         }
 
-        public async Task<SECTOR> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)
+        public async Task<Sector> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)
             ?? throw new KeyNotFoundException("Sector no encontrado.");
 
         public List<string> GetGeneratedRows(int rowCount)
