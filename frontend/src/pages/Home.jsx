@@ -1,9 +1,14 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import Topbar from "../components/topbar";
+import { t } from "../i18n";
 
-function Home({ darkMode, setDarkMode }) {
+function Home({
+  darkMode,
+  setDarkMode,
+  session,
+  onLogout,
+  language,
+}) {
   const navigate = useNavigate();
 
   const eventos = [
@@ -19,27 +24,34 @@ function Home({ darkMode, setDarkMode }) {
 
   return (
     <div className={darkMode ? "page dark" : "page"}>
-      <Topbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      <Topbar
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        session={session}
+        onLogout={onLogout}
+        language={language}
+      />
 
       <main className="content">
         <section className="header">
           <div>
-            <p className="header-badge">Eventos en vivo</p>
-            <h1>Viví tus eventos favoritos</h1>
+            <p className="header-badge">{t(language, "home.badge")}</p>
+            <h1>{t(language, "home.title")}</h1>
             <p className="header-text">
-              Descubrí conciertos, festivales y experiencias únicas. Explorá la
-              cartelera y conseguí tus entradas.
+              {t(language, "home.copy")}
             </p>
           </div>
         </section>
 
         <section className="events-section" id="events">
           <div className="section-header">
-            <h2>Próximos Eventos</h2>
-            <button className="btn btn-secondary"
-              onClick={() => navigate("/eventos")}
+            <h2>{t(language, "home.upcoming")}</h2>
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate("/events")}
             >
-              Ver todos</button>
+              {t(language, "home.viewAll")}
+            </button>
           </div>
 
           <div className="events-grid">
@@ -56,14 +68,14 @@ function Home({ darkMode, setDarkMode }) {
                     <button className="btn link-button"
                       onClick={() => navigate(`/event/${evento.id}`)}
                     >
-                      Más info
+                      {t(language, "home.moreInfo")}
                     </button>
 
                     <button
                       className="btn btn-event"
                       onClick={() => navigate(`/event/${evento.id}`)}
                     >
-                      Comprar
+                      {t(language, "home.buy")}
                     </button>
                   </div>
                 </div>
