@@ -312,7 +312,7 @@ Implementado:
   - reservar al continuar
   - checkout
   - pago simulado
-- `Mis entradas`
+- Mis entradas
 - títulos dinámicos por página
 - fallback visual para eventos sin imagen
 
