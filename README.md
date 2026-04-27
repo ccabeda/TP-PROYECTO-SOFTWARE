@@ -59,6 +59,49 @@ La solución sigue una arquitectura por capas dentro de `backend`:
 - `frontend/src/lib`: utilidades, i18n y formateo
 - `frontend/css`: estilos separados por feature
 
+## Arquitectura del frontend
+
+- `frontend/src/pages`: vistas principales del flujo
+  - `Home`
+  - `Eventos`
+  - `Evento`
+  - `Purchase`
+  - `Checkout`
+  - `MyTickets`
+  - `Login`
+  - `Register`
+- `frontend/src/components/auth`: layout y campos de autenticación
+- `frontend/src/components/events`: componentes de catálogo, como `EventCard`
+- `frontend/src/components/layout`: shell general, topbar y acciones globales
+- `frontend/src/components/ui`: controles reutilizables como selector de idioma y toggle de tema
+- `frontend/src/context`: estado global de autenticación, idioma y tema
+- `frontend/src/hooks`: lógica reutilizable para:
+  - sesión
+  - título dinámico del documento
+  - eventos
+  - sectores
+  - butacas
+  - idioma
+  - tema
+- `frontend/src/services`: comunicación con la API REST
+  - autenticación
+  - eventos
+  - checkout
+  - entradas del usuario
+- `frontend/src/lib`: utilidades de soporte
+  - i18n
+  - validaciones
+  - formateo
+  - configuración de API
+- `frontend/css`: estilos separados por feature
+  - `base.css`
+  - `layout.css`
+  - `auth.css`
+  - `home.css`
+  - `events-list.css`
+  - `event-detail.css`
+  - `purchase.css`
+
 ## Requisitos
 
 Antes de levantar el proyecto, tener instalado:
