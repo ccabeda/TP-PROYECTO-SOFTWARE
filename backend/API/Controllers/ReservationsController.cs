@@ -17,16 +17,37 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
     {
         private readonly ICreateReservationHandler _handler;
         private readonly IGetReservationByIdHandler _getReservationByIdHandler;
+        private readonly IGetMyReservationsHandler _getMyReservationsHandler;
         private readonly IMapper _mapper;
 
         public ReservationsController(
             ICreateReservationHandler handler,
             IGetReservationByIdHandler getReservationByIdHandler,
+            IGetMyReservationsHandler getMyReservationsHandler,
             IMapper mapper)
         {
             _handler = handler;
             _getReservationByIdHandler = getReservationByIdHandler;
+            _getMyReservationsHandler = getMyReservationsHandler;
             _mapper = mapper;
+        }
+
+        [HttpGet("mine")]
+        [Authorize]
+        [SwaggerOperation(Summary = "Obtiene las entradas pagadas del usuario actual")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [ProducesResponseType(typeof(List<ReservationTicketGetDTO>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMyReservations()
+        {
+            var currentUserId = UserClaimsHelper.GetCurrentUserId(User)
+                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
+
+            var result = await _getMyReservationsHandler.Handle(new GetMyReservationsQuery
+            {
+                CurrentUserId = currentUserId
+            });
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

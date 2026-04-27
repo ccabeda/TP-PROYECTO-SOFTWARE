@@ -7,6 +7,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.DTOs.SeatDTOs
         public string? RowIdentifier { get; set; }
         public int SeatNumber { get; set; }
         public string? Status { get; set; }
+        public bool ReservedByCurrentUser { get; set; }
+        public Guid? ActiveReservationId { get; set; }
         public int Version { get; set; }
     }
 }

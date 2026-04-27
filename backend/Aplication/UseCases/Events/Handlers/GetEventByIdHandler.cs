@@ -3,6 +3,8 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Queries;
+using System;
+using System.Linq;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 {
@@ -22,7 +24,25 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             var eventEntity = await _repositoryEventQuery.GetById(query.Id)
                 ?? throw new KeyNotFoundException("Evento no encontrado.");
 
-            return _mapper.Map<EventGetDTO>(eventEntity);
+            var eventDto = _mapper.Map<EventGetDTO>(eventEntity);
+            eventDto.Status = ResolveDisplayStatus(eventEntity);
+
+            return eventDto;
+        }
+
+        private static string ResolveDisplayStatus(Domain.Models.Event eventEntity)
+        {
+            var allSeats = eventEntity.Sectors.SelectMany(sector => sector.Seats).ToList();
+
+            if (allSeats.Count == 0)
+            {
+                return eventEntity.Status;
+            }
+
+            var hasAvailableSeats = allSeats.Any(seat =>
+                string.Equals(seat.Status, "Available", StringComparison.OrdinalIgnoreCase));
+
+            return hasAvailableSeats ? eventEntity.Status : "SoldOut";
         }
     }
 }

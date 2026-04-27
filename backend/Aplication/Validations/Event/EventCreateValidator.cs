@@ -11,6 +11,11 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Validations.Event
             RuleFor(x => x.Venue).NotEmpty().MaximumLength(150);
             RuleFor(x => x.Status).NotEmpty().MaximumLength(50);
             RuleFor(x => x.EventDate).GreaterThan(DateTime.MinValue);
+            RuleFor(x => x.ImageUrl)
+                .MaximumLength(500)
+                .Must(url => string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+                .WithMessage("ImageUrl debe ser una URL valida.");
+            RuleFor(x => x.Description).MaximumLength(2000);
         }
     }
 }

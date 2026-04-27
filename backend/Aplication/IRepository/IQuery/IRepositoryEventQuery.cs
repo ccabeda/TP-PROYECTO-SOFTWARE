@@ -7,5 +7,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
     {
         Task<Event?> GetById(int id);
         Task<List<Event>> GetAll(GetEventsQuery filters);
+        Task<bool> ExistsDuplicate(string name, string venue, DateTime eventDate);
     }
 }

@@ -1,0 +1,138 @@
+export const purchaseCheckoutTranslations = {
+  es: {
+    purchaseSectorsTitle: "Elegí tu sector",
+    purchaseSectorsCopy:
+      "Selecciona el sector que prefieras para continuar luego con la elección de butacas.",
+    purchaseMapTitle: "Vista de sectores",
+    purchaseMapCopy:
+      "Ubicación ilustrativa de los sectores disponibles dentro del recinto.",
+    purchaseSummaryTitle: "Resumen del sector",
+    purchaseSummaryCopy:
+      "Revisa el sector elegido y el detalle del precio antes de seleccionar tu butaca.",
+    purchaseBasePriceLabel: "Precio base",
+    purchaseFeeLabel: "Cargo por servicio",
+    purchaseFinalPriceLabel: "Precio final",
+    purchaseSectorsEmpty: "Todavía no hay sectores con butacas cargadas para este evento.",
+    purchaseSeatsTitle: "Butacas del sector",
+    purchaseSeatsCopy:
+      "Elegí una butaca disponible para continuar con tu reserva.",
+    purchaseContinueButton: "Continuar",
+    purchaseReservingButton: "Reservando butaca...",
+    purchaseSelectSeatWarning: "Selecciona una butaca disponible para continuar.",
+    purchaseLegendAvailable: "Disponible",
+    purchaseLegendMine: "Tu reserva",
+    purchaseLegendReserved: "Reservada",
+    purchaseLegendSold: "Vendida",
+    purchaseSelectSectorFirst:
+      "Selecciona primero un sector para ver sus butacas disponibles.",
+    purchaseSeatsLoading: "Cargando butacas...",
+    purchaseSeatsEmpty: "Todavía no hay butacas cargadas para este sector.",
+    checkoutBadge: "Pago",
+    checkoutTitle: "Finalizar compra",
+    checkoutSummaryTitle: "Resumen de tu entrada",
+    checkoutSummaryCopy:
+      "Confirma el sector y la butaca elegida antes de pasar al pago.",
+    checkoutPaymentTitle: "Método de pago",
+    checkoutPaymentCopy:
+      "Elegí el método de pago para finalizar la compra de tu entrada.",
+    checkoutPaymentMethodTitle: "Pago seguro",
+    checkoutPaymentMethodCopy:
+      "Pago rápido, seguro y confirmado al instante dentro de la plataforma.",
+    checkoutPayButton: "Confirmar pago",
+    checkoutPayingButton: "Procesando pago...",
+    checkoutSuccessMessage: "Pago realizado con éxito.",
+    checkoutSuccessCopy:
+      "Tu entrada ya quedó reservada y pagada. Puedes verla ahora en Mis entradas.",
+    checkoutSuccessButton: "Ir a Mis entradas",
+    checkoutMissingSelection:
+      "No encontramos una butaca seleccionada para continuar con la compra.",
+    checkoutBackToPurchase: "Volver a seleccionar butaca",
+    myTicketsBadge: "Mis entradas",
+    myTicketsTitle: "Tus próximas entradas",
+    myTicketsCopy:
+      "Aquí vas a encontrar las entradas que ya compraste para eventos futuros.",
+    myTicketsLoading: "Cargando entradas...",
+    myTicketsError: "No se pudieron cargar tus entradas.",
+    myTicketsEmptyTitle: "No tienes entradas activas",
+    myTicketsEmptyCopy:
+      "Cuando compres una entrada para un evento futuro, aparecerá aquí.",
+    myTicketsStatusPaid: "Pagada",
+    myTicketsSectorLabel: "Sector",
+    myTicketsSeatLabel: "Butaca",
+    myTicketsPriceLabel: "Precio",
+    myTicketsQrLabel: "Validar en acceso",
+    myTicketsViewEventButton: "Ver evento",
+    seatStage: "Escenario",
+    seatAvailable: "Disponible",
+    seatReserved: "Reservada",
+    seatSold: "Vendida",
+  },
+  en: {
+    purchaseSectorsTitle: "Choose your sector",
+    purchaseSectorsCopy:
+      "Select the sector you prefer to continue later with seat selection.",
+    purchaseMapTitle: "Sector overview",
+    purchaseMapCopy:
+      "Illustrative position of the available sectors inside the venue.",
+    purchaseSummaryTitle: "Sector summary",
+    purchaseSummaryCopy:
+      "Review the selected sector and price breakdown before choosing your seat.",
+    purchaseBasePriceLabel: "Base price",
+    purchaseFeeLabel: "Service fee",
+    purchaseFinalPriceLabel: "Final price",
+    purchaseSectorsEmpty: "There are no sectors with loaded seats for this event yet.",
+    purchaseSeatsTitle: "Sector seats",
+    purchaseSeatsCopy:
+      "Choose an available seat to continue with your reservation.",
+    purchaseContinueButton: "Continue",
+    purchaseReservingButton: "Reserving seat...",
+    purchaseSelectSeatWarning: "Select an available seat to continue.",
+    purchaseLegendAvailable: "Available",
+    purchaseLegendMine: "Your reservation",
+    purchaseLegendReserved: "Reserved",
+    purchaseLegendSold: "Sold",
+    purchaseSelectSectorFirst:
+      "Select a sector first to view its available seats.",
+    purchaseSeatsLoading: "Loading seats...",
+    purchaseSeatsEmpty: "There are no seats loaded for this sector yet.",
+    checkoutBadge: "Payment",
+    checkoutTitle: "Complete purchase",
+    checkoutSummaryTitle: "Your ticket summary",
+    checkoutSummaryCopy:
+      "Confirm the selected sector and seat before continuing to payment.",
+    checkoutPaymentTitle: "Payment method",
+    checkoutPaymentCopy:
+      "Choose the payment method to complete your ticket purchase.",
+    checkoutPaymentMethodTitle: "Secure payment",
+    checkoutPaymentMethodCopy:
+      "Secure payment with instant confirmation inside the platform.",
+    checkoutPayButton: "Confirm payment",
+    checkoutPayingButton: "Processing payment...",
+    checkoutSuccessMessage: "Payment completed successfully.",
+    checkoutSuccessCopy:
+      "Your ticket is now reserved and paid. You can view it now in My tickets.",
+    checkoutSuccessButton: "Go to My tickets",
+    checkoutMissingSelection:
+      "We could not find a selected seat to continue with the purchase.",
+    checkoutBackToPurchase: "Go back to seat selection",
+    myTicketsBadge: "My tickets",
+    myTicketsTitle: "Your upcoming tickets",
+    myTicketsCopy:
+      "Here you can find the tickets you already bought for upcoming events.",
+    myTicketsLoading: "Loading tickets...",
+    myTicketsError: "Your tickets could not be loaded.",
+    myTicketsEmptyTitle: "You have no active tickets",
+    myTicketsEmptyCopy:
+      "When you buy a ticket for a future event, it will appear here.",
+    myTicketsStatusPaid: "Paid",
+    myTicketsSectorLabel: "Sector",
+    myTicketsSeatLabel: "Seat",
+    myTicketsPriceLabel: "Price",
+    myTicketsQrLabel: "Validate at entry",
+    myTicketsViewEventButton: "View event",
+    seatStage: "Stage",
+    seatAvailable: "Available",
+    seatReserved: "Reserved",
+    seatSold: "Sold",
+  },
+};

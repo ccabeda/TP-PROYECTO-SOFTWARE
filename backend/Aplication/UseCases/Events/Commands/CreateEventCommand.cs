@@ -7,5 +7,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Commands
         public DateTime EventDate { get; set; }
         public string Venue { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
     }
 }

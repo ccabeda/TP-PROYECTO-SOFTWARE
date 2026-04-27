@@ -1,33 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import LanguageSelector from "../components/LanguageSelector";
-import ThemeToggle from "../components/ThemeToggle";
-import { t } from "../i18n";
+import AuthLayout from "../components/auth/AuthLayout";
+import PasswordField from "../components/auth/PasswordField";
+import { useAuthContext } from "../context/AuthContext";
+import { useLanguageContext } from "../context/LanguageContext";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import getErrorMessage from "../lib/getErrorMessage";
+import { t } from "../lib/i18n";
+import { validateRegisterForm } from "../lib/authValidation";
 import { registerUser } from "../services/authService";
 
-function Register({
-  darkMode,
-  setDarkMode,
-  session,
-  language,
-  onLanguageChange,
-}) {
+const INITIAL_FORM_DATA = {
+  name: "",
+  email: "",
+  password: "",
+};
+
+function Register() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [showPassword, setShowPassword] = useState(false);
+  const { language } = useLanguageContext();
+  const { session } = useAuthContext();
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [showLoginLink, setShowLoginLink] = useState(false);
-
-  const pageClassName = useMemo(
-    () => (darkMode ? "page dark" : "page"),
-    [darkMode],
-  );
+  const registerEyebrow = t(language, "auth.registerEyebrow");
+  const registerTitle = t(language, "auth.registerTitle");
+  const registerSubtitle = t(language, "auth.registerSubtitle");
+  const nameLabel = t(language, "auth.name");
+  const namePlaceholder = t(language, "auth.namePlaceholder");
+  const emailLabel = t(language, "auth.email");
+  const emailPlaceholder = t(language, "auth.emailPlaceholder");
+  const passwordLabel = t(language, "auth.password");
+  const passwordPlaceholder = t(language, "auth.registerPasswordPlaceholder");
+  const goToLoginLabel = t(language, "auth.goToLogin");
+  const registerSubmittingLabel = t(language, "auth.registerSubmitting");
+  const registerSubmitLabel = t(language, "auth.registerSubmit");
+  const alreadyHaveAccountLabel = t(language, "auth.alreadyHaveAccount");
+  const backHomeLabel = t(language, "auth.backHome");
+  const successRegisterLabel = t(language, "auth.successRegister");
+  useDocumentTitle(t(language, "topbar.register"));
 
   useEffect(() => {
     if (session?.token) {
@@ -46,26 +59,9 @@ function Register({
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (
-      !formData.name.trim() ||
-      !formData.email.trim() ||
-      !formData.password.trim()
-    ) {
-      setMessage(t(language, "auth.validationMissingRegister"));
-      setMessageType("error");
-      setShowLoginLink(false);
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setMessage(t(language, "auth.validationEmail"));
-      setMessageType("error");
-      setShowLoginLink(false);
-      return;
-    }
-
-    if (formData.password.length < 4) {
-      setMessage(t(language, "auth.validationPassword"));
+    const validationMessage = validateRegisterForm(formData, t, language);
+    if (validationMessage) {
+      setMessage(validationMessage);
       setMessageType("error");
       setShowLoginLink(false);
       return;
@@ -78,16 +74,12 @@ function Register({
 
     try {
       await registerUser(formData);
-      setMessage(t(language, "auth.successRegister"));
+      setMessage(successRegisterLabel);
       setMessageType("success");
       setShowLoginLink(true);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
+      setFormData(INITIAL_FORM_DATA);
     } catch (error) {
-      setMessage(error.message);
+      setMessage(getErrorMessage(error, t(language, "auth.registerError")));
       setMessageType("error");
       setShowLoginLink(false);
     } finally {
@@ -96,131 +88,88 @@ function Register({
   }
 
   return (
-    <div className={pageClassName}>
-      <main className="auth-page">
-        <ThemeToggle
-          className="auth-theme-button"
-          darkMode={darkMode}
-          onToggle={() => setDarkMode(!darkMode)}
-          ariaLabel={t(
-            language,
-            darkMode ? "topbar.themeToLight" : "topbar.themeToDark",
-          )}
+    <AuthLayout
+      eyebrow={registerEyebrow}
+      title={registerTitle}
+      subtitle={registerSubtitle}
+    >
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <label className="auth-label" htmlFor="register-name">
+          {nameLabel}
+        </label>
+        <input
+          id="register-name"
+          className="auth-input"
+          name="name"
+          type="text"
+          autoComplete="name"
+          placeholder={namePlaceholder}
+          value={formData.name}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          autoFocus
         />
 
-        <section className="auth-card">
-          <p className="auth-eyebrow">{t(language, "auth.registerEyebrow")}</p>
-          <h1 className="auth-title">{t(language, "auth.registerTitle")}</h1>
-          <p className="auth-subtitle">
-            {t(language, "auth.registerSubtitle")}
-          </p>
+        <label className="auth-label" htmlFor="register-email">
+          {emailLabel}
+        </label>
+        <input
+          id="register-email"
+          className="auth-input"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder={emailPlaceholder}
+          value={formData.email}
+          onChange={handleChange}
+          disabled={isSubmitting}
+        />
 
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            <label className="auth-label" htmlFor="register-name">
-              {t(language, "auth.name")}
-            </label>
-            <input
-              id="register-name"
-              className="auth-input"
-              name="name"
-              type="text"
-              autoComplete="name"
-              placeholder={t(language, "auth.namePlaceholder")}
-              value={formData.name}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              autoFocus
-            />
-
-            <label className="auth-label" htmlFor="register-email">
-              {t(language, "auth.email")}
-            </label>
-            <input
-              id="register-email"
-              className="auth-input"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder={t(language, "auth.emailPlaceholder")}
-              value={formData.email}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-
-            <label className="auth-label" htmlFor="register-password">
-              {t(language, "auth.password")}
-            </label>
-            <div className="password-input-group">
-              <input
-                id="register-password"
-                className="auth-input"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                placeholder={t(language, "auth.registerPasswordPlaceholder")}
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isSubmitting}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={t(
-                  language,
-                  showPassword ? "auth.hidePassword" : "auth.showPassword",
-                )}
-              >
-                <img
-                  src={showPassword ? "/eye-closed.svg" : "/eye-open.svg"}
-                  alt=""
-                  className="password-toggle-icon"
-                />
-              </button>
-            </div>
-
-            {message ? (
-              <div className={`auth-alert auth-alert-${messageType}`}>
-                {message}
-                {showLoginLink ? (
-                  <Link className="auth-inline-link" to="/login">
-                    {t(language, "auth.goToLogin")}
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-
-            <button className="btn btn-primary auth-submit" disabled={isSubmitting}>
-              <span
-                className={`auth-button-spinner ${isSubmitting ? "is-visible" : ""}`}
-                aria-hidden="true"
-              />
-              <span className="auth-button-label">
-                {isSubmitting
-                  ? t(language, "auth.registerSubmitting")
-                  : t(language, "auth.registerSubmit")}
-              </span>
-            </button>
-          </form>
-
-          <div className="auth-links">
-            <Link className="auth-secondary-link" to="/login">
-              {t(language, "auth.alreadyHaveAccount")}
-            </Link>
-            <Link className="auth-secondary-link" to="/">
-              {t(language, "auth.backHome")}
-            </Link>
-          </div>
-        </section>
-
-        <LanguageSelector
+        <label className="auth-label" htmlFor="register-password">
+          {passwordLabel}
+        </label>
+        <PasswordField
+          id="register-password"
+          name="password"
+          autoComplete="new-password"
+          placeholder={passwordPlaceholder}
+          value={formData.password}
+          onChange={handleChange}
+          disabled={isSubmitting}
           language={language}
-          onChange={onLanguageChange}
-          englishLabel={t(language, "auth.languageEnglish")}
-          spanishLabel={t(language, "auth.languageSpanish")}
         />
-      </main>
-    </div>
+
+        {message ? (
+          <div className={`auth-alert auth-alert-${messageType}`}>
+            {message}
+            {showLoginLink ? (
+              <Link className="auth-inline-link" to="/login">
+                {goToLoginLabel}
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+
+        <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
+          <span
+            className={`auth-button-spinner ${isSubmitting ? "is-visible" : ""}`}
+            aria-hidden="true"
+          />
+          <span className="auth-button-label">
+            {isSubmitting ? registerSubmittingLabel : registerSubmitLabel}
+          </span>
+        </button>
+      </form>
+
+      <div className="auth-links">
+        <Link className="auth-secondary-link" to="/login">
+          {alreadyHaveAccountLabel}
+        </Link>
+        <Link className="auth-secondary-link" to="/">
+          {backHomeLabel}
+        </Link>
+      </div>
+    </AuthLayout>
   );
 }
 

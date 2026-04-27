@@ -1,0 +1,26 @@
+export const topbarTranslations = {
+  es: {
+    home: "Inicio",
+    events: "Eventos",
+    login: "Iniciar sesión",
+    register: "Crear cuenta",
+    myTickets: "Mis entradas",
+    logout: "Cerrar sesión",
+    greeting: "Hola, {name}",
+    themeToLight: "Cambiar al modo claro",
+    themeToDark: "Cambiar al modo oscuro",
+    toggleLanguage: "Cambiar idioma",
+  },
+  en: {
+    home: "Home",
+    events: "Events",
+    login: "Log in",
+    register: "Create account",
+    myTickets: "My tickets",
+    logout: "Log out",
+    greeting: "Hi, {name}",
+    themeToLight: "Switch to light mode",
+    themeToDark: "Switch to dark mode",
+    toggleLanguage: "Change language",
+  },
+};

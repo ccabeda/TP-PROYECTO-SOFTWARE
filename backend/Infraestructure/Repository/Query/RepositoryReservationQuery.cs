@@ -35,6 +35,14 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             .AsNoTracking()
             .Where(r => seatIds.Contains(r.SeatId))
             .ToListAsync();
+
+        public async Task<List<Reservation>> GetPaidByUserId(int userId) => await _context.Reservations
+            .AsNoTracking()
+            .Include(r => r.Seat)
+                .ThenInclude(seat => seat.Sector)
+                    .ThenInclude(sector => sector.Event)
+            .Where(r => r.UserId == userId && r.Status == "Paid")
+            .ToListAsync();
     }
 }
 

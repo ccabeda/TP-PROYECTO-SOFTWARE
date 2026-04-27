@@ -1,11 +1,29 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import 'bootstrap/dist/css/bootstrap.min.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "react-datepicker/dist/react-datepicker.css";
+import "../css/base.css";
+import "../css/layout.css";
+import "../css/home.css";
+import "../css/events-list.css";
+import "../css/event-detail.css";
+import "../css/purchase.css";
+import "../css/auth.css";
+import App from "./App.jsx";
+import AppProviders from "./context/AppProviders.jsx";
 
-createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error("No se encontró el elemento raíz para iniciar la aplicación.");
+}
+
+const root = createRoot(rootElement);
+
+root.render(
   <StrictMode>
-    <App />
+    <AppProviders>
+      <App />
+    </AppProviders>
   </StrictMode>,
-)
+);

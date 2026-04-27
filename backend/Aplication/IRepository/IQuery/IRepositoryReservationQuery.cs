@@ -10,5 +10,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
         Task<bool> AnyBySectorId(int sectorId);
         Task<bool> AnyBySeatId(Guid seatId);
         Task<List<Reservation>> GetBySeatIds(List<Guid> seatIds);
+        Task<List<Reservation>> GetPaidByUserId(int userId);
     }
 }

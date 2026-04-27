@@ -1,39 +1,54 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import LanguageSelector from "../components/LanguageSelector";
-import ThemeToggle from "../components/ThemeToggle";
-import { t } from "../i18n";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import AuthLayout from "../components/auth/AuthLayout";
+import PasswordField from "../components/auth/PasswordField";
+import { useAuthContext } from "../context/AuthContext";
+import { useLanguageContext } from "../context/LanguageContext";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import getErrorMessage from "../lib/getErrorMessage";
+import { t } from "../lib/i18n";
+import { validateLoginForm } from "../lib/authValidation";
 import { loginUser } from "../services/authService";
 
-function Login({
-  darkMode,
-  setDarkMode,
-  session,
-  setSession,
-  language,
-  onLanguageChange,
-}) {
+const LOGIN_REDIRECT_DELAY_MS = 250;
+
+function getRedirectTarget(location) {
+  return location.state?.redirectTo ?? "/";
+}
+
+function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { language } = useLanguageContext();
+  const { session, setSession } = useAuthContext();
+  const redirectTo = getRedirectTarget(location);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: true,
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
-
-  const pageClassName = useMemo(
-    () => (darkMode ? "page dark" : "page"),
-    [darkMode],
-  );
+  const loginEyebrow = t(language, "auth.loginEyebrow");
+  const loginTitle = t(language, "auth.loginTitle");
+  const loginSubtitle = t(language, "auth.loginSubtitle");
+  const emailLabel = t(language, "auth.email");
+  const passwordLabel = t(language, "auth.password");
+  const emailPlaceholder = t(language, "auth.emailPlaceholder");
+  const passwordPlaceholder = t(language, "auth.loginPasswordPlaceholder");
+  const rememberLabel = t(language, "auth.remember");
+  const loginSubmittingLabel = t(language, "auth.loginSubmitting");
+  const loginSubmitLabel = t(language, "auth.loginSubmit");
+  const createAccountLabel = t(language, "auth.createAccount");
+  const backHomeLabel = t(language, "auth.backHome");
+  useDocumentTitle(t(language, "topbar.login"));
 
   useEffect(() => {
     if (session?.token) {
-      navigate("/", { replace: true });
+      navigate(redirectTo, { replace: true });
     }
-  }, [navigate, session]);
+  }, [navigate, redirectTo, session]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -46,14 +61,9 @@ function Login({
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!formData.email.trim() || !formData.password.trim()) {
-      setMessage(t(language, "auth.validationMissingLogin"));
-      setMessageType("error");
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setMessage(t(language, "auth.validationEmail"));
+    const validationMessage = validateLoginForm(formData, t, language);
+    if (validationMessage) {
+      setMessage(validationMessage);
       setMessageType("error");
       return;
     }
@@ -65,9 +75,11 @@ function Login({
     try {
       const authSession = await loginUser(formData);
       setSession(authSession);
-      navigate("/", { replace: true });
+      window.setTimeout(() => {
+        window.location.assign(redirectTo);
+      }, LOGIN_REDIRECT_DELAY_MS);
     } catch (error) {
-      setMessage(error.message);
+      setMessage(getErrorMessage(error, t(language, "auth.loginError")));
       setMessageType("error");
     } finally {
       setIsSubmitting(false);
@@ -75,120 +87,77 @@ function Login({
   }
 
   return (
-    <div className={pageClassName}>
-      <main className="auth-page">
-        <ThemeToggle
-          className="auth-theme-button"
-          darkMode={darkMode}
-          onToggle={() => setDarkMode(!darkMode)}
-          ariaLabel={t(
-            language,
-            darkMode ? "topbar.themeToLight" : "topbar.themeToDark",
-          )}
+    <AuthLayout
+      eyebrow={loginEyebrow}
+      title={loginTitle}
+      subtitle={loginSubtitle}
+    >
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <label className="auth-label" htmlFor="login-email">
+          {emailLabel}
+        </label>
+        <input
+          id="login-email"
+          className="auth-input"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder={emailPlaceholder}
+          value={formData.email}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          autoFocus
         />
 
-        <section className="auth-card">
-          <p className="auth-eyebrow">{t(language, "auth.loginEyebrow")}</p>
-          <h1 className="auth-title">{t(language, "auth.loginTitle")}</h1>
-          <p className="auth-subtitle">{t(language, "auth.loginSubtitle")}</p>
-
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            <label className="auth-label" htmlFor="login-email">
-              {t(language, "auth.email")}
-            </label>
-            <input
-              id="login-email"
-              className="auth-input"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder={t(language, "auth.emailPlaceholder")}
-              value={formData.email}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              autoFocus
-            />
-
-            <label className="auth-label" htmlFor="login-password">
-              {t(language, "auth.password")}
-            </label>
-            <div className="password-input-group">
-              <input
-                id="login-password"
-                className="auth-input"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder={t(language, "auth.loginPasswordPlaceholder")}
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isSubmitting}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={t(
-                  language,
-                  showPassword ? "auth.hidePassword" : "auth.showPassword",
-                )}
-              >
-                <img
-                  src={showPassword ? "/eye-closed.svg" : "/eye-open.svg"}
-                  alt=""
-                  className="password-toggle-icon"
-                />
-              </button>
-            </div>
-
-            <label className="remember-row">
-              <input
-                name="rememberMe"
-                type="checkbox"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                disabled={isSubmitting}
-              />
-              <span>{t(language, "auth.remember")}</span>
-            </label>
-
-            {message ? (
-              <div className={`auth-alert auth-alert-${messageType}`}>
-                {message}
-              </div>
-            ) : null}
-
-            <button className="btn btn-primary auth-submit" disabled={isSubmitting}>
-              <span
-                className={`auth-button-spinner ${isSubmitting ? "is-visible" : ""}`}
-                aria-hidden="true"
-              />
-              <span className="auth-button-label">
-                {isSubmitting
-                  ? t(language, "auth.loginSubmitting")
-                  : t(language, "auth.loginSubmit")}
-              </span>
-            </button>
-          </form>
-
-          <div className="auth-links">
-            <Link className="auth-secondary-link" to="/register">
-              {t(language, "auth.createAccount")}
-            </Link>
-            <Link className="auth-secondary-link" to="/">
-              {t(language, "auth.backHome")}
-            </Link>
-          </div>
-        </section>
-
-        <LanguageSelector
+        <label className="auth-label" htmlFor="login-password">
+          {passwordLabel}
+        </label>
+        <PasswordField
+          id="login-password"
+          name="password"
+          autoComplete="current-password"
+          placeholder={passwordPlaceholder}
+          value={formData.password}
+          onChange={handleChange}
+          disabled={isSubmitting}
           language={language}
-          onChange={onLanguageChange}
-          englishLabel={t(language, "auth.languageEnglish")}
-          spanishLabel={t(language, "auth.languageSpanish")}
         />
-      </main>
-    </div>
+
+        <label className="remember-row">
+          <input
+            name="rememberMe"
+            type="checkbox"
+            checked={formData.rememberMe}
+            onChange={handleChange}
+            disabled={isSubmitting}
+          />
+          <span>{rememberLabel}</span>
+        </label>
+
+        {message ? (
+          <div className={`auth-alert auth-alert-${messageType}`}>{message}</div>
+        ) : null}
+
+        <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
+          <span
+            className={`auth-button-spinner ${isSubmitting ? "is-visible" : ""}`}
+            aria-hidden="true"
+          />
+          <span className="auth-button-label">
+            {isSubmitting ? loginSubmittingLabel : loginSubmitLabel}
+          </span>
+        </button>
+      </form>
+
+      <div className="auth-links">
+        <Link className="auth-secondary-link" to="/register">
+          {createAccountLabel}
+        </Link>
+        <Link className="auth-secondary-link" to="/">
+          {backHomeLabel}
+        </Link>
+      </div>
+    </AuthLayout>
   );
 }
 

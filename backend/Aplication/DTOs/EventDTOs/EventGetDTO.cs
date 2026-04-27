@@ -7,5 +7,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs
         public DateTime EventDate { get; set; }
         public string? Venue { get; set; }
         public string? Status { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
     }
 }

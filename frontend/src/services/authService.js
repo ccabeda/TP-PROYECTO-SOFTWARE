@@ -1,12 +1,50 @@
-const API_BASE_URL = "https://localhost:7176/api/v1";
+import { API_BASE_URL } from "../lib/api";
+
 const AUTH_STORAGE_KEY = "ticketing_auth";
+const JSON_HEADERS = {
+  "Content-Type": "application/json",
+};
+
+function isBrowser() {
+  return typeof window !== "undefined";
+}
+
+function getPersistentStorage(rememberMe) {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  return rememberMe ? window.localStorage : window.sessionStorage;
+}
+
+function getStoredSessionValue() {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  return (
+    window.localStorage.getItem(AUTH_STORAGE_KEY) ??
+    window.sessionStorage.getItem(AUTH_STORAGE_KEY)
+  );
+}
+
+function parseStoredSession(rawSession) {
+  if (!rawSession) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawSession);
+  } catch {
+    clearSession();
+    return null;
+  }
+}
 
 export async function registerUser({ name, email, password }) {
   const response = await fetch(`${API_BASE_URL}/users`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: JSON_HEADERS,
     body: JSON.stringify({ name, email, password }),
   });
 
@@ -16,9 +54,7 @@ export async function registerUser({ name, email, password }) {
 export async function loginUser({ email, password, rememberMe = true }) {
   const response = await fetch(`${API_BASE_URL}/users/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: JSON_HEADERS,
     body: JSON.stringify({ email, password }),
   });
 
@@ -48,17 +84,22 @@ export async function getCurrentUser() {
 }
 
 export function saveSession(session, rememberMe = true) {
+  if (!session) {
+    return;
+  }
+
   clearSession();
-  const storage = rememberMe ? localStorage : sessionStorage;
+  const storage = getPersistentStorage(rememberMe);
+
+  if (!storage) {
+    return;
+  }
+
   storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
 }
 
 export function getSession() {
-  const rawSession =
-    localStorage.getItem(AUTH_STORAGE_KEY) ??
-    sessionStorage.getItem(AUTH_STORAGE_KEY);
-
-  return rawSession ? JSON.parse(rawSession) : null;
+  return parseStoredSession(getStoredSessionValue());
 }
 
 export function getToken() {
@@ -66,8 +107,12 @@ export function getToken() {
 }
 
 export function clearSession() {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-  sessionStorage.removeItem(AUTH_STORAGE_KEY);
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
 }
 
 export function logoutUser() {

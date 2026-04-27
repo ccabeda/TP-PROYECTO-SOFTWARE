@@ -201,6 +201,7 @@ builder.Services.AddScoped<ICreateAuditLogHandler, CreateAuditLogHandler>();
 builder.Services.AddScoped<ICreateReservationHandler, CreateReservationHandler>();
 builder.Services.AddScoped<IConfirmReservationPaymentHandler, ConfirmReservationPaymentHandler>();
 builder.Services.AddScoped<IGetReservationByIdHandler, GetReservationByIdHandler>();
+builder.Services.AddScoped<IGetMyReservationsHandler, GetMyReservationsHandler>();
 builder.Services.AddValidatorsFromAssemblyContaining<UserCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<EventCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SectorCreateValidator>();

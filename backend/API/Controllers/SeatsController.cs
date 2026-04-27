@@ -59,7 +59,11 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [ProducesResponseType(typeof(List<SeatGetDTO>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSeatsBySector([FromRoute] int sectorId)
         {
-            var result = await _getSeatsBySectorHandler.Handle(new GetSeatsBySectorQuery { SectorId = sectorId });
+            var result = await _getSeatsBySectorHandler.Handle(new GetSeatsBySectorQuery
+            {
+                SectorId = sectorId,
+                CurrentUserId = UserClaimsHelper.GetCurrentUserId(User)
+            });
             return Ok(result);
         }
 
