@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuthContext } from "../../context/AuthContext";
-import { useLanguageContext } from "../../context/LanguageContext";
-import { useThemeContext } from "../../context/ThemeContext";
+import useAuthContext from "../../context/useAuthContext";
+import useLanguageContext from "../../context/useLanguageContext";
+import useThemeContext from "../../context/useThemeContext";
 import { t } from "../../lib/i18n";
 import TopbarActions from "./TopbarActions";
 
@@ -43,6 +43,9 @@ function Topbar() {
         session={session}
         onLogout={clearSession}
         language={language}
+        onAdmin={() => navigate("/admin")}
+        onAdminUsers={() => navigate("/admin/users")}
+        onAdminAuditLogs={() => navigate("/admin/audit-logs")}
         onLogin={() => navigate("/login")}
         onMyTickets={() => navigate("/my-tickets")}
         onRegister={() => navigate("/register")}

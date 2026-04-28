@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
-import { useAuthContext } from "../context/AuthContext";
-import { useLanguageContext } from "../context/LanguageContext";
+import useAuthContext from "../context/useAuthContext";
+import useLanguageContext from "../context/useLanguageContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import { formatEventDate } from "../lib/eventFormat";
 import getErrorMessage from "../lib/getErrorMessage";
@@ -73,7 +73,7 @@ function MyTickets() {
     return () => {
       isCancelled = true;
     };
-  }, [language, navigate, session]);
+  }, [errorLabel, navigate, session]);
 
   const upcomingTickets = useMemo(() => {
     const now = new Date();

@@ -4,7 +4,7 @@ import AppShell from "../components/layout/AppShell";
 import EventCard from "../components/events/EventCard";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvents from "../hooks/useEvents";
-import { useLanguageContext } from "../context/LanguageContext";
+import useLanguageContext from "../context/useLanguageContext";
 import { t } from "../lib/i18n";
 import { formatEventDate } from "../lib/eventFormat";
 

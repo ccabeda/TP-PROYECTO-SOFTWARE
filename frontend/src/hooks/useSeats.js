@@ -4,20 +4,15 @@ import { getSeatsBySectorId } from "../services/eventsService";
 
 function useSeats(sectorId) {
   const [seats, setSeats] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(sectorId));
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let isMounted = true;
-
     if (!sectorId) {
-      if (isMounted) {
-        setSeats([]);
-        setError("");
-        setIsLoading(false);
-      }
-      return;
+      return undefined;
     }
+
+    let isMounted = true;
 
     async function loadSeats() {
       if (isMounted) {
@@ -49,7 +44,11 @@ function useSeats(sectorId) {
     };
   }, [sectorId]);
 
-  return { seats, isLoading, error };
+  return {
+    seats: sectorId ? seats : [],
+    isLoading: sectorId ? isLoading : false,
+    error: sectorId ? error : "",
+  };
 }
 
 export default useSeats;

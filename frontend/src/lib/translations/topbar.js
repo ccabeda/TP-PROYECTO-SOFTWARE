@@ -2,6 +2,10 @@ export const topbarTranslations = {
   es: {
     home: "Inicio",
     events: "Eventos",
+    admin: "Admin",
+    adminCreateEvent: "Crear evento",
+    adminViewUsers: "Ver usuarios",
+    adminViewAuditLogs: "Ver auditoría",
     login: "Iniciar sesión",
     register: "Crear cuenta",
     myTickets: "Mis entradas",
@@ -14,6 +18,10 @@ export const topbarTranslations = {
   en: {
     home: "Home",
     events: "Events",
+    admin: "Admin",
+    adminCreateEvent: "Create event",
+    adminViewUsers: "View users",
+    adminViewAuditLogs: "View audit logs",
     login: "Log in",
     register: "Create account",
     myTickets: "My tickets",

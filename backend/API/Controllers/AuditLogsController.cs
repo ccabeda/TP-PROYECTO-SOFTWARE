@@ -7,7 +7,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
-    [Route("api/v1/audit-logs")]
+    [Route("api/v1/auditlogs")]
     [ApiController]
     [Tags("AuditLogs")]
     public class AuditLogsController : ControllerBase
@@ -23,15 +23,18 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Listado de auditoría")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(List<AuditLogGetDTO>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAuditLogs([FromQuery] int? userId, [FromQuery] DateTime? date, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
+        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<AuditLogGetDTO>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAuditLogs([FromQuery] int? userId, [FromQuery] string? search, [FromQuery] DateTime? date, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var result = await _getAuditLogsHandler.Handle(new GetAuditLogsQuery
             {
                 UserId = userId,
+                Search = search,
                 Date = date,
                 DateFrom = dateFrom,
-                DateTo = dateTo
+                DateTo = dateTo,
+                Page = page,
+                PageSize = pageSize
             });
             return Ok(result);
         }

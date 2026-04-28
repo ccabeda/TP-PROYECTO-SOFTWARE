@@ -15,7 +15,7 @@ Sistema de ticketing de eventos con:
 - roles `Admin` y `User`
 - catálogo de eventos, sectores y butacas
 - reservas y pago simulado
-- vista de compra y `Mis entradas`
+- vista de compra, `Mis entradas` y panel admin
 
 La solución sigue una arquitectura por capas dentro de `backend`:
 - `backend/Domain`
@@ -206,7 +206,7 @@ npm run build
 - `POST /api/v1/sectors/{sectorId}/seats`
 - `POST /api/v1/sectors/{sectorId}/seats/bulk`
 - `DELETE /api/v1/sectors/{sectorId}/seats/{seatId}`
-- `GET /api/v1/audit-logs`
+- `GET /api/v1/auditlogs`
 - `GET /api/v1/users`
 - `GET /api/v1/users/{id}`
 
@@ -223,6 +223,11 @@ npm run build
 Notas:
 - las contraseñas se almacenan hasheadas con ASP.NET Core Identity
 - el login devuelve `id`, `name`, `email`, `role` y `token`
+- `GET /api/v1/users` soporta paginación y filtros:
+  - `name`
+  - `email`
+  - `page`
+  - `pageSize`
 
 ### Eventos
 
@@ -277,12 +282,29 @@ Notas:
 
 ### Auditoría
 
-- `GET /api/v1/audit-logs` `Admin`
+- `GET /api/v1/auditlogs` `Admin`
 
 Ejemplos:
-- `GET /api/v1/audit-logs?userId=3`
-- `GET /api/v1/audit-logs?date=2026-05-24`
-- `GET /api/v1/audit-logs?dateFrom=2026-04-01&dateTo=2026-04-23`
+- `GET /api/v1/auditlogs?userId=3`
+- `GET /api/v1/auditlogs?date=2026-05-24`
+- `GET /api/v1/auditlogs?dateFrom=2026-04-01&dateTo=2026-04-23`
+- `GET /api/v1/auditlogs?search=evento&page=1&pageSize=12`
+
+Notas:
+- `GET /api/v1/auditlogs` soporta:
+  - `userId`
+  - `search`
+  - `date`
+  - `dateFrom`
+  - `dateTo`
+  - `page`
+  - `pageSize`
+- `GET /api/v1/users` y `GET /api/v1/auditlogs` devuelven:
+  - `items`
+  - `totalCount`
+  - `page`
+  - `pageSize`
+  - `totalPages`
 
 ## Reglas de catálogo admin
 
@@ -310,19 +332,21 @@ Implementado:
   - elegir sector
   - elegir butaca
   - reservar al continuar
-  - checkout
-  - pago simulado
+- checkout
+- pago simulado
 - Mis entradas
+- panel admin:
+  - crear evento completo con sectores y butacas en un solo flujo
+  - ver usuarios con filtros por nombre y mail
+  - ver auditoría con filtros por fecha y texto
+  - paginación real para usuarios y auditoría
 - títulos dinámicos por página
 - fallback visual para eventos sin imagen
+- lazy loading de páginas principales
 
 Notas:
 - el frontend consume eventos reales del backend
 - si no hay `ImageUrl`, usa placeholders visuales
-
-## Pendiente real
-
-- vista admin en frontend
 
 ## Pendiente de segunda entrega
 

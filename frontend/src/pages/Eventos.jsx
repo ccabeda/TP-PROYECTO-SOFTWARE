@@ -6,7 +6,7 @@ import AppShell from "../components/layout/AppShell";
 import EventCard from "../components/events/EventCard";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvents from "../hooks/useEvents";
-import { useLanguageContext } from "../context/LanguageContext";
+import useLanguageContext from "../context/useLanguageContext";
 import { formatEventDate } from "../lib/eventFormat";
 import { t } from "../lib/i18n";
 
@@ -30,56 +30,58 @@ function Eventos() {
 
   return (
     <AppShell>
-      <div className="events-toolbar">
-        <h1>{allEventsLabel}</h1>
-        <div className="events-filters">
-          <input
-            className="events-search"
-            type="search"
-            placeholder={searchPlaceholder}
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            minDate={today}
-            locale={locale}
-            dateFormat="dd/MM/yyyy"
-            placeholderText={datePlaceholder}
-            className="events-search events-date-filter"
-            ariaLabelClose={dateFilterLabel}
-            isClearable
-            popperPlacement="bottom-end"
-            showPopperArrow={false}
-          />
-        </div>
-      </div>
-
-      {isLoading ? (
-        <p className="events-feedback">{eventsLoadingLabel}</p>
-      ) : error ? (
-        <p className="events-feedback">{error}</p>
-      ) : (
-        <>
-          {events.length === 0 ? (
-            <p className="events-feedback">{emptyEventsLabel}</p>
-          ) : null}
-
-          <div className="events-grid">
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={{
-                  ...event,
-                  fecha: formatEventDate(event.eventDate, language),
-                }}
-                language={language}
-              />
-            ))}
+      <section className="events-section">
+        <div className="events-toolbar">
+          <h1>{allEventsLabel}</h1>
+          <div className="events-filters">
+            <input
+              className="events-search"
+              type="search"
+              placeholder={searchPlaceholder}
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              minDate={today}
+              locale={locale}
+              dateFormat="dd/MM/yyyy"
+              placeholderText={datePlaceholder}
+              className="events-search events-date-filter"
+              ariaLabelClose={dateFilterLabel}
+              isClearable
+              popperPlacement="bottom-end"
+              showPopperArrow={false}
+            />
           </div>
-        </>
-      )}
+        </div>
+
+        {isLoading ? (
+          <p className="events-feedback">{eventsLoadingLabel}</p>
+        ) : error ? (
+          <p className="events-feedback">{error}</p>
+        ) : (
+          <>
+            {events.length === 0 ? (
+              <p className="events-feedback">{emptyEventsLabel}</p>
+            ) : null}
+
+            <div className="events-grid">
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={{
+                    ...event,
+                    fecha: formatEventDate(event.eventDate, language),
+                  }}
+                  language={language}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </section>
     </AppShell>
   );
 }

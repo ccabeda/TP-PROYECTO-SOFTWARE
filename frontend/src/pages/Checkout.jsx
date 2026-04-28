@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
-import { useAuthContext } from "../context/AuthContext";
-import { useLanguageContext } from "../context/LanguageContext";
+import useAuthContext from "../context/useAuthContext";
+import useLanguageContext from "../context/useLanguageContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvent from "../hooks/useEvent";
 import getErrorMessage from "../lib/getErrorMessage";

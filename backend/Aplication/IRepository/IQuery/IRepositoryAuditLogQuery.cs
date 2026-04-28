@@ -5,7 +5,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
 {
     public interface IRepositoryAuditLogQuery
     {
-        Task<List<AuditLog>> GetAll(GetAuditLogsQuery query);
+        Task<(List<AuditLog> Items, int TotalCount)> GetAll(GetAuditLogsQuery query);
     }
 }
 

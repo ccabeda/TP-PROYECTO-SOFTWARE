@@ -4,20 +4,15 @@ import { getSectorsByEventId } from "../services/eventsService";
 
 function useSectors(eventId) {
   const [sectors, setSectors] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(eventId));
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let isMounted = true;
-
     if (!eventId) {
-      if (isMounted) {
-        setSectors([]);
-        setError("");
-        setIsLoading(false);
-      }
-      return;
+      return undefined;
     }
+
+    let isMounted = true;
 
     async function loadSectors() {
       if (isMounted) {
@@ -51,7 +46,11 @@ function useSectors(eventId) {
     };
   }, [eventId]);
 
-  return { sectors, isLoading, error };
+  return {
+    sectors: eventId ? sectors : [],
+    isLoading: eventId ? isLoading : false,
+    error: eventId ? error : "",
+  };
 }
 
 export default useSectors;

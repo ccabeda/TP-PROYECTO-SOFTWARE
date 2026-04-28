@@ -3,6 +3,7 @@ import { getEvents } from "../services/eventsService";
 import getErrorMessage from "../lib/getErrorMessage";
 
 function useEvents(filters = {}) {
+  const { eventDate = "", name = "" } = filters;
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,7 +18,7 @@ function useEvents(filters = {}) {
       }
 
       try {
-        const nextEvents = await getEvents(filters);
+        const nextEvents = await getEvents({ eventDate, name });
         if (isMounted) {
           setEvents(nextEvents);
         }
@@ -40,7 +41,7 @@ function useEvents(filters = {}) {
     return () => {
       isMounted = false;
     };
-  }, [filters.eventDate, filters.name]);
+  }, [eventDate, name]);
 
   return { events, isLoading, error };
 }

@@ -1,5 +1,5 @@
 import Topbar from "./Topbar";
-import { useThemeContext } from "../../context/ThemeContext";
+import useThemeContext from "../../context/useThemeContext";
 
 function AppShell({ children }) {
   const { darkMode } = useThemeContext();

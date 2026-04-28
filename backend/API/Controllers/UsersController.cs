@@ -41,10 +41,16 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Listado de usuarios")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(List<UserGetDTO>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetUsers()
+        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<UserGetDTO>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUsers([FromQuery] string? name, [FromQuery] string? email, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
-            var result = await _getUsersHandler.Handle(new GetUsersQuery());
+            var result = await _getUsersHandler.Handle(new GetUsersQuery
+            {
+                Name = name,
+                Email = email,
+                Page = page,
+                PageSize = pageSize
+            });
             return Ok(result);
         }
 

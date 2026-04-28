@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell";
-import { useAuthContext } from "../context/AuthContext";
-import { useLanguageContext } from "../context/LanguageContext";
+import useAuthContext from "../context/useAuthContext";
+import useLanguageContext from "../context/useLanguageContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvent from "../hooks/useEvent";
 import useSectors from "../hooks/useSectors";
@@ -85,11 +85,6 @@ function Purchase() {
     isLoading: isLoadingSectors,
     error: sectorsError,
   } = useSectors(id);
-  const {
-    seats,
-    isLoading: isLoadingSeats,
-    error: seatsError,
-  } = useSeats(selectedSectorId);
   const priceLocale = getPriceLocale(language);
   const eventTitle = getEventTitle(event);
   const loadingLabel = t(language, "home.eventLoading");
@@ -127,9 +122,29 @@ function Purchase() {
 
     return sectors.filter((sector) => availableSectorIds.has(sector.id));
   }, [availableSectorIds, sectors]);
+  const resolvedSelectedSectorId = useMemo(() => {
+    if (visibleSectors.length === 0) {
+      return null;
+    }
+
+    if (
+      selectedSectorId &&
+      visibleSectors.some((sector) => sector.id === selectedSectorId)
+    ) {
+      return selectedSectorId;
+    }
+
+    return visibleSectors[0]?.id ?? null;
+  }, [selectedSectorId, visibleSectors]);
+  const {
+    seats,
+    isLoading: isLoadingSeats,
+    error: seatsError,
+  } = useSeats(resolvedSelectedSectorId);
   const selectedSector = useMemo(
-    () => visibleSectors.find((sector) => sector.id === selectedSectorId) ?? null,
-    [visibleSectors, selectedSectorId]
+    () =>
+      visibleSectors.find((sector) => sector.id === resolvedSelectedSectorId) ?? null,
+    [resolvedSelectedSectorId, visibleSectors]
   );
   const groupedSeats = useMemo(() => groupSeatsByRow(seats), [seats]);
   const sectorSlots = useMemo(() => buildSectorSlots(visibleSectors), [visibleSectors]);
@@ -141,26 +156,7 @@ function Purchase() {
   const finalPrice = selectedSector ? selectedSector.price + serviceFee : 0;
 
   useEffect(() => {
-    if (visibleSectors.length === 0) {
-      setSelectedSectorId(null);
-      setSelectedSeatId(null);
-      return;
-    }
-
-    if (!selectedSectorId || !visibleSectors.some((sector) => sector.id === selectedSectorId)) {
-      setSelectedSectorId(visibleSectors[0].id);
-    }
-  }, [visibleSectors, selectedSectorId]);
-
-  useEffect(() => {
-    setSelectedSeatId(null);
-    setSeatWarning("");
-  }, [selectedSectorId]);
-
-  useEffect(() => {
     if (sectors.length === 0) {
-      setAvailableSectorIds(new Set());
-      setIsFilteringSectors(false);
       return;
     }
 
@@ -287,9 +283,17 @@ function Purchase() {
                       key={slot.key}
                       className={`purchase-venue-slot purchase-venue-slot-${slot.position} purchase-venue-slot-${slot.tone} ${
                         slot.sector ? "has-sector" : "is-empty"
-                      } ${slot.sector?.id === selectedSectorId ? "is-selected" : ""}`}
+                      } ${slot.sector?.id === resolvedSelectedSectorId ? "is-selected" : ""}`}
                       onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => slot.sector && setSelectedSectorId(slot.sector.id)}
+                      onClick={() => {
+                        if (!slot.sector) {
+                          return;
+                        }
+
+                        setSelectedSectorId(slot.sector.id);
+                        setSelectedSeatId(null);
+                        setSeatWarning("");
+                      }}
                       disabled={!slot.sector}
                     >
                       {slot.sector ? (
@@ -338,7 +342,7 @@ function Purchase() {
           <h2>{purchaseSeatsTitle}</h2>
           <p className="event-detail-copy">{purchaseSeatsCopy}</p>
 
-          {!selectedSectorId ? (
+          {!resolvedSelectedSectorId ? (
             <p className="event-detail-copy">{purchaseSelectSectorFirst}</p>
           ) : seatsError ? (
             <p className="event-detail-copy">{seatsError}</p>

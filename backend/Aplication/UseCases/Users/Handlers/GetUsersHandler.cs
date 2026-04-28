@@ -1,4 +1,5 @@
 using AutoMapper;
+using TP_PROYECTO_SOFTWARE.Aplication.DTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
@@ -17,10 +18,27 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             _mapper = mapper;
         }
 
-        public async Task<List<UserGetDTO>> Handle(GetUsersQuery query)
+        public async Task<PagedResultDTO<UserGetDTO>> Handle(GetUsersQuery query)
         {
-            var users = await _repositoryUserQuery.GetAll();
-            return _mapper.Map<List<UserGetDTO>>(users);
+            var normalizedPage = Math.Max(query.Page, 1);
+            var normalizedPageSize = Math.Clamp(query.PageSize, 1, 50);
+            var normalizedQuery = query with
+            {
+                Page = normalizedPage,
+                PageSize = normalizedPageSize
+            };
+
+            var (users, totalCount) = await _repositoryUserQuery.GetAll(normalizedQuery);
+            var items = _mapper.Map<List<UserGetDTO>>(users);
+
+            return new PagedResultDTO<UserGetDTO>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = normalizedPage,
+                PageSize = normalizedPageSize,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)normalizedPageSize)
+            };
         }
     }
 }

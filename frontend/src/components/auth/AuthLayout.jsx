@@ -1,7 +1,7 @@
 import LanguageSelector from "../ui/LanguageSelector";
 import ThemeToggle from "../ui/ThemeToggle";
-import { useLanguageContext } from "../../context/LanguageContext";
-import { useThemeContext } from "../../context/ThemeContext";
+import useLanguageContext from "../../context/useLanguageContext";
+import useThemeContext from "../../context/useThemeContext";
 import { t } from "../../lib/i18n";
 
 function AuthLayout({ eyebrow, title, subtitle, children }) {

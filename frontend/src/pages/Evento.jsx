@@ -1,6 +1,6 @@
 import AppShell from "../components/layout/AppShell";
-import { useAuthContext } from "../context/AuthContext";
-import { useLanguageContext } from "../context/LanguageContext";
+import useAuthContext from "../context/useAuthContext";
+import useLanguageContext from "../context/useLanguageContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvent from "../hooks/useEvent";
 import useSectors from "../hooks/useSectors";
@@ -80,9 +80,6 @@ function Evento() {
 
   useEffect(() => {
     if (sectors.length === 0) {
-      setAvailableSectorIds(new Set());
-      setIsFilteringSectors(false);
-      setHasOwnReservation(false);
       return;
     }
 

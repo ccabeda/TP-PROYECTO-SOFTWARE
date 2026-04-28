@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLanguageContext } from "../../context/LanguageContext";
+import useLanguageContext from "../../context/useLanguageContext";
 import { t } from "../../lib/i18n";
 import ThemeToggle from "../ui/ThemeToggle";
 
@@ -7,6 +7,9 @@ function TopbarActions({
   darkMode,
   setDarkMode,
   session,
+  onAdmin,
+  onAdminUsers,
+  onAdminAuditLogs,
   onLogout,
   onLogin,
   onMyTickets,
@@ -14,6 +17,7 @@ function TopbarActions({
 }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const { language, setLanguage } = useLanguageContext();
   const themeAriaLabel = t(
     language,
@@ -25,9 +29,14 @@ function TopbarActions({
     name: session?.name ?? "usuario",
   });
   const loginLabel = t(language, "topbar.login");
+  const adminLabel = t(language, "topbar.admin");
+  const adminCreateEventLabel = t(language, "topbar.adminCreateEvent");
+  const adminViewUsersLabel = t(language, "topbar.adminViewUsers");
+  const adminViewAuditLogsLabel = t(language, "topbar.adminViewAuditLogs");
   const registerLabel = t(language, "topbar.register");
   const myTicketsLabel = t(language, "topbar.myTickets");
   const logoutLabel = t(language, "topbar.logout");
+  const isAdmin = session?.role?.trim().toLowerCase() === "admin";
 
   function handleLogoutClick() {
     setIsLoggingOut(true);
@@ -41,6 +50,11 @@ function TopbarActions({
     setIsLanguageMenuOpen(false);
     setLanguage(nextLanguage);
     window.location.reload();
+  }
+
+  function handleAdminSelect(action) {
+    setIsAdminMenuOpen(false);
+    action();
   }
 
   return (
@@ -85,6 +99,47 @@ function TopbarActions({
 
       {session?.token ? (
         <>
+          {isAdmin ? (
+            <div className={`admin-menu ${isAdminMenuOpen ? "is-open" : ""}`}>
+              <button
+                type="button"
+                className="admin-toggle"
+                onClick={() => setIsAdminMenuOpen((current) => !current)}
+                aria-label={adminLabel}
+                aria-expanded={isAdminMenuOpen}
+              >
+                <span className="admin-toggle-dot" aria-hidden="true" />
+                <span className="admin-toggle-text">{adminLabel}</span>
+                <span className="admin-toggle-caret" aria-hidden="true">▾</span>
+              </button>
+
+              {isAdminMenuOpen ? (
+                <div className="admin-menu-dropdown">
+                  <button
+                    type="button"
+                    className="admin-menu-option"
+                    onClick={() => handleAdminSelect(onAdmin)}
+                  >
+                    {adminCreateEventLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-menu-option"
+                    onClick={() => handleAdminSelect(onAdminUsers)}
+                  >
+                    {adminViewUsersLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-menu-option"
+                    onClick={() => handleAdminSelect(onAdminAuditLogs)}
+                  >
+                    {adminViewAuditLogsLabel}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           <span className="session-chip">{greetingLabel}</span>
           <button className="btn btn-login" onClick={onMyTickets}>
             {myTicketsLabel}

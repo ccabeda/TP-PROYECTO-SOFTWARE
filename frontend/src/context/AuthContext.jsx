@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import useAuthSession from "../hooks/useAuthSession";
 
 const AuthContext = createContext(null);
@@ -10,12 +10,4 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuthContext() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuthContext must be used within an AuthProvider");
-  }
-
-  return context;
-}
+export { AuthContext };

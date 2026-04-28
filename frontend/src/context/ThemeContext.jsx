@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import useTheme from "../hooks/useTheme";
 
 const ThemeContext = createContext(null);
@@ -10,12 +10,4 @@ export function ThemeProvider({ children }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useThemeContext() {
-  const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error("useThemeContext must be used within a ThemeProvider");
-  }
-
-  return context;
-}
+export { ThemeContext };

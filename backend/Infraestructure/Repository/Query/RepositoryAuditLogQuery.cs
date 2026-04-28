@@ -15,7 +15,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<AuditLog>> GetAll(GetAuditLogsQuery query)
+        public async Task<(List<AuditLog> Items, int TotalCount)> GetAll(GetAuditLogsQuery query)
         {
             var auditLogsQuery = _context.AuditLogs
                 .AsNoTracking()
@@ -46,11 +46,24 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
                 auditLogsQuery = auditLogsQuery.Where(a => a.CreatedAt <= dateTo);
             }
 
-            return await auditLogsQuery
+            if (!string.IsNullOrWhiteSpace(query.Search))
+            {
+                var normalizedSearch = query.Search.Trim();
+                auditLogsQuery = auditLogsQuery.Where(a =>
+                    (a.User != null && a.User.Email != null && a.User.Email.Contains(normalizedSearch)) ||
+                    (a.Action != null && a.Action.Contains(normalizedSearch)) ||
+                    (a.EntityType != null && a.EntityType.Contains(normalizedSearch)) ||
+                    (a.Details != null && a.Details.Contains(normalizedSearch)));
+            }
+
+            var totalCount = await auditLogsQuery.CountAsync();
+            var items = await auditLogsQuery
                 .OrderByDescending(a => a.CreatedAt)
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
                 .ToListAsync();
+
+            return (items, totalCount);
         }
     }
 }
-
-
