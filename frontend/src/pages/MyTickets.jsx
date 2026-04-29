@@ -106,15 +106,15 @@ function MyTickets() {
                 <div className="my-ticket-layout">
                   <div className="my-ticket-main">
                     <div className="my-ticket-card-head">
-                      <span className="purchase-seat-map-label">
+                      <span className="my-ticket-chip">
                         {ticket.sectorName} · {ticket.rowIdentifier}{ticket.seatNumber}
                       </span>
                       <span className="my-ticket-status">{paidLabel}</span>
                     </div>
 
                     <h2>{ticket.eventName}</h2>
-                    <p className="event-detail-copy">{formatEventDate(ticket.eventDate, language)}</p>
-                    <p className="event-detail-copy">{ticket.venue}</p>
+                    <p className="my-ticket-date">{formatEventDate(ticket.eventDate, language)}</p>
+                    <p className="my-ticket-venue">{ticket.venue}</p>
 
                     <div className="purchase-summary-lines my-ticket-lines">
                       <div className="purchase-summary-line">
@@ -136,6 +136,7 @@ function MyTickets() {
                   </div>
 
                   <aside className="my-ticket-qr-panel" aria-hidden="true">
+                    <div className="my-ticket-divider" />
                     <div className="my-ticket-qr-card">
                       <div className="my-ticket-qr">
                         <span className="my-ticket-qr-corner corner-top-left" />

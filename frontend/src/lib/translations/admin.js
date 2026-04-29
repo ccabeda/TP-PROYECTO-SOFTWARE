@@ -2,7 +2,7 @@ export const adminTranslations = {
   es: {
     adminTitle: "Panel admin",
     adminCopy:
-      "Crea el evento completo con sus sectores y butacas desde un único formulario.",
+      "Gestiona el contenido principal de la plataforma desde un único panel.",
     adminForbiddenTitle: "Acceso restringido",
     adminForbiddenCopy:
       "Esta vista está disponible únicamente para usuarios con rol administrador.",
@@ -19,7 +19,7 @@ export const adminTranslations = {
     adminEventDateLabel: "Fecha y hora",
     adminVenueLabel: "Estadio",
     adminStatusLabel: "Estado",
-    adminImageUrlLabel: "Image URL",
+    adminImageUrlLabel: "URL de la imagen",
     adminDescriptionLabel: "Descripción",
     adminEventLabel: "Evento",
     adminSectorLabel: "Sector",
@@ -57,7 +57,7 @@ export const adminTranslations = {
     adminEventDateRequiredError: "Debes seleccionar la fecha y hora del evento.",
     adminUsersTitle: "Usuarios",
     adminUsersCopy:
-      "Consulta la base de usuarios registrados y filtra rápidamente por nombre o correo.",
+      "Consulta los usuarios registrados y encuentra rápido cada cuenta por nombre o correo.",
     adminUsersNameSearchPlaceholder: "Buscar por nombre",
     adminUsersEmailSearchPlaceholder: "Buscar por correo",
     adminUsersLoading: "Cargando usuarios...",
@@ -68,7 +68,7 @@ export const adminTranslations = {
     adminUsersCountLabel: "{count} usuarios registrados",
     adminAuditLogsTitle: "Auditoría",
     adminAuditLogsCopy:
-      "Revisa las acciones administrativas y filtra por rango de fechas o texto libre.",
+      "Revisa la actividad administrativa y filtra por fechas o por texto libre.",
     adminAuditLogsSearchPlaceholder: "Buscar por usuario, acción, entidad o detalle",
     adminAuditLogsDateFromLabel: "Desde",
     adminAuditLogsDateToLabel: "Hasta",

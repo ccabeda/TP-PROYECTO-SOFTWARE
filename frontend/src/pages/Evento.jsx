@@ -176,6 +176,11 @@ function Evento() {
             </section>
 
             <article className="event-detail-card">
+              <div className="event-detail-section-head">
+                <span className="event-detail-section-kicker">
+                  {t(language, "home.detailSectorsTitle")}
+                </span>
+              </div>
               <h3>{t(language, "home.detailSectorsTitle")}</h3>
 
               {isLoadingSectors || isFilteringSectors ? (
@@ -201,6 +206,11 @@ function Evento() {
 
           <aside className="event-detail-sidebar">
             <article className="event-detail-card event-detail-info-side">
+              <div className="event-detail-section-head">
+                <span className="event-detail-section-kicker">
+                  {t(language, "home.detailInfoTitle")}
+                </span>
+              </div>
               <h2>{t(language, "home.detailInfoTitle")}</h2>
               <p className="event-detail-copy">{fallbackDescription}</p>
 
@@ -228,6 +238,7 @@ function Evento() {
               <span className="event-placeholder-badge">
                 {t(language, "home.buy")}
               </span>
+              <div className="event-detail-action-copy">
               <h3>{t(language, "home.detailActionTitle")}</h3>
               <p>
                 {isSoldOut && hasOwnReservation
@@ -238,6 +249,7 @@ function Evento() {
                       ? t(language, "home.detailActionCopy")
                       : t(language, "home.detailActionSoonCopy")}
               </p>
+              </div>
               <button
                 className="btn btn-event event-detail-cta"
                 onClick={handleContinuePurchase}

@@ -149,27 +149,29 @@ function AdminUsers() {
             </div>
           </div>
 
-          <div className="admin-users-search-grid">
-            <input
-              className="auth-input admin-users-search"
-              type="search"
-              value={nameSearchTerm}
-              onChange={(event) => {
-                setNameSearchTerm(event.target.value);
-                setPage(1);
-              }}
-              placeholder={adminUsersNameSearchPlaceholder}
-            />
-            <input
-              className="auth-input admin-users-search"
-              type="search"
-              value={emailSearchTerm}
-              onChange={(event) => {
-                setEmailSearchTerm(event.target.value);
-                setPage(1);
-              }}
-              placeholder={adminUsersEmailSearchPlaceholder}
-            />
+          <div className="admin-controls-card">
+            <div className="admin-users-search-grid">
+              <input
+                className="auth-input admin-users-search"
+                type="search"
+                value={nameSearchTerm}
+                onChange={(event) => {
+                  setNameSearchTerm(event.target.value);
+                  setPage(1);
+                }}
+                placeholder={adminUsersNameSearchPlaceholder}
+              />
+              <input
+                className="auth-input admin-users-search"
+                type="search"
+                value={emailSearchTerm}
+                onChange={(event) => {
+                  setEmailSearchTerm(event.target.value);
+                  setPage(1);
+                }}
+                placeholder={adminUsersEmailSearchPlaceholder}
+              />
+            </div>
           </div>
 
           {isLoading ? (

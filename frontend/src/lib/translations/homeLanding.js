@@ -4,11 +4,11 @@ export const homeLandingTranslations = {
     title: "Viví tus eventos favoritos",
     copy:
       "Descubrí conciertos, festivales y experiencias únicas. Explorá la cartelera y conseguí tus entradas.",
-    upcoming: "Próximos Eventos",
+    upcoming: "Próximos eventos",
     viewAll: "Ver todos",
     moreInfo: "Más info",
     buy: "Comprar",
-    allEvents: "Todos los Eventos",
+    allEvents: "Todos los eventos",
     statsListed: "Eventos listados",
     statsIssued: "Entradas emitidas",
     statsSatisfaction: "Satisfacción",

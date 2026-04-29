@@ -2,13 +2,13 @@ export const eventDetailTranslations = {
   es: {
     detailBadge: "Evento destacado",
     detailCopy:
-      "Próximamente vamos a conectar esta vista con el backend para mostrar sectores, disponibilidad y compra real de entradas.",
+      "Consulta los detalles principales del evento y continúa con la selección de sector y butaca.",
     detailTitle: "Detalle del Evento",
     detailInfoTitle: "Información del evento",
     detailInfoCopy:
-      "Explora los detalles principales del evento y prepárate para la próxima etapa de selección de entradas.",
+      "Revisa la fecha, el estadio y el estado del evento antes de continuar con la compra.",
     detailDateLabel: "Fecha",
-    detailVenueLabel: "Venue",
+    detailVenueLabel: "Estadio",
     detailStatusLabel: "Estado",
     detailActionTitle: "Compra tus entradas",
     detailActionCopy:
@@ -31,11 +31,11 @@ export const eventDetailTranslations = {
   en: {
     detailBadge: "Featured event",
     detailCopy:
-      "Soon we will connect this view to the backend to show sectors, availability and real ticket purchase.",
+      "Check the main event details and continue to sector and seat selection.",
     detailTitle: "Event Detail",
     detailInfoTitle: "Event information",
     detailInfoCopy:
-      "Explore the main event details and get ready for the next ticket selection step.",
+      "Review the date, venue and event status before continuing with the purchase.",
     detailDateLabel: "Date",
     detailVenueLabel: "Venue",
     detailStatusLabel: "Status",

@@ -274,53 +274,55 @@ function AdminAuditLogs() {
             </div>
           </div>
 
-          <div className="admin-audit-filters">
-            <input
-              className="auth-input admin-users-search"
-              type="search"
-              value={searchTerm}
-              onChange={(event) => {
-                setSearchTerm(event.target.value);
-                setPage(1);
-              }}
-              placeholder={adminAuditLogsSearchPlaceholder}
-            />
-
-            <div className="admin-audit-date-field">
-              <label className="auth-label" htmlFor="admin-audit-date-from">
-                {adminAuditLogsDateFromLabel}
-              </label>
-              <DatePicker
-                id="admin-audit-date-from"
-                selected={selectedDateFrom}
-                onChange={handleDateFromChange}
-                locale={locale}
-                dateFormat="dd/MM/yyyy"
-                placeholderText={adminAuditLogsDateFromLabel}
-                className="auth-input events-search events-date-filter admin-date-filter"
-                showPopperArrow={false}
-                isClearable
-                popperPlacement="bottom-start"
+          <div className="admin-controls-card">
+            <div className="admin-audit-filters">
+              <input
+                className="auth-input admin-users-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                  setPage(1);
+                }}
+                placeholder={adminAuditLogsSearchPlaceholder}
               />
-            </div>
 
-            <div className="admin-audit-date-field">
-              <label className="auth-label" htmlFor="admin-audit-date-to">
-                {adminAuditLogsDateToLabel}
-              </label>
-              <DatePicker
-                id="admin-audit-date-to"
-                selected={selectedDateTo}
-                onChange={handleDateToChange}
-                locale={locale}
-                dateFormat="dd/MM/yyyy"
-                placeholderText={adminAuditLogsDateToLabel}
-                className="auth-input events-search events-date-filter admin-date-filter"
-                showPopperArrow={false}
-                isClearable
-                minDate={selectedDateFrom ?? undefined}
-                popperPlacement="bottom-start"
-              />
+              <div className="admin-audit-date-field">
+                <label className="auth-label" htmlFor="admin-audit-date-from">
+                  {adminAuditLogsDateFromLabel}
+                </label>
+                <DatePicker
+                  id="admin-audit-date-from"
+                  selected={selectedDateFrom}
+                  onChange={handleDateFromChange}
+                  locale={locale}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText={adminAuditLogsDateFromLabel}
+                  className="auth-input events-search events-date-filter admin-date-filter"
+                  showPopperArrow={false}
+                  isClearable
+                  popperPlacement="bottom-start"
+                />
+              </div>
+
+              <div className="admin-audit-date-field">
+                <label className="auth-label" htmlFor="admin-audit-date-to">
+                  {adminAuditLogsDateToLabel}
+                </label>
+                <DatePicker
+                  id="admin-audit-date-to"
+                  selected={selectedDateTo}
+                  onChange={handleDateToChange}
+                  locale={locale}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText={adminAuditLogsDateToLabel}
+                  className="auth-input events-search events-date-filter admin-date-filter"
+                  showPopperArrow={false}
+                  isClearable
+                  minDate={selectedDateFrom ?? undefined}
+                  popperPlacement="bottom-start"
+                />
+              </div>
             </div>
           </div>
 

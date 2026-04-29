@@ -66,6 +66,14 @@ function buildCheckoutState(selectedSector, selectedSeat, reservationId, service
   };
 }
 
+function getSelectedSeatLabel(seat) {
+  if (!seat) {
+    return "";
+  }
+
+  return `${seat.rowIdentifier}${seat.seatNumber}`;
+}
+
 function Purchase() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -100,6 +108,10 @@ function Purchase() {
   const purchaseBasePriceLabel = t(language, "home.purchaseBasePriceLabel");
   const purchaseFeeLabel = t(language, "home.purchaseFeeLabel");
   const purchaseFinalPriceLabel = t(language, "home.purchaseFinalPriceLabel");
+  const purchaseSelectedSeatLabel = t(language, "home.purchaseSelectedSeatLabel");
+  const purchaseSelectedSeatEmpty = t(language, "home.purchaseSelectedSeatEmpty");
+  const purchaseSelectedSeatReady = t(language, "home.purchaseSelectedSeatReady");
+  const purchaseSelectedSeatMine = t(language, "home.purchaseSelectedSeatMine");
   const purchaseSeatsTitle = t(language, "home.purchaseSeatsTitle");
   const purchaseSeatsCopy = t(language, "home.purchaseSeatsCopy");
   const purchaseSeatsEmpty = t(language, "home.purchaseSeatsEmpty");
@@ -152,6 +164,10 @@ function Purchase() {
     () => seats.find((seat) => seat.id === selectedSeatId) ?? null,
     [seats, selectedSeatId]
   );
+  const selectedSeatLabel = getSelectedSeatLabel(selectedSeat);
+  const selectedSeatStateLabel = selectedSeat?.reservedByCurrentUser
+    ? purchaseSelectedSeatMine
+    : purchaseSelectedSeatReady;
   const serviceFee = selectedSector ? Math.round(selectedSector.price * SERVICE_FEE_RATE) : 0;
   const finalPrice = selectedSector ? selectedSector.price + serviceFee : 0;
 
@@ -317,6 +333,26 @@ function Purchase() {
               <div className="purchase-summary-box">
                 <span className="purchase-seat-map-label">{selectedSector.name}</span>
 
+                <div className="purchase-selected-seat-card">
+                  <div className="purchase-selected-seat-copy">
+                    <span>{purchaseSelectedSeatLabel}</span>
+                    <strong>
+                      {selectedSeatLabel || purchaseSelectedSeatEmpty}
+                    </strong>
+                  </div>
+                  {selectedSeat ? (
+                    <span
+                      className={`purchase-selected-seat-status ${
+                        selectedSeat.reservedByCurrentUser
+                          ? "is-mine"
+                          : "is-ready"
+                      }`}
+                    >
+                      {selectedSeatStateLabel}
+                    </span>
+                  ) : null}
+                </div>
+
                 <div className="purchase-summary-lines">
                   <div className="purchase-summary-line">
                     <span>{purchaseBasePriceLabel}</span>
@@ -354,7 +390,19 @@ function Purchase() {
                 <div className="purchase-seat-map-header">
                   <div>
                     <span className="purchase-seat-map-label">{selectedSector.name}</span>
+                    {selectedSeat ? (
+                      <strong>{selectedSeatLabel}</strong>
+                    ) : null}
                   </div>
+                  {selectedSeat ? (
+                    <span
+                      className={`purchase-seat-focus-badge ${
+                        selectedSeat.reservedByCurrentUser ? "is-mine" : "is-ready"
+                      }`}
+                    >
+                      {selectedSeatStateLabel}
+                    </span>
+                  ) : null}
                 </div>
               ) : null}
 

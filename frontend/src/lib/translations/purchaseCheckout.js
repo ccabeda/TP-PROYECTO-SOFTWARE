@@ -8,10 +8,14 @@ export const purchaseCheckoutTranslations = {
       "Ubicación ilustrativa de los sectores disponibles dentro del recinto.",
     purchaseSummaryTitle: "Resumen del sector",
     purchaseSummaryCopy:
-      "Revisa el sector elegido y el detalle del precio antes de seleccionar tu butaca.",
+      "Revisa el sector elegido, la butaca y el detalle del precio antes de continuar.",
     purchaseBasePriceLabel: "Precio base",
     purchaseFeeLabel: "Cargo por servicio",
     purchaseFinalPriceLabel: "Precio final",
+    purchaseSelectedSeatLabel: "Butaca elegida",
+    purchaseSelectedSeatEmpty: "Todavía no elegiste una butaca.",
+    purchaseSelectedSeatReady: "Lista para continuar",
+    purchaseSelectedSeatMine: "Retomar tu reserva",
     purchaseSectorsEmpty: "Todavía no hay sectores con butacas cargadas para este evento.",
     purchaseSeatsTitle: "Butacas del sector",
     purchaseSeatsCopy:
@@ -50,7 +54,7 @@ export const purchaseCheckoutTranslations = {
     myTicketsBadge: "Mis entradas",
     myTicketsTitle: "Tus próximas entradas",
     myTicketsCopy:
-      "Aquí vas a encontrar las entradas que ya compraste para eventos futuros.",
+      "Aquí encontrarás las entradas que ya compraste para próximos eventos.",
     myTicketsLoading: "Cargando entradas...",
     myTicketsError: "No se pudieron cargar tus entradas.",
     myTicketsEmptyTitle: "No tienes entradas activas",
@@ -76,10 +80,14 @@ export const purchaseCheckoutTranslations = {
       "Illustrative position of the available sectors inside the venue.",
     purchaseSummaryTitle: "Sector summary",
     purchaseSummaryCopy:
-      "Review the selected sector and price breakdown before choosing your seat.",
+      "Review the selected sector, seat and price breakdown before continuing.",
     purchaseBasePriceLabel: "Base price",
     purchaseFeeLabel: "Service fee",
     purchaseFinalPriceLabel: "Final price",
+    purchaseSelectedSeatLabel: "Selected seat",
+    purchaseSelectedSeatEmpty: "You have not chosen a seat yet.",
+    purchaseSelectedSeatReady: "Ready to continue",
+    purchaseSelectedSeatMine: "Resume your reservation",
     purchaseSectorsEmpty: "There are no sectors with loaded seats for this event yet.",
     purchaseSeatsTitle: "Sector seats",
     purchaseSeatsCopy:
