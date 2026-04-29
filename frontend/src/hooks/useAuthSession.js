@@ -15,6 +15,7 @@ function mergeSessionWithCurrentUser(currentSession, currentUser) {
 
 function useAuthSession() {
   const [session, setSession] = useState(() => getSession());
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -24,6 +25,7 @@ function useAuthSession() {
       if (!currentSession?.token) {
         if (isMounted) {
           setSession(null);
+          setIsReady(true);
         }
         return;
       }
@@ -33,17 +35,20 @@ function useAuthSession() {
         if (!currentUser) {
           if (isMounted) {
             setSession(null);
+            setIsReady(true);
           }
           return;
         }
 
         if (isMounted) {
           setSession(mergeSessionWithCurrentUser(currentSession, currentUser));
+          setIsReady(true);
         }
       } catch {
         logoutUser();
         if (isMounted) {
           setSession(null);
+          setIsReady(true);
         }
       }
     }
@@ -65,6 +70,7 @@ function useAuthSession() {
   }
 
   return {
+    isReady,
     session,
     setSession: saveSession,
     clearSession,

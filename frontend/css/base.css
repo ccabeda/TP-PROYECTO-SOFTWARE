@@ -53,6 +53,80 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.app-loader {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.app-loader-inline {
+  min-height: calc(100vh - 84px);
+  min-height: calc(100dvh - 84px);
+}
+
+.app-loader-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  width: min(100%, 320px);
+  padding: 28px 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(121, 93, 64, 0.14);
+  background:
+    radial-gradient(circle at top left, rgba(246, 194, 139, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(248, 240, 229, 0.98));
+  box-shadow: 0 18px 40px rgba(53, 28, 18, 0.08);
+  text-align: center;
+}
+
+.app-loader-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(163, 59, 32, 0.14);
+  background: rgba(255, 248, 238, 0.96);
+  color: #8d3d1f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-loader-title {
+  margin: 0;
+  color: #2a1a12;
+  font-size: clamp(34px, 6vw, 44px);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.app-loader-copy {
+  margin: 0;
+  color: #6e5a4c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.app-loader-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(163, 59, 32, 0.18);
+  border-top-color: #a33b20;
+  border-right-color: #d9a441;
+  animation: app-loader-spin 0.85s linear infinite;
+}
+
+@keyframes app-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 button,
 input,
 textarea,
@@ -81,6 +155,28 @@ select {
   --header-bg: #000000;
   --header-text: #ffffff;
   --header-text-hover: #f5d0a1;
+}
+
+.page.dark .app-loader-card {
+  background:
+    radial-gradient(circle at top left, rgba(246, 194, 139, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(20, 20, 20, 0.98), rgba(13, 13, 13, 0.98));
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.36);
+}
+
+.page.dark .app-loader-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f6c28b;
+}
+
+.page.dark .app-loader-title {
+  color: #f5f5f5;
+}
+
+.page.dark .app-loader-copy {
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .page {

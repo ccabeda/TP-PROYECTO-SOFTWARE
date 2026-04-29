@@ -42,7 +42,6 @@ function Topbar() {
         setDarkMode={setDarkMode}
         session={session}
         onLogout={clearSession}
-        language={language}
         onAdmin={() => navigate("/admin")}
         onAdminUsers={() => navigate("/admin/users")}
         onAdminAuditLogs={() => navigate("/admin/audit-logs")}

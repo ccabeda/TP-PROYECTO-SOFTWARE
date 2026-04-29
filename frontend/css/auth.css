@@ -204,17 +204,24 @@
 }
 
 .auth-button-spinner {
-  display: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 248, 241, 0.35);
+  display: inline-block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 248, 241, 0.28);
   border-top-color: var(--auth-text-inverse);
+  border-right-color: rgba(255, 248, 241, 0.9);
   border-radius: 50%;
   animation: auth-spin 0.8s linear infinite;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  box-shadow: 0 0 0 1px rgba(255, 248, 241, 0.12);
 }
 
 .auth-button-spinner.is-visible {
-  display: inline-block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .auth-button-label {

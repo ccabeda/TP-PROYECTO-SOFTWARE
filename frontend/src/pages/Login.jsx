@@ -10,8 +10,6 @@ import { t } from "../lib/i18n";
 import { validateLoginForm } from "../lib/authValidation";
 import { loginUser } from "../services/authService";
 
-const LOGIN_REDIRECT_DELAY_MS = 250;
-
 function getRedirectTarget(location) {
   return location.state?.redirectTo ?? "/";
 }
@@ -20,7 +18,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguageContext();
-  const { session, setSession } = useAuthContext();
+  const { session } = useAuthContext();
   const redirectTo = getRedirectTarget(location);
   const [formData, setFormData] = useState({
     email: "",
@@ -73,11 +71,8 @@ function Login() {
     setMessageType("");
 
     try {
-      const authSession = await loginUser(formData);
-      setSession(authSession);
-      window.setTimeout(() => {
-        window.location.assign(redirectTo);
-      }, LOGIN_REDIRECT_DELAY_MS);
+      await loginUser(formData);
+      window.location.assign(redirectTo);
     } catch (error) {
       setMessage(getErrorMessage(error, t(language, "auth.loginError")));
       setMessageType("error");
@@ -139,10 +134,6 @@ function Login() {
         ) : null}
 
         <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
-          <span
-            className={`auth-button-spinner ${isSubmitting ? "is-visible" : ""}`}
-            aria-hidden="true"
-          />
           <span className="auth-button-label">
             {isSubmitting ? loginSubmittingLabel : loginSubmitLabel}
           </span>

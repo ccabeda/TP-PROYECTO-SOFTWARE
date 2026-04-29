@@ -26,8 +26,11 @@ const INITIAL_EVENT_FORM = {
 };
 
 function createEmptySectorForm() {
+  const fallbackId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const generatedId = globalThis.crypto?.randomUUID?.() ?? fallbackId;
+
   return {
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    id: generatedId,
     name: "",
     price: "",
     capacity: "",

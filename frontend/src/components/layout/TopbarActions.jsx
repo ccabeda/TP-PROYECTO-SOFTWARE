@@ -43,13 +43,12 @@ function TopbarActions({
     onLogout();
     window.setTimeout(() => {
       window.location.assign("/");
-    }, 250);
+    }, 50);
   }
 
   function handleLanguageSelect(nextLanguage) {
     setIsLanguageMenuOpen(false);
     setLanguage(nextLanguage);
-    window.location.reload();
   }
 
   function handleAdminSelect(action) {

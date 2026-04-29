@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AppLoader from "./components/ui/AppLoader";
 
 const Home = lazy(() => import("./pages/Home"));
 const Eventos = lazy(() => import("./pages/Eventos"));
@@ -44,7 +45,7 @@ const appRoutes = [
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div className="events-feedback">Cargando...</div>}>
+      <Suspense fallback={<AppLoader />}>
         <Routes>
           {appRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />

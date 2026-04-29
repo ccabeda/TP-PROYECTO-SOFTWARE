@@ -67,6 +67,20 @@ function getPrioritizedTopEvents(events, storedIds) {
   return [...prioritized, ...remaining].slice(0, MAX_TOP_EVENTS);
 }
 
+function shuffleEvents(events) {
+  const shuffled = [...events];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [
+      shuffled[randomIndex],
+      shuffled[index],
+    ];
+  }
+
+  return shuffled;
+}
+
 function Home() {
   const navigate = useNavigate();
   const { language } = useLanguageContext();
@@ -259,7 +273,7 @@ function getSessionTopEvents(events) {
     return prioritized;
   }
 
-  const shuffled = [...events].sort(() => Math.random() - 0.5);
+  const shuffled = shuffleEvents(events);
   const selected = shuffled.slice(0, MAX_TOP_EVENTS);
   persistTopEventIds(selected);
 
