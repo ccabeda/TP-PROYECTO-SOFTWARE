@@ -6,6 +6,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
     {
         Task<Reservation?> GetById(Guid id);
         Task<Reservation?> GetActiveBySeatId(Guid seatId);
+        Task<List<Reservation>> GetExpiredPendingReservations(DateTime utcNow);
         Task<bool> AnyByEventId(int eventId);
         Task<bool> AnyBySectorId(int sectorId);
         Task<bool> AnyBySeatId(Guid seatId);

@@ -3,6 +3,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
@@ -16,6 +17,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private readonly IRepositoryUserQuery _repositoryUserQuery;
         private readonly IUnitOfWorkReservationCommand _unitOfWorkReservationCommand;
         private readonly ICreateAuditLogHandler _createAuditLogHandler;
+        private readonly IReservationExpirationService _reservationExpirationService;
         private readonly IMapper _mapper;
 
         public CreateReservationHandler(
@@ -24,6 +26,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             IRepositoryUserQuery repositoryUserQuery,
             IUnitOfWorkReservationCommand unitOfWorkReservationCommand,
             ICreateAuditLogHandler createAuditLogHandler,
+            IReservationExpirationService reservationExpirationService,
             IMapper mapper)
         {
             _repositorySeatQuery = repositorySeatQuery;
@@ -31,11 +34,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             _repositoryUserQuery = repositoryUserQuery;
             _unitOfWorkReservationCommand = unitOfWorkReservationCommand;
             _createAuditLogHandler = createAuditLogHandler;
+            _reservationExpirationService = reservationExpirationService;
             _mapper = mapper;
         }
 
         public async Task<ReservationGetDTO> Handle(CreateReservationCommand command)
         {
+            await _reservationExpirationService.ExpirePendingReservations();
+
             var user = await GetUserOrThrow(command.CurrentUserId);
             var seat = await GetSeatOrThrow(command.SeatId);
 
@@ -45,9 +51,17 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             MarkSeatAsReserved(seat);
             var reservation = BuildReservation(user.Id, seat.Id);
 
-            await PersistReservation(seat, reservation);
-            await CreateAuditLog(user.Id, seat.Id, reservation);
-            await _unitOfWorkReservationCommand.Save();
+            try
+            {
+                await PersistReservation(seat, reservation);
+                await CreateAuditLog(user.Id, seat.Id, reservation);
+                await _unitOfWorkReservationCommand.Save();
+            }
+            catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
+            {
+                await CreateConcurrencyRejectedReservationAuditLog(user.Id, seat.Id);
+                throw new InvalidOperationException("La butaca acaba de ser reservada por otro usuario.");
+            }
 
             return _mapper.Map<ReservationGetDTO>(reservation);
         }
@@ -118,6 +132,18 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 EntityType = "Seat",
                 EntityId = seat.Id.ToString(),
                 Details = $"Intento de reserva rechazado. UserId={userId}, SeatId={seat.Id}, Status={seat.Status}, HasActiveReservation={hasActiveReservation}"
+            });
+        }
+
+        private async Task CreateConcurrencyRejectedReservationAuditLog(int userId, Guid seatId)
+        {
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = userId,
+                Action = "CreateReservationRejectedConcurrency",
+                EntityType = "Seat",
+                EntityId = seatId.ToString(),
+                Details = $"Intento de reserva rechazado por concurrencia. UserId={userId}, SeatId={seatId}"
             });
         }
     }

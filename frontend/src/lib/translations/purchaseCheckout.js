@@ -36,6 +36,8 @@ export const purchaseCheckoutTranslations = {
     checkoutSummaryTitle: "Resumen de tu entrada",
     checkoutSummaryCopy:
       "Confirma el sector y la butaca elegida antes de pasar al pago.",
+    checkoutReservationTimerLabel: "Tu reserva vence en",
+    checkoutReservationExpiredLabel: "Reserva vencida",
     checkoutPaymentTitle: "Método de pago",
     checkoutPaymentCopy:
       "Elegí el método de pago para finalizar la compra de tu entrada.",
@@ -51,6 +53,9 @@ export const purchaseCheckoutTranslations = {
     checkoutMissingSelection:
       "No encontramos una butaca seleccionada para continuar con la compra.",
     checkoutBackToPurchase: "Volver a seleccionar butaca",
+    checkoutExpiredError:
+      "Tu reserva venció. Vuelve a elegir una butaca para continuar.",
+    checkoutExpiredAction: "Elegir otra butaca",
     myTicketsBadge: "Mis entradas",
     myTicketsTitle: "Tus próximas entradas",
     myTicketsCopy:
@@ -108,6 +113,8 @@ export const purchaseCheckoutTranslations = {
     checkoutSummaryTitle: "Your ticket summary",
     checkoutSummaryCopy:
       "Confirm the selected sector and seat before continuing to payment.",
+    checkoutReservationTimerLabel: "Your reservation expires in",
+    checkoutReservationExpiredLabel: "Reservation expired",
     checkoutPaymentTitle: "Payment method",
     checkoutPaymentCopy:
       "Choose the payment method to complete your ticket purchase.",
@@ -123,6 +130,9 @@ export const purchaseCheckoutTranslations = {
     checkoutMissingSelection:
       "We could not find a selected seat to continue with the purchase.",
     checkoutBackToPurchase: "Go back to seat selection",
+    checkoutExpiredError:
+      "Your reservation expired. Choose another seat to continue.",
+    checkoutExpiredAction: "Choose another seat",
     myTicketsBadge: "My tickets",
     myTicketsTitle: "Your upcoming tickets",
     myTicketsCopy:

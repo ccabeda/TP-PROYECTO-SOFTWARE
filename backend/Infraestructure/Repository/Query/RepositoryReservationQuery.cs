@@ -20,7 +20,12 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<Reservation?> GetActiveBySeatId(Guid seatId) => await _context.Reservations
             .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.SeatId == seatId && r.Status == "Pending");
+            .FirstOrDefaultAsync(r => r.SeatId == seatId && r.Status == "Pending" && r.ExpiresAt > DateTime.UtcNow);
+
+        public async Task<List<Reservation>> GetExpiredPendingReservations(DateTime utcNow) => await _context.Reservations
+            .Include(r => r.Seat)
+            .Where(r => r.Status == "Pending" && r.ExpiresAt <= utcNow)
+            .ToListAsync();
 
         public async Task<bool> AnyByEventId(int eventId) => await _context.Reservations
             .AnyAsync(r => r.Seat.Sector.EventId == eventId);
@@ -33,7 +38,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<List<Reservation>> GetBySeatIds(List<Guid> seatIds) => await _context.Reservations
             .AsNoTracking()
-            .Where(r => seatIds.Contains(r.SeatId))
+            .Where(r => seatIds.Contains(r.SeatId) && r.Status == "Pending" && r.ExpiresAt > DateTime.UtcNow)
             .ToListAsync();
 
         public async Task<List<Reservation>> GetPaidByUserId(int userId) => await _context.Reservations

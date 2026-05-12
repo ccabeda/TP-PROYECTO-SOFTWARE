@@ -11,9 +11,10 @@ import getErrorMessage from "../lib/getErrorMessage";
 import { useNavigate, useParams } from "react-router-dom";
 import { t } from "../lib/i18n";
 import { getSeatsBySectorId } from "../services/eventsService";
-import { createReservation } from "../services/checkoutService";
+import { createReservation, getReservationById } from "../services/checkoutService";
 
 const SERVICE_FEE_RATE = 0.12;
+const SEAT_MAP_REFRESH_INTERVAL_MS = 10_000;
 const SECTOR_SLOT_POSITIONS = [
   { position: "left-front", tone: "tone-1" },
   { position: "center-front", tone: "tone-2" },
@@ -53,12 +54,13 @@ function getAvailableSectorIdSet(seatLists) {
   );
 }
 
-function buildCheckoutState(selectedSector, selectedSeat, reservationId, serviceFee, finalPrice) {
+function buildCheckoutState(selectedSector, selectedSeat, reservationId, expiresAt, serviceFee, finalPrice) {
   return {
     sectorId: selectedSector.id,
     sectorName: selectedSector.name,
     seatId: selectedSeat.id,
     reservationId,
+    expiresAt,
     seatLabel: `${selectedSeat.rowIdentifier}${selectedSeat.seatNumber}`,
     basePrice: selectedSector.price,
     serviceFee,
@@ -72,6 +74,16 @@ function getSelectedSeatLabel(seat) {
   }
 
   return `${seat.rowIdentifier}${seat.seatNumber}`;
+}
+
+function shouldRefreshSeatsAfterReservationError(errorMessage) {
+  const normalizedMessage = errorMessage.trim().toLowerCase();
+
+  return (
+    normalizedMessage.includes("expir") ||
+    normalizedMessage.includes("disponible") ||
+    normalizedMessage.includes("reservad")
+  );
 }
 
 function Purchase() {
@@ -152,6 +164,7 @@ function Purchase() {
     seats,
     isLoading: isLoadingSeats,
     error: seatsError,
+    refreshSeats,
   } = useSeats(resolvedSelectedSectorId);
   const selectedSector = useMemo(
     () =>
@@ -207,6 +220,20 @@ function Purchase() {
     };
   }, [sectors]);
 
+  useEffect(() => {
+    if (!resolvedSelectedSectorId || isLoadingSeats) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      refreshSeats();
+    }, SEAT_MAP_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isLoadingSeats, refreshSeats, resolvedSelectedSectorId]);
+
   if (isLoading) {
     return (
       <AppShell>
@@ -238,27 +265,39 @@ function Purchase() {
     setIsReservingSeat(true);
 
     try {
-      const reservationId = selectedSeat.activeReservationId
-        ? selectedSeat.activeReservationId
-        : (
-            await createReservation({
-              seatId: selectedSeat.id,
-              token: session.token,
-            })
-          ).id;
+      const reservation = selectedSeat.activeReservationId
+        ? await getReservationById({
+            reservationId: selectedSeat.activeReservationId,
+            token: session.token,
+          })
+        : await createReservation({
+            seatId: selectedSeat.id,
+            token: session.token,
+          });
 
       navigate(checkoutPath, {
         state: buildCheckoutState(
           selectedSector,
           selectedSeat,
-          reservationId,
+          reservation.id,
+          reservation.expiresAt ?? null,
           serviceFee,
           finalPrice,
         ),
       });
     } catch (reservationError) {
+      const errorMessage = getErrorMessage(
+        reservationError,
+        purchaseSelectSeatWarning,
+      );
+
+      if (shouldRefreshSeatsAfterReservationError(errorMessage)) {
+        setSelectedSeatId(null);
+        refreshSeats();
+      }
+
       setSeatWarning(
-        getErrorMessage(reservationError, purchaseSelectSeatWarning),
+        errorMessage,
       );
     } finally {
       setIsReservingSeat(false);

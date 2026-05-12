@@ -13,7 +13,7 @@ public class SeatConfiguration : IEntityTypeConfiguration<Seat>
 
         entity.Property(s => s.RowIdentifier).IsRequired().HasMaxLength(10);
         entity.Property(s => s.Status).IsRequired().HasMaxLength(50);
-        entity.Property(s => s.Version);
+        entity.Property(s => s.Version).IsConcurrencyToken();
 
         entity.HasIndex(s => new { s.SectorId, s.RowIdentifier, s.SeatNumber }).IsUnique();
 

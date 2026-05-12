@@ -4,8 +4,10 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 {
@@ -15,6 +17,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private readonly IRepositorySeatQuery _repositorySeatQuery;
         private readonly IUnitOfWorkReservationCommand _unitOfWorkReservationCommand;
         private readonly ICreateAuditLogHandler _createAuditLogHandler;
+        private readonly IReservationExpirationService _reservationExpirationService;
         private readonly IMapper _mapper;
 
         public ConfirmReservationPaymentHandler(
@@ -22,23 +25,26 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             IRepositorySeatQuery repositorySeatQuery,
             IUnitOfWorkReservationCommand unitOfWorkReservationCommand,
             ICreateAuditLogHandler createAuditLogHandler,
+            IReservationExpirationService reservationExpirationService,
             IMapper mapper)
         {
             _repositoryReservationQuery = repositoryReservationQuery;
             _repositorySeatQuery = repositorySeatQuery;
             _unitOfWorkReservationCommand = unitOfWorkReservationCommand;
             _createAuditLogHandler = createAuditLogHandler;
+            _reservationExpirationService = reservationExpirationService;
             _mapper = mapper;
         }
 
         public async Task<ReservationGetDTO> Handle(ConfirmReservationPaymentCommand command)
         {
+            await _reservationExpirationService.ExpirePendingReservations();
+
             var reservation = await GetReservationOrThrow(command.ReservationId);
 
             await ValidateUserCanPayReservation(command, reservation);
-            await ValidateReservationIsPending(reservation);
-
             var seat = await GetSeatOrThrow(reservation.SeatId);
+            await ValidateReservationIsPending(command, reservation, seat);
             await ValidateSeatIsReserved(reservation, seat);
 
             MarkReservationAsPaid(reservation);
@@ -51,10 +57,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             return _mapper.Map<ReservationGetDTO>(reservation);
         }
 
-        private async Task<Domain.Models.Reservation> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
+        private async Task<Reservation> GetReservationOrThrow(Guid reservationId) => await _repositoryReservationQuery.GetById(reservationId)
             ?? throw new KeyNotFoundException("Reserva no encontrada.");
 
-        private async Task ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Domain.Models.Reservation reservation)
+        private async Task ValidateUserCanPayReservation(ConfirmReservationPaymentCommand command, Reservation reservation)
         {
             if (!command.IsAdmin && reservation.UserId != command.CurrentUserId)
             {
@@ -66,8 +72,28 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private async Task ValidateReservationIsPending(Domain.Models.Reservation reservation)  //esto es mas para la segunda entrega, ya que aun no se implemento la expiracion de reservas.
+        private async Task ValidateReservationIsPending(ConfirmReservationPaymentCommand command, Reservation reservation, Seat seat)
         {
+            if (reservation.Status == "Pending" && reservation.ExpiresAt <= DateTime.UtcNow)
+            {
+                reservation.Status = "Expired";
+
+                if (seat.Status == "Reserved")
+                {
+                    seat.Status = "Available";
+                    seat.Version += 1;
+                    await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+                }
+
+                await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
+                await CreateRejectedPaymentAuditLog(
+                    command.CurrentUserId,
+                    reservation.Id.ToString(),
+                    $"Intento de pago rechazado por expiración. ReservationId={reservation.Id}, ExpiresAt={reservation.ExpiresAt:O}, CurrentTime={DateTime.UtcNow:O}");
+                await _unitOfWorkReservationCommand.Save();
+                throw new InvalidOperationException("La reserva expiró. Selecciona otra butaca.");
+            }
+
             if (reservation.Status != "Pending")
             {
                 await CreateRejectedPaymentAuditLog(
@@ -78,10 +104,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private async Task<Domain.Models.Seat> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
+        private async Task<Seat> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)
             ?? throw new KeyNotFoundException("Butaca no encontrada.");
 
-        private async Task ValidateSeatIsReserved(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
+        private async Task ValidateSeatIsReserved(Reservation reservation, Seat seat)
         {
             if (seat.Status != "Reserved")
             {
@@ -93,24 +119,24 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             }
         }
 
-        private static void MarkReservationAsPaid(Domain.Models.Reservation reservation)
+        private static void MarkReservationAsPaid(Reservation reservation)
         {
             reservation.Status = "Paid";
         }
 
-        private static void MarkSeatAsSold(Domain.Models.Seat seat)
+        private static void MarkSeatAsSold(Seat seat)
         {
             seat.Status = "Sold";
             seat.Version += 1;
         }
 
-        private async Task PersistPaymentConfirmation(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
+        private async Task PersistPaymentConfirmation(Reservation reservation, Seat seat)
         {
             await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
             await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
         }
 
-        private async Task CreateAuditLog(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
+        private async Task CreateAuditLog(Reservation reservation, Seat seat)
         {
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {

@@ -8,7 +8,11 @@ import useEvent from "../hooks/useEvent";
 import getErrorMessage from "../lib/getErrorMessage";
 import { t } from "../lib/i18n";
 import { formatEventDate } from "../lib/eventFormat";
-import { createPayment, createReservation } from "../services/checkoutService";
+import {
+  createPayment,
+  createReservation,
+  getReservationById,
+} from "../services/checkoutService";
 
 function getPriceLocale(language) {
   return language === "en" ? "en-US" : "es-AR";
@@ -24,6 +28,7 @@ function buildCheckoutSummary(checkoutState) {
     sectorName: checkoutState.sectorName,
     seatId: checkoutState.seatId,
     reservationId: checkoutState.reservationId ?? null,
+    expiresAt: checkoutState.expiresAt ?? null,
     seatLabel: checkoutState.seatLabel,
     basePrice: checkoutState.basePrice ?? 0,
     serviceFee: checkoutState.serviceFee ?? 0,
@@ -35,17 +40,28 @@ function getEventTitle(event) {
   return event?.titulo || event?.title || event?.name || "";
 }
 
+function formatRemainingTime(remainingMs) {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 function Checkout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const checkoutState = location.state ?? null;
   const { session } = useAuthContext();
   const { language } = useLanguageContext();
   const { event, isLoading, error } = useEvent(id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const checkoutState = location.state ?? null;
+  const [isReservationExpired, setIsReservationExpired] = useState(false);
+  const [fallbackReservationExpiresAt, setFallbackReservationExpiresAt] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
   const checkoutPath = `/event/${id}/checkout`;
   const purchasePath = `/event/${id}/purchase`;
   const myTicketsPath = "/my-tickets";
@@ -57,6 +73,8 @@ function Checkout() {
   const checkoutTitle = t(language, "home.checkoutTitle");
   const checkoutSummaryTitle = t(language, "home.checkoutSummaryTitle");
   const checkoutSummaryCopy = t(language, "home.checkoutSummaryCopy");
+  const checkoutReservationTimerLabel = t(language, "home.checkoutReservationTimerLabel");
+  const checkoutReservationExpiredLabel = t(language, "home.checkoutReservationExpiredLabel");
   const checkoutPaymentTitle = t(language, "home.checkoutPaymentTitle");
   const checkoutPaymentCopy = t(language, "home.checkoutPaymentCopy");
   const checkoutPaymentMethodTitle = t(language, "home.checkoutPaymentMethodTitle");
@@ -65,6 +83,8 @@ function Checkout() {
   const checkoutSuccessButton = t(language, "home.checkoutSuccessButton");
   const checkoutMissingSelection = t(language, "home.checkoutMissingSelection");
   const checkoutBackToPurchase = t(language, "home.checkoutBackToPurchase");
+  const checkoutExpiredError = t(language, "home.checkoutExpiredError");
+  const checkoutExpiredAction = t(language, "home.checkoutExpiredAction");
   const purchaseBasePriceLabel = t(language, "home.purchaseBasePriceLabel");
   const purchaseFeeLabel = t(language, "home.purchaseFeeLabel");
   const purchaseFinalPriceLabel = t(language, "home.purchaseFinalPriceLabel");
@@ -74,12 +94,73 @@ function Checkout() {
   useDocumentTitle(eventTitle || checkoutTitle);
 
   const summary = useMemo(() => buildCheckoutSummary(checkoutState), [checkoutState]);
+  const reservationExpiresAt = fallbackReservationExpiresAt ?? summary?.expiresAt ?? null;
+  const remainingReservationMs = reservationExpiresAt
+    ? new Date(reservationExpiresAt).getTime() - currentTime
+    : null;
+  const isReservationUrgent =
+    remainingReservationMs !== null &&
+    remainingReservationMs > 0 &&
+    remainingReservationMs <= 60_000;
+  const isReservationTimeOver =
+    remainingReservationMs !== null && remainingReservationMs <= 0;
+  const effectiveReservationExpired = isReservationExpired || isReservationTimeOver;
+  const effectiveCheckoutError =
+    checkoutError || (effectiveReservationExpired ? checkoutExpiredError : "");
 
   useEffect(() => {
     if (!session?.token) {
       navigate("/login", { replace: true, state: { redirectTo: checkoutPath } });
     }
   }, [checkoutPath, navigate, session]);
+
+  useEffect(() => {
+    if (!session?.token || !summary?.reservationId || reservationExpiresAt) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadReservation() {
+      try {
+        const reservation = await getReservationById({
+          reservationId: summary.reservationId,
+          token: session.token,
+        });
+
+        if (isMounted) {
+          setFallbackReservationExpiresAt(reservation.expiresAt ?? null);
+        }
+      } catch {
+        // Keep checkout usable; payment flow will surface backend validation if needed.
+      }
+    }
+
+    void loadReservation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [reservationExpiresAt, session, summary?.reservationId]);
+
+  useEffect(() => {
+    if (!reservationExpiresAt || effectiveReservationExpired || successMessage) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCurrentTime(Date.now());
+    }, 0);
+
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+    };
+  }, [effectiveReservationExpired, reservationExpiresAt, successMessage]);
 
   async function ensureReservationId() {
     if (!session?.token || !summary) {
@@ -106,6 +187,7 @@ function Checkout() {
     setIsSubmitting(true);
     setCheckoutError("");
     setSuccessMessage("");
+    setIsReservationExpired(false);
 
     try {
       const reservationId = await ensureReservationId();
@@ -120,9 +202,16 @@ function Checkout() {
 
       setSuccessMessage(t(language, "home.checkoutSuccessMessage"));
     } catch (paymentError) {
-      setCheckoutError(
-        getErrorMessage(paymentError, t(language, "home.checkoutError")),
+      const errorMessage = getErrorMessage(
+        paymentError,
+        t(language, "home.checkoutError"),
       );
+      const expiredReservation =
+        errorMessage.toLowerCase().includes("expir") &&
+        errorMessage.toLowerCase().includes("reserva");
+
+      setIsReservationExpired(expiredReservation);
+      setCheckoutError(expiredReservation ? "" : errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -178,15 +267,34 @@ function Checkout() {
             <h2>{checkoutSummaryTitle}</h2>
             <p className="event-detail-copy">{checkoutSummaryCopy}</p>
 
-            <div className="checkout-summary-box">
-              <div className="checkout-summary-main">
-                <span className="purchase-seat-map-label">{summary.sectorName}</span>
-                <strong>{summary.seatLabel}</strong>
-                <p>{formatEventDate(event.eventDate, language)}</p>
-                <p>{event.venue || "-"}</p>
-              </div>
+              <div className="checkout-summary-box">
+                <div className="checkout-summary-main">
+                  <span className="purchase-seat-map-label">{summary.sectorName}</span>
+                  <strong>{summary.seatLabel}</strong>
+                  <p>{formatEventDate(event.eventDate, language)}</p>
+                  <p>{event.venue || "-"}</p>
+                </div>
 
-              <div className="purchase-summary-lines">
+                {reservationExpiresAt ? (
+                  <div
+                    className={`checkout-reservation-timer ${
+                      isReservationTimeOver
+                        ? "is-expired"
+                        : isReservationUrgent
+                          ? "is-urgent"
+                          : ""
+                    }`}
+                  >
+                    <span>{checkoutReservationTimerLabel}</span>
+                    <strong>
+                      {isReservationTimeOver
+                        ? checkoutReservationExpiredLabel
+                        : formatRemainingTime(remainingReservationMs)}
+                    </strong>
+                  </div>
+                ) : null}
+
+                <div className="purchase-summary-lines">
                 <div className="purchase-summary-line">
                   <span>{purchaseBasePriceLabel}</span>
                   <strong>{formatPrice(summary.basePrice)}</strong>
@@ -215,8 +323,19 @@ function Checkout() {
               </div>
             </div>
 
-            {checkoutError ? (
-              <p className="auth-message auth-message-error">{checkoutError}</p>
+            {effectiveCheckoutError ? (
+              <div className="checkout-error-stack">
+                <p className="auth-message auth-message-error">{effectiveCheckoutError}</p>
+                {effectiveReservationExpired ? (
+                  <button
+                    type="button"
+                    className="button button-secondary checkout-expired-button"
+                    onClick={() => navigate(purchasePath, { replace: true })}
+                  >
+                    {checkoutExpiredAction}
+                  </button>
+                ) : null}
+              </div>
             ) : null}
 
             {successMessage ? (
@@ -241,7 +360,12 @@ function Checkout() {
                 type="button"
                 className="button button-primary purchase-continue-button"
                 onClick={handlePay}
-                disabled={isSubmitting}
+                disabled={isSubmitting || effectiveReservationExpired}
+                title={
+                  effectiveReservationExpired
+                    ? checkoutReservationExpiredLabel
+                    : undefined
+                }
               >
                 {isSubmitting ? checkoutPayingButton : checkoutPayButton}
               </button>

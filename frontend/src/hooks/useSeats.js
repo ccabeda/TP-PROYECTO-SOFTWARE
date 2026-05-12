@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import getErrorMessage from "../lib/getErrorMessage";
 import { getSeatsBySectorId } from "../services/eventsService";
 
@@ -6,6 +6,7 @@ function useSeats(sectorId) {
   const [seats, setSeats] = useState([]);
   const [isLoading, setIsLoading] = useState(Boolean(sectorId));
   const [error, setError] = useState("");
+  const [refreshIndex, setRefreshIndex] = useState(0);
 
   useEffect(() => {
     if (!sectorId) {
@@ -42,12 +43,17 @@ function useSeats(sectorId) {
     return () => {
       isMounted = false;
     };
-  }, [sectorId]);
+  }, [refreshIndex, sectorId]);
+
+  const refreshSeats = useCallback(() => {
+    setRefreshIndex((current) => current + 1);
+  }, []);
 
   return {
     seats: sectorId ? seats : [],
     isLoading: sectorId ? isLoading : false,
     error: sectorId ? error : "",
+    refreshSeats,
   };
 }
 

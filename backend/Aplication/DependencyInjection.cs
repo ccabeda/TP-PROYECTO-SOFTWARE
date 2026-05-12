@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TP_PROYECTO_SOFTWARE.Aplication.Configuration;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.Mapping;
+using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers;
@@ -45,6 +46,7 @@ public static class DependencyInjection
 
         services.AddAutoMapper(_ => { }, typeof(AutomapperConfig).Assembly);
         services.AddScoped<ISeatRulesService, SeatRulesService>();
+        services.AddScoped<IReservationExpirationService, ReservationExpirationService>();
         services.AddScoped<IGetEventsHandler, GetEventsHandler>();
         services.AddScoped<IGetAuditLogsHandler, GetAuditLogsHandler>();
         services.AddScoped<IGetEventByIdHandler, GetEventByIdHandler>();

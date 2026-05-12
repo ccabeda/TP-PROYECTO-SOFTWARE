@@ -275,9 +275,18 @@ Notas:
 
 Notas:
 - al reservar, la butaca pasa a `Reserved` y la reserva a `Pending`
+- al crear la reserva se guarda `ExpiresAt = UtcNow + 5 minutos`
+- las reservas `Pending` vencidas se marcan como `Expired`
+- cuando una reserva vence, la butaca vuelve a `Available`
+- la expiración se aplica de forma lazy al listar butacas, reservar y pagar
 - al confirmar el pago, la butaca pasa a `Sold` y la reserva a `Paid`
+- no se puede pagar una reserva vencida
 - `POST /api/v1/payments` recibe `reservationId`
 - hoy el pago es simulado interno
+- el checkout del frontend muestra countdown visible de la reserva
+- si la reserva vence, el checkout bloquea el pago y fuerza a volver a elegir butaca
+- las butacas usan `Version` como token real de concurrencia optimista
+- si dos usuarios compiten por la misma butaca, uno gana y el otro recibe conflicto de disponibilidad
 - si un evento, sector o butaca tiene reservas asociadas, no se permite su eliminación
 
 ### Auditoría
@@ -334,6 +343,7 @@ Implementado:
   - reservar al continuar
 - checkout
 - pago simulado
+- countdown visible de expiración en checkout
 - Mis entradas
 - panel admin:
   - crear evento completo con sectores y butacas en un solo flujo
@@ -347,9 +357,14 @@ Implementado:
 Notas:
 - el frontend consume eventos reales del backend
 - si no hay `ImageUrl`, usa placeholders visuales
+- si una reserva falla por vencimiento o disponibilidad, la vista de compra refresca el mapa de butacas
+- si una reserva propia ya existía, el flujo puede retomar ese `reservationId`
 
-## Pendiente de segunda entrega
+## Segunda entrega implementada
 
-- liberación automática de reservas vencidas
-- expiración efectiva de reservas a los 5 minutos
-- mejoras más fuertes de concurrencia
+- expiración real de reservas a los 5 minutos
+- liberación lazy de butacas vencidas
+- bloqueo de pago sobre reservas expiradas
+- countdown visible de la reserva en checkout
+- refresco del mapa de butacas ante conflictos o vencimientos
+- concurrencia optimista real con `Seat.Version`
