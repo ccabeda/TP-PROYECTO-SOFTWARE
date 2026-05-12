@@ -950,6 +950,45 @@
   gap: 18px;
 }
 
+.my-tickets-sections {
+  display: grid;
+  gap: 18px;
+}
+
+.my-tickets-switch {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(163, 59, 32, 0.12);
+  background: rgba(255, 248, 238, 0.92);
+  box-shadow: 0 10px 22px rgba(53, 28, 18, 0.06);
+}
+
+.my-tickets-switch-button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--purchase-text-muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.my-tickets-switch-button.is-active {
+  background: linear-gradient(135deg, #a33b20 0%, #7f2d17 100%);
+  color: #fff8f1;
+  box-shadow: 0 12px 22px rgba(95, 47, 28, 0.18);
+}
+
+.my-tickets-switch-button:not(.is-active):hover {
+  color: var(--purchase-heading-strong);
+}
+
 .my-ticket-card {
   display: grid;
   gap: 16px;
@@ -1987,6 +2026,22 @@
   color: #9de0af;
 }
 
+.page.dark .my-tickets-switch {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.page.dark .my-tickets-switch-button {
+  color: var(--purchase-text-muted);
+}
+
+.page.dark .my-tickets-switch-button.is-active {
+  background: linear-gradient(135deg, #f0b77a 0%, #d8924c 100%);
+  color: #20150f;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24);
+}
+
 @media (max-width: 1100px) {
   .checkout-layout {
     grid-template-columns: 1fr;
@@ -2133,6 +2188,16 @@
 }
 
 @media (max-width: 720px) {
+  .my-tickets-switch {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-tickets-switch-button {
+    width: 100%;
+  }
+
   .my-ticket-layout {
     grid-template-columns: 1fr;
   }

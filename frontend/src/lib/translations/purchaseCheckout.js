@@ -65,6 +65,9 @@ export const purchaseCheckoutTranslations = {
     myTicketsEmptyTitle: "No tienes entradas activas",
     myTicketsEmptyCopy:
       "Cuando compres una entrada para un evento futuro, aparecerá aquí.",
+    myTicketsUpcomingSection: "Próximas",
+    myTicketsPastSection: "Pasadas",
+    myTicketsPastEmpty: "Todavía no tienes entradas de eventos pasados.",
     myTicketsStatusPaid: "Pagada",
     myTicketsSectorLabel: "Sector",
     myTicketsSeatLabel: "Butaca",
@@ -142,6 +145,9 @@ export const purchaseCheckoutTranslations = {
     myTicketsEmptyTitle: "You have no active tickets",
     myTicketsEmptyCopy:
       "When you buy a ticket for a future event, it will appear here.",
+    myTicketsUpcomingSection: "Upcoming",
+    myTicketsPastSection: "Past",
+    myTicketsPastEmpty: "You do not have tickets for past events yet.",
     myTicketsStatusPaid: "Paid",
     myTicketsSectorLabel: "Sector",
     myTicketsSeatLabel: "Seat",
