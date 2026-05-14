@@ -203,6 +203,37 @@ Notas:
   - `50` butacas por sector
 - si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
 
+### Pasos para prueba
+
+Para probar el proyecto desde cero:
+
+1. configurar `Jwt:Key`
+2. usar una base nueva o vacía
+3. ejecutar migraciones:
+
+```powershell
+dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+```
+
+4. levantar la API:
+
+```powershell
+dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+```
+
+5. levantar el frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+6. si se quiere acceder al panel admin, registrar el usuario:
+- `admintest@test.com`
+
+Ese mail queda con rol `Admin` automáticamente por configuración.
+
 ### Script idempotente
 
 También se puede generar un script SQL idempotente de EF Core con:
