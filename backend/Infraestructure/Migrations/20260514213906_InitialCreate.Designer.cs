@@ -12,8 +12,8 @@ using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
 {
     [DbContext(typeof(AplicationDbContext))]
-    [Migration("20260425002302_addIdentityAuth")]
-    partial class addIdentityAuth
+    [Migration("20260514213906_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,8 +205,16 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -293,6 +301,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Version")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.HasKey("Id");

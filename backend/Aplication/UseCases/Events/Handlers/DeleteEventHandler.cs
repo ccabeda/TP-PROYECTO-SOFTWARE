@@ -48,10 +48,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 
             await DeleteSeatsIfAny(seats);
             await DeleteSectorsIfAny(sectors);
-            await CreateDeleteAuditLog(command.UserId, eventEntity, sectors.Count, seats.Count);
 
             await _repositoryEventCommand.Delete(eventEntity);
             await _repositoryEventCommand.Save();
+            await CreateDeleteAuditLog(command.UserId, eventEntity, sectors.Count, seats.Count);
         }
 
         private async Task<Domain.Models.Event> GetEventOrThrow(int eventId) => await _repositoryEventQuery.GetById(eventId)

@@ -14,6 +14,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command
         }
 
         public async Task Create(AuditLog auditLog) => await _context.AuditLogs.AddAsync(auditLog);
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }
 

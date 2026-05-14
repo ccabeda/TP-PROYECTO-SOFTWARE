@@ -45,8 +45,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             var sector = BuildSector(command, eventEntity.Id);
 
             await _repositorySectorCommand.Create(sector);
-            await CreateAuditLog(command.UserId, sector);
             await _repositorySectorCommand.Save();
+            await CreateAuditLog(command.UserId, sector);
 
             return _mapper.Map<SectorGetDTO>(sector);
         }

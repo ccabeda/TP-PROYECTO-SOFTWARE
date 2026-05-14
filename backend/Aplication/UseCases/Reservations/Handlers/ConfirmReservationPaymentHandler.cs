@@ -51,8 +51,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             MarkSeatAsSold(seat);
 
             await PersistPaymentConfirmation(reservation, seat);
-            await CreateAuditLog(reservation, seat);
             await _unitOfWorkReservationCommand.Save();
+            await CreateAuditLog(reservation, seat);
 
             return _mapper.Map<ReservationGetDTO>(reservation);
         }

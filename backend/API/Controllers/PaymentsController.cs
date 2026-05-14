@@ -29,23 +29,20 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [HttpPost]
         [Authorize]
         [SwaggerOperation(Summary = "Crea un pago simulado para una reserva")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Created")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found")]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Conflict")]
         [SwaggerResponse(StatusCodes.Status403Forbidden, "Forbidden")]
-        [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ReservationGetDTO), StatusCodes.Status201Created)]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateDTO paymentCreateDTO)
         {
-            var currentUserId = UserClaimsHelper.GetCurrentUserId(User)
-                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
-
             var command = _mapper.Map<ConfirmReservationPaymentCommand>(paymentCreateDTO);
-            command.CurrentUserId = currentUserId;
+            command.CurrentUserId = UserClaimsHelper.GetRequiredCurrentUserId(User);
             command.IsAdmin = UserClaimsHelper.IsAdmin(User);
 
             var result = await _confirmReservationPaymentHandler.Handle(command);
 
-            return Ok(result);
+            return StatusCode(StatusCodes.Status201Created, result);
         }
     }
 }

@@ -13,6 +13,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+await app.InitializeDatabaseAsync();
 await app.InitializeAuthorizationAsync(builder.Configuration);
 
 // Configure the HTTP request pipeline.

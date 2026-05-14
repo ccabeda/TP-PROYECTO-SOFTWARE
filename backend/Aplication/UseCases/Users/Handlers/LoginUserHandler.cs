@@ -42,8 +42,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
 
         private async Task<User> GetUserOrThrow(string email)
         {
-            return await _userManager.FindByEmailAsync(email)
-                ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos. Verifica los datos e intenta de nuevo.");
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                await CreateRejectedAuditLog(null, email, "Usuario inexistente.");
+                throw new UnauthorizedAccessException("Email o contraseña incorrectos. Verifica los datos e intenta de nuevo.");
+            }
+
+            return user;
         }
 
         private async Task ValidatePasswordOrThrow(User user, string password)
@@ -51,6 +57,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
             if (!isPasswordValid)
             {
+                await CreateRejectedAuditLog(user.Id, user.Email, "Contraseña inválida.");
                 throw new UnauthorizedAccessException("Email o contraseña incorrectos. Verifica los datos e intenta de nuevo.");
             }
         }
@@ -69,9 +76,21 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             {
                 UserId = user.Id,
                 Action = "LoginUser",
-                EntityType = "USER",
+                EntityType = "User",
                 EntityId = user.Id.ToString(),
                 Details = $"Login exitoso. UserId={user.Id}, Email={user.Email}, Role={role}"
+            });
+        }
+
+        private async Task CreateRejectedAuditLog(int? userId, string? email, string reason)
+        {
+            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
+            {
+                UserId = userId,
+                Action = "LoginUserRejected",
+                EntityType = "User",
+                EntityId = userId?.ToString() ?? (email ?? string.Empty),
+                Details = $"Login rechazado. UserId={userId?.ToString() ?? "null"}, Email={email ?? string.Empty}, Reason={reason}"
             });
         }
     }

@@ -21,7 +21,8 @@ namespace TP_PROYECTO_SOFTWARE.API.Security
         {
             var issuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer no configurado.");
             var audience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience no configurado.");
-            var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado.");
+            var key = _configuration["Jwt:Key"]
+                ?? throw new InvalidOperationException("Jwt:Key no configurado. Definirlo en User Secrets o variable de entorno Jwt__Key.");
 
             var claims = new List<Claim>
             {

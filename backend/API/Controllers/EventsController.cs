@@ -38,13 +38,15 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Listado de eventos")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(List<EventGetDTO>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetEvents([FromQuery] string? name, [FromQuery] DateTime? eventDate)
+        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<EventGetDTO>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEvents([FromQuery] string? name, [FromQuery] DateTime? eventDate, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var result = await _getEventsHandler.Handle(new GetEventsQuery
             {
                 Name = name,
-                EventDate = eventDate
+                EventDate = eventDate,
+                Page = page,
+                PageSize = pageSize
             });
             return Ok(result);
         }

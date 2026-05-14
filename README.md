@@ -78,7 +78,7 @@ Ejemplo:
 ```json
 {
   "ConnectionStrings": {
-    "Connection": "Server=AGUSTIN\\SQLEXPRESS;Database=TicketingDb;Trusted_Connection=True;TrustServerCertificate=True"
+    "Connection": "Server=AGUSTIN\\SQLEXPRESS;Database=TicketingDb_2026;Trusted_Connection=True;TrustServerCertificate=True"
   }
 }
 ```
@@ -87,12 +87,11 @@ Si el servidor local es distinto, cambiar `Server=...` por la instancia correcta
 
 ### JWT, roles y reglas
 
-Ejemplo de configuración:
+Configuración pública:
 
 ```json
 {
   "Jwt": {
-    "Key": "TP-Proyecto-Software-Jwt-Key-2026-segura",
     "Issuer": "TP_PROYECTO_SOFTWARE.API",
     "Audience": "TP_PROYECTO_SOFTWARE.Client"
   },
@@ -107,6 +106,26 @@ Ejemplo de configuración:
     "RowLabels": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" ]
   }
 }
+```
+
+La clave JWT no se guarda en el repo.
+
+Definirla con una de estas opciones:
+
+```powershell
+dotnet user-secrets --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj set "Jwt:Key" "TU-CLAVE-JWT-LARGA-Y-SEGURA"
+```
+
+o variable de entorno:
+
+```powershell
+$env:Jwt__Key="TU-CLAVE-JWT-LARGA-Y-SEGURA"
+```
+
+Para verificar que quedó cargada:
+
+```powershell
+dotnet user-secrets --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj list
 ```
 
 Notas:
@@ -152,7 +171,50 @@ dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE
 
 Notas:
 - las migraciones ya están creadas en `backend\Infraestructure\Migrations`
+- la migración inicial actual es `20260514213906_InitialCreate`
 - el proyecto incluye seeds base
+- este flujo está pensado para una base nueva o vacía
+- al levantar la API también se ejecuta `Database.Migrate()` automáticamente
+- al levantar la API se verifica además si falta el dataset base y, en ese caso, se inicializan las seeds
+- no usar una base vieja armada con la historia anterior de migraciones, porque la nueva migración inicial intenta crear el esquema completo desde cero
+
+### Proceso recomendado desde cero
+
+1. definir `Jwt:Key` con User Secrets o variable de entorno
+2. usar una base nueva vacía en SQL Server
+3. configurar la cadena de conexión en `backend/API/appsettings.json` o `appsettings.Development.json`
+4. ejecutar:
+
+```powershell
+dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+```
+
+5. levantar la API:
+
+```powershell
+dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+```
+
+Notas:
+- si la base está vacía, la API carga automáticamente el dataset semilla base al iniciar
+- las seeds base incluyen:
+  - `1` evento
+  - `2` sectores
+  - `50` butacas por sector
+- si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
+
+### Script idempotente
+
+También se puede generar un script SQL idempotente de EF Core con:
+
+```powershell
+dotnet ef migrations script --idempotent --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+```
+
+Ese script:
+- verifica la tabla `__EFMigrationsHistory`
+- aplica sólo las migraciones que falten
+- sirve para instalar o actualizar la base sin asumir un estado exacto
 
 ## Ejecutar backend
 

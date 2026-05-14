@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using TP_PROYECTO_SOFTWARE.API.Helpers;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
@@ -44,13 +45,15 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<UserGetDTO>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUsers([FromQuery] string? name, [FromQuery] string? email, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
-            var result = await _getUsersHandler.Handle(new GetUsersQuery
+            var query = new GetUsersQuery
             {
                 Name = name,
                 Email = email,
                 Page = page,
                 PageSize = pageSize
-            });
+            };
+
+            var result = await _getUsersHandler.Handle(query);
             return Ok(result);
         }
 
@@ -63,13 +66,12 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [ProducesResponseType(typeof(UserGetDTO), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var currentUserId = API.Helpers.UserClaimsHelper.GetCurrentUserId(User)
-                ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
-
-            var result = await _getCurrentUserHandler.Handle(new GetCurrentUserQuery
+            var query = new GetCurrentUserQuery
             {
-                UserId = currentUserId
-            });
+                UserId = UserClaimsHelper.GetRequiredCurrentUserId(User)
+            };
+
+            var result = await _getCurrentUserHandler.Handle(query);
 
             return Ok(result);
         }

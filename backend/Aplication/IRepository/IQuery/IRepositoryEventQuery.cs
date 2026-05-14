@@ -6,7 +6,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery
     public interface IRepositoryEventQuery
     {
         Task<Event?> GetById(int id);
-        Task<List<Event>> GetAll(GetEventsQuery filters);
+        Task<(List<Event> Items, int TotalCount)> GetAll(GetEventsQuery filters);
         Task<bool> ExistsDuplicate(string name, string venue, DateTime eventDate);
     }
 }

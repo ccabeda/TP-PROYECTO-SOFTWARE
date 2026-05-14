@@ -15,7 +15,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             _context = context;
         }
 
-        public async Task<List<Event>> GetAll(GetEventsQuery filters)
+        public async Task<(List<Event> Items, int TotalCount)> GetAll(GetEventsQuery filters)
         {
             var query = _context.Events
                 .AsNoTracking()
@@ -36,7 +36,17 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
                 query = query.Where(e => e.EventDate.Date == filterDate);
             }
 
-            return await query.ToListAsync();
+            var totalCount = await query.CountAsync();
+            var normalizedPage = filters.Page < 1 ? 1 : filters.Page;
+            var normalizedPageSize = Math.Clamp(filters.PageSize, 1, 50);
+
+            var items = await query
+                .OrderBy(e => e.EventDate)
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task<bool> ExistsDuplicate(string name, string venue, DateTime eventDate)

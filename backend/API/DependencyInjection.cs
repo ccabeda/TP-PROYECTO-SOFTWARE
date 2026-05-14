@@ -2,12 +2,15 @@ using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using TP_PROYECTO_SOFTWARE.API.Security;
 using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
+using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
+using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence.Seeds;
 
 namespace TP_PROYECTO_SOFTWARE.API;
 
@@ -58,7 +61,8 @@ public static class DependencyInjection
             });
         });
 
-        var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado.");
+        var jwtKey = configuration["Jwt:Key"]
+            ?? throw new InvalidOperationException("Jwt:Key no configurado. Definirlo en User Secrets o variable de entorno Jwt__Key.");
         var jwtIssuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer no configurado.");
         var jwtAudience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience no configurado.");
         var localFrontendOrigins = new[]
@@ -134,5 +138,27 @@ public static class DependencyInjection
                 await userManager.AddToRoleAsync(existingUser, "Admin");
             }
         }
+    }
+
+    public static async Task InitializeDatabaseAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AplicationDbContext>();
+
+        await dbContext.Database.MigrateAsync();
+        await SeedReferenceDataAsync(dbContext);
+    }
+
+    private static async Task SeedReferenceDataAsync(AplicationDbContext dbContext)
+    {
+        if (await dbContext.Events.AnyAsync())
+        {
+            return;
+        }
+
+        await dbContext.Events.AddRangeAsync(EventSeeds.GetSeedData());
+        await dbContext.Sectors.AddRangeAsync(SectorSeeds.GetSeedData());
+        await dbContext.Seats.AddRangeAsync(SeatSeeds.GetSeedData());
+        await dbContext.SaveChangesAsync();
     }
 }

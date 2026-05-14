@@ -46,8 +46,9 @@ async function fetchJson(path, options) {
 
 export async function getEvents(filters = {}) {
   const data = await fetchJson(`/events${buildEventQuery(filters)}`);
+  const items = Array.isArray(data) ? data : data?.items ?? [];
 
-  return data.map(mapEventDto).sort(sortEventsByDate);
+  return items.map(mapEventDto).sort(sortEventsByDate);
 }
 
 export async function getEventById(id) {

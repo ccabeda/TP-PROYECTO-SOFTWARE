@@ -1302,9 +1302,9 @@
 
 .purchase-selected-seat-status.is-mine,
 .purchase-seat-focus-badge.is-mine {
-  background: rgba(244, 180, 0, 0.14);
-  border-color: rgba(211, 154, 0, 0.22);
-  color: #8a5b00;
+  background: rgba(165, 120, 255, 0.16);
+  border-color: rgba(98, 58, 186, 0.24);
+  color: #5b34a4;
 }
 
 .purchase-summary-line {
@@ -1392,7 +1392,7 @@
 }
 
 .seat-legend-available { background: #34a853; }
-.seat-legend-mine { background: #f4b400; }
+.seat-legend-mine { background: #8f63f7; }
 .seat-legend-reserved { background: #d8a200; }
 .seat-legend-sold { background: #c62828; }
 
@@ -1499,18 +1499,18 @@
 }
 
 .seat-chip-mine {
-  background: linear-gradient(180deg, rgba(255, 198, 54, 0.72), rgba(235, 154, 11, 0.42));
-  border-color: rgba(176, 103, 0, 0.58);
-  color: #5a3300;
+  background: linear-gradient(180deg, rgba(165, 120, 255, 0.78), rgba(110, 72, 214, 0.46));
+  border-color: rgba(98, 58, 186, 0.62);
+  color: #30185f;
   cursor: pointer;
   box-shadow:
-    inset 0 -3px 0 rgba(120, 82, 0, 0.18),
-    0 0 0 2px rgba(255, 183, 0, 0.38);
+    inset 0 -3px 0 rgba(58, 31, 120, 0.18),
+    0 0 0 2px rgba(142, 95, 255, 0.28);
 }
 
 .seat-chip-mine.is-selected {
-  border-color: rgba(176, 103, 0, 0.68);
-  background: linear-gradient(180deg, rgba(255, 214, 102, 0.88), rgba(235, 154, 11, 0.5));
+  border-color: rgba(98, 58, 186, 0.74);
+  background: linear-gradient(180deg, rgba(191, 159, 255, 0.9), rgba(126, 84, 223, 0.56));
 }
 
 .seat-chip-available:hover {
@@ -1828,9 +1828,9 @@
 
 .page.dark .purchase-selected-seat-status.is-mine,
 .page.dark .purchase-seat-focus-badge.is-mine {
-  background: rgba(244, 180, 0, 0.18);
-  border-color: rgba(244, 180, 0, 0.22);
-  color: #ffd76a;
+  background: rgba(185, 153, 255, 0.2);
+  border-color: rgba(185, 153, 255, 0.24);
+  color: #e6d6ff;
 }
 
 .page.dark .checkout-summary-box,
@@ -1933,17 +1933,17 @@
 }
 
 .page.dark .seat-chip-mine {
-  background: linear-gradient(180deg, rgba(255, 215, 106, 0.34), rgba(244, 180, 0, 0.2));
-  border-color: rgba(255, 215, 106, 0.32);
-  color: #ffe28e;
+  background: linear-gradient(180deg, rgba(185, 153, 255, 0.4), rgba(118, 80, 226, 0.24));
+  border-color: rgba(185, 153, 255, 0.34);
+  color: #e6d6ff;
   box-shadow:
     inset 0 -3px 0 rgba(0, 0, 0, 0.12),
-    0 0 0 2px rgba(255, 215, 106, 0.18);
+    0 0 0 2px rgba(185, 153, 255, 0.16);
 }
 
 .page.dark .seat-chip-mine.is-selected {
-  border-color: rgba(255, 227, 145, 0.5);
-  background: linear-gradient(180deg, rgba(255, 227, 145, 0.42), rgba(244, 180, 0, 0.24));
+  border-color: rgba(211, 190, 255, 0.5);
+  background: linear-gradient(180deg, rgba(211, 190, 255, 0.46), rgba(118, 80, 226, 0.28));
 }
 
 .page.dark .seat-chip-available.is-selected {

@@ -54,8 +54,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             try
             {
                 await PersistReservation(seat, reservation);
-                await CreateAuditLog(user.Id, seat.Id, reservation);
                 await _unitOfWorkReservationCommand.Save();
+                await CreateAuditLog(user.Id, seat.Id, reservation);
             }
             catch (Exception ex) when (ex.GetType().Name == "DbUpdateConcurrencyException")
             {

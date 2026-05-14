@@ -97,16 +97,15 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 await _repositorySeatCommand.Create(seat);
             }
 
+            await _repositorySeatCommand.Save();
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = command.UserId,
                 Action = "CreateSeatsBulk",
-                EntityType = "Seat",
+                EntityType = "Sector",
                 EntityId = command.SectorId.ToString(),
                 Details = $"Creación masiva de butacas. SectorId={sectorId}, RowCount={command.RowCount}, GeneratedRows={string.Join(",", generatedRows)}, SeatsPerRow={command.SeatsPerRow}, TotalCreated={seatsToCreate.Count}"
             });
-
-            await _repositorySeatCommand.Save();
         }
     }
 }

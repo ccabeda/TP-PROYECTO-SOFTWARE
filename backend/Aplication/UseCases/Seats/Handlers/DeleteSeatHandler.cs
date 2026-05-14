@@ -32,10 +32,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
 
             ValidateSeatBelongsToSector(seat, command.SectorId);
             await EnsureSeatHasNoReservations(seat.Id);
-            await CreateDeleteAuditLog(command.UserId, seat);
 
             await _repositorySeatCommand.Delete(seat);
             await _repositorySeatCommand.Save();
+            await CreateDeleteAuditLog(command.UserId, seat);
         }
 
         private async Task<Seat> GetSeatOrThrow(Guid seatId) => await _repositorySeatQuery.GetById(seatId)

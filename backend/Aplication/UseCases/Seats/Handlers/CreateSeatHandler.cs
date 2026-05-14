@@ -64,6 +64,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             };
 
             await _repositorySeatCommand.Create(seat);
+            await _repositorySeatCommand.Save();
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = command.UserId,
@@ -72,7 +73,6 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca creada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });
-            await _repositorySeatCommand.Save();
 
             return _mapper.Map<SeatGetDTO>(seat);
         }

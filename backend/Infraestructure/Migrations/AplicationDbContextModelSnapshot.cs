@@ -298,6 +298,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Version")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.HasKey("Id");

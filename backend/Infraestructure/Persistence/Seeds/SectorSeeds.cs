@@ -5,14 +5,14 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Persistence.Seeds;
 
 public static class SectorSeeds
 {
-    public static void Seed(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Sector>().HasData(
+    public static IReadOnlyList<Sector> GetSeedData() =>
+        new[]
+        {
             new Sector
             {
                 Id = 1,
                 EventId = 1,
-                Name = "Sector A",
+                Name = "Campo",
                 Price = 12000m,
                 Capacity = 50
             },
@@ -20,10 +20,14 @@ public static class SectorSeeds
             {
                 Id = 2,
                 EventId = 1,
-                Name = "Sector B",
+                Name = "Platea",
                 Price = 18000m,
                 Capacity = 50
             }
-        );
+        };
+
+    public static void Seed(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Sector>().HasData(GetSeedData());
     }
 }

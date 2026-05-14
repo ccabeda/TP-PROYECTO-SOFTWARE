@@ -78,7 +78,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             {
                 UserId = null,
                 Action = "CreateUser",
-                EntityType = "USER",
+                EntityType = "User",
                 EntityId = user.Id.ToString(),
                 Details = $"Usuario creado. UserId={user.Id}, Email={user.Email}, Name={user.Name}, Role={role}"
             });

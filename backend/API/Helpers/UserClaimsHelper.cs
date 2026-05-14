@@ -10,6 +10,9 @@ namespace TP_PROYECTO_SOFTWARE.API.Helpers
             return int.TryParse(claimValue, out var userId) ? userId : null;
         }
 
+        public static int GetRequiredCurrentUserId(ClaimsPrincipal user) =>
+            GetCurrentUserId(user) ?? throw new UnauthorizedAccessException("Usuario no autenticado.");
+
         public static bool IsAdmin(ClaimsPrincipal user) => user.IsInRole("Admin");
     }
 }

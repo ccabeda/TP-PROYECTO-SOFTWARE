@@ -27,6 +27,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers
             };
 
             await _repositoryAuditLogCommand.Create(auditLog);
+            await _repositoryAuditLogCommand.Save();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Persistence.Seeds;
 
 public static class SeatSeeds
 {
-    public static void Seed(ModelBuilder modelBuilder)
+    public static IReadOnlyList<Seat> GetSeedData()
     {
         var seats = new List<Seat>();
         var rows = new[] { "A", "B", "C", "D", "E" };
@@ -33,7 +33,12 @@ public static class SeatSeeds
             }
         }
 
-        modelBuilder.Entity<Seat>().HasData(seats);
+        return seats;
+    }
+
+    public static void Seed(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Seat>().HasData(GetSeedData());
     }
 
     private static Guid BuildGuid(int sectorId, int sequence)

@@ -40,10 +40,10 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
 
             var seats = await GetSeatsBySector(sector.Id);
             await DeleteSeatsIfAny(seats);
-            await CreateDeleteAuditLog(command.UserId, sector, seats.Count);
 
             await _repositorySectorCommand.Delete(sector);
             await _repositorySectorCommand.Save();
+            await CreateDeleteAuditLog(command.UserId, sector, seats.Count);
         }
 
         private async Task<Domain.Models.Sector> GetSectorOrThrow(int sectorId) => await _repositorySectorQuery.GetById(sectorId)

@@ -34,8 +34,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             var eventEntity = BuildEvent(command);
 
             await _repositoryEventCommand.Create(eventEntity);
-            await CreateAuditLog(command.UserId, eventEntity);
             await _repositoryEventCommand.Save();
+            await CreateAuditLog(command.UserId, eventEntity);
 
             return _mapper.Map<EventGetDTO>(eventEntity);
         }
