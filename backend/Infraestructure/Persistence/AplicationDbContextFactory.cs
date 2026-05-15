@@ -8,7 +8,7 @@ public class AplicationDbContextFactory : IDesignTimeDbContextFactory<Aplication
 {
     public AplicationDbContext CreateDbContext(string[] args)
     {
-        var apiPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "API"));
+        var apiPath = ResolveApiPath();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(apiPath)
@@ -21,5 +21,30 @@ public class AplicationDbContextFactory : IDesignTimeDbContextFactory<Aplication
         optionsBuilder.UseSqlServer(configuration.GetConnectionString("Connection"));
 
         return new AplicationDbContext(optionsBuilder.Options);
+    }
+
+    private static string ResolveApiPath()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var candidatePaths = new[]
+        {
+            Path.Combine(currentDirectory, "backend", "API"),
+            Path.Combine(currentDirectory, "..", "API"),
+            Path.Combine(currentDirectory, "API"),
+        };
+
+        foreach (var candidatePath in candidatePaths)
+        {
+            var fullPath = Path.GetFullPath(candidatePath);
+            var appsettingsPath = Path.Combine(fullPath, "appsettings.json");
+
+            if (Directory.Exists(fullPath) && File.Exists(appsettingsPath))
+            {
+                return fullPath;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"No se pudo resolver la carpeta del proyecto API desde '{currentDirectory}'.");
     }
 }
