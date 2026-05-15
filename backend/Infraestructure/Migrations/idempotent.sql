@@ -231,7 +231,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'EventDate', N'ImageUrl', N'Name', N'Status', N'Venue') AND [object_id] = OBJECT_ID(N'[EVENT]'))
         SET IDENTITY_INSERT [EVENT] ON;
     EXEC(N'INSERT INTO [EVENT] ([Id], [Description], [EventDate], [ImageUrl], [Name], [Status], [Venue])
-    VALUES (1, NULL, ''2026-07-15T21:00:00.0000000'', NULL, N''Concierto de Rock'', N''Published'', N''Estadio Central'')');
+    VALUES (1, NULL, ''2026-07-15T21:00:00.0000000'', NULL, N''Noches en Vivo 2026'', N''Published'', N''Microestadio UNAJ'')');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'EventDate', N'ImageUrl', N'Name', N'Status', N'Venue') AND [object_id] = OBJECT_ID(N'[EVENT]'))
         SET IDENTITY_INSERT [EVENT] OFF;
 END;
@@ -245,8 +245,8 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Capacity', N'EventId', N'Name', N'Price') AND [object_id] = OBJECT_ID(N'[SECTOR]'))
         SET IDENTITY_INSERT [SECTOR] ON;
     EXEC(N'INSERT INTO [SECTOR] ([Id], [Capacity], [EventId], [Name], [Price])
-    VALUES (1, 50, 1, N''Sector A'', 12000.0),
-    (2, 50, 1, N''Sector B'', 18000.0)');
+    VALUES (1, 50, 1, N''Campo'', 12000.0),
+    (2, 50, 1, N''Platea'', 18000.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Capacity', N'EventId', N'Name', N'Price') AND [object_id] = OBJECT_ID(N'[SECTOR]'))
         SET IDENTITY_INSERT [SECTOR] OFF;
 END;

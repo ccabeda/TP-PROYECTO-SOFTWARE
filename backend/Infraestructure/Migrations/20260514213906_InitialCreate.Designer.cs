@@ -240,9 +240,9 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                         {
                             Id = 1,
                             EventDate = new DateTime(2026, 7, 15, 21, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Concierto de Rock",
+                            Name = "Noches en Vivo 2026",
                             Status = "Published",
-                            Venue = "Estadio Central"
+                            Venue = "Microestadio UNAJ"
                         });
                 });
 
@@ -1248,7 +1248,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                             Id = 1,
                             Capacity = 50,
                             EventId = 1,
-                            Name = "Sector A",
+                            Name = "Campo",
                             Price = 12000m
                         },
                         new
@@ -1256,7 +1256,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
                             Id = 2,
                             Capacity = 50,
                             EventId = 1,
-                            Name = "Sector B",
+                            Name = "Platea",
                             Price = 18000m
                         });
                 });

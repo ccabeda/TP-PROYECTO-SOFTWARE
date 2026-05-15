@@ -277,15 +277,15 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Migrations
             migrationBuilder.InsertData(
                 table: "EVENT",
                 columns: new[] { "Id", "Description", "EventDate", "ImageUrl", "Name", "Status", "Venue" },
-                values: new object[] { 1, null, new DateTime(2026, 7, 15, 21, 0, 0, 0, DateTimeKind.Unspecified), null, "Concierto de Rock", "Published", "Estadio Central" });
+                values: new object[] { 1, null, new DateTime(2026, 7, 15, 21, 0, 0, 0, DateTimeKind.Unspecified), null, "Noches en Vivo 2026", "Published", "Microestadio UNAJ" });
 
             migrationBuilder.InsertData(
                 table: "SECTOR",
                 columns: new[] { "Id", "Capacity", "EventId", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, 50, 1, "Sector A", 12000m },
-                    { 2, 50, 1, "Sector B", 18000m }
+                    { 1, 50, 1, "Campo", 12000m },
+                    { 2, 50, 1, "Platea", 18000m }
                 });
 
             migrationBuilder.InsertData(
