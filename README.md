@@ -113,14 +113,17 @@ La clave JWT no se guarda en el repo.
 Definirla con una de estas opciones:
 
 ```powershell
-dotnet user-secrets --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj set "Jwt:Key" "TU-CLAVE-JWT-LARGA-Y-SEGURA"
+dotnet user-secrets --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj set "Jwt:Key" "TP-Proyecto-Software-Jwt-Key-Local-2026-Segura"
 ```
 
 o variable de entorno:
 
 ```powershell
-$env:Jwt__Key="TU-CLAVE-JWT-LARGA-Y-SEGURA"
+$env:Jwt__Key="TP-Proyecto-Software-Jwt-Key-Local-2026-Segura"
 ```
+
+Nota:
+- la `Jwt:Key` debe tener al menos `32` caracteres para que `HS256` funcione correctamente
 
 Para verificar que quedó cargada:
 
@@ -178,51 +181,34 @@ Notas:
 - al levantar la API se verifica además si falta el dataset base y, en ese caso, se inicializan las seeds
 - no usar una base vieja armada con la historia anterior de migraciones, porque la nueva migración inicial intenta crear el esquema completo desde cero
 
-### Proceso recomendado desde cero
+### Prueba desde cero
 
 1. definir `Jwt:Key` con User Secrets o variable de entorno
-2. usar una base nueva vacía en SQL Server
+2. usar una base nueva o vacía en SQL Server
 3. configurar la cadena de conexión en `backend/API/appsettings.json` o `appsettings.Development.json`
-4. ejecutar:
+4. guardar el archivo si se cambió el nombre de la base
+5. ejecutar migraciones:
 
 ```powershell
 dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
-5. levantar la API:
+6. levantar la API:
 
 ```powershell
 dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
-Notas:
-- si la base está vacía, la API carga automáticamente el dataset semilla base al iniciar
-- las seeds base incluyen:
-  - `1` evento
-  - `2` sectores
-  - `50` butacas por sector
-- si se cambia el nombre de la base en `appsettings.json`, guardar el archivo antes de correr `dotnet ef database update`
-- si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
-
-### Pasos para prueba
-
-Para probar el proyecto desde cero:
-
-1. configurar `Jwt:Key`
-2. usar una base nueva o vacía
-3. ejecutar migraciones:
+Si se quiere abrir Swagger directamente con el perfil configurado del proyecto:
 
 ```powershell
-dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj --launch-profile https
 ```
 
-4. levantar la API:
+Si el navegador no se abre automáticamente, ingresar manualmente a:
+- `https://localhost:7176/swagger`
 
-```powershell
-dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
-```
-
-5. levantar el frontend:
+7. levantar el frontend:
 
 ```powershell
 cd frontend
@@ -230,10 +216,17 @@ npm install
 npm run dev
 ```
 
-6. si se quiere acceder al panel admin, registrar el usuario:
+8. si se quiere acceder al panel admin, registrar el usuario:
 - `admintest@test.com`
 
-Ese mail queda con rol `Admin` automáticamente por configuración.
+Notas:
+- si la base está vacía, la API carga automáticamente el dataset semilla base al iniciar
+- las seeds base incluyen:
+  - `1` evento
+  - `2` sectores
+  - `50` butacas por sector
+- si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
+- ese mail queda con rol `Admin` automáticamente por configuración
 
 ### Script idempotente
 
