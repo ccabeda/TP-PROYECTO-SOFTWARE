@@ -201,6 +201,7 @@ Notas:
   - `1` evento
   - `2` sectores
   - `50` butacas por sector
+- si se cambia el nombre de la base en `appsettings.json`, guardar el archivo antes de correr `dotnet ef database update`
 - si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
 
 ### Pasos para prueba
