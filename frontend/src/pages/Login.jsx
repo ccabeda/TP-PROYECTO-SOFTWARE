@@ -4,6 +4,7 @@ import AuthLayout from "../components/auth/AuthLayout";
 import PasswordField from "../components/auth/PasswordField";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
+import useToastContext from "../context/useToastContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import getErrorMessage from "../lib/getErrorMessage";
 import { t } from "../lib/i18n";
@@ -19,6 +20,7 @@ function Login() {
   const location = useLocation();
   const { language } = useLanguageContext();
   const { session } = useAuthContext();
+  const { showToast } = useToastContext();
   const redirectTo = getRedirectTarget(location);
   const [formData, setFormData] = useState({
     email: "",
@@ -74,8 +76,10 @@ function Login() {
       await loginUser(formData);
       window.location.assign(redirectTo);
     } catch (error) {
-      setMessage(getErrorMessage(error, t(language, "auth.loginError")));
+      const errorMessage = getErrorMessage(error, t(language, "auth.loginError"));
+      setMessage(errorMessage);
       setMessageType("error");
+      showToast(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }

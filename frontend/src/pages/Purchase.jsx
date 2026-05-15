@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
+import useToastContext from "../context/useToastContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvent from "../hooks/useEvent";
 import useSectors from "../hooks/useSectors";
@@ -91,6 +92,7 @@ function Purchase() {
   const navigate = useNavigate();
   const { session } = useAuthContext();
   const { language } = useLanguageContext();
+  const { showToast } = useToastContext();
   const purchasePath = getPurchasePath(id);
   const checkoutPath = getCheckoutPath(id);
   const [selectedSectorId, setSelectedSectorId] = useState(null);
@@ -296,9 +298,8 @@ function Purchase() {
         refreshSeats();
       }
 
-      setSeatWarning(
-        errorMessage,
-      );
+      setSeatWarning(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setIsReservingSeat(false);
     }

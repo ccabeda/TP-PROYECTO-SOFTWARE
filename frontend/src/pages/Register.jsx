@@ -4,6 +4,7 @@ import AuthLayout from "../components/auth/AuthLayout";
 import PasswordField from "../components/auth/PasswordField";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
+import useToastContext from "../context/useToastContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import getErrorMessage from "../lib/getErrorMessage";
 import { t } from "../lib/i18n";
@@ -20,6 +21,7 @@ function Register() {
   const navigate = useNavigate();
   const { language } = useLanguageContext();
   const { session } = useAuthContext();
+  const { showToast } = useToastContext();
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -78,10 +80,13 @@ function Register() {
       setMessageType("success");
       setShowLoginLink(true);
       setFormData(INITIAL_FORM_DATA);
+      showToast(successRegisterLabel, "success");
     } catch (error) {
-      setMessage(getErrorMessage(error, t(language, "auth.registerError")));
+      const errorMessage = getErrorMessage(error, t(language, "auth.registerError"));
+      setMessage(errorMessage);
       setMessageType("error");
       setShowLoginLink(false);
+      showToast(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }

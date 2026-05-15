@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
+import useToastContext from "../context/useToastContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useEvent from "../hooks/useEvent";
 import getErrorMessage from "../lib/getErrorMessage";
@@ -55,6 +56,7 @@ function Checkout() {
   const checkoutState = location.state ?? null;
   const { session } = useAuthContext();
   const { language } = useLanguageContext();
+  const { showToast } = useToastContext();
   const { event, isLoading, error } = useEvent(id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
@@ -200,7 +202,9 @@ function Checkout() {
         token: session.token,
       });
 
-      setSuccessMessage(t(language, "home.checkoutSuccessMessage"));
+      const successLabel = t(language, "home.checkoutSuccessMessage");
+      setSuccessMessage(successLabel);
+      showToast(successLabel, "success");
     } catch (paymentError) {
       const errorMessage = getErrorMessage(
         paymentError,
@@ -212,6 +216,10 @@ function Checkout() {
 
       setIsReservationExpired(expiredReservation);
       setCheckoutError(expiredReservation ? "" : errorMessage);
+      showToast(
+        expiredReservation ? checkoutExpiredError : errorMessage,
+        expiredReservation ? "warning" : "error",
+      );
     } finally {
       setIsSubmitting(false);
     }

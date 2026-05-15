@@ -1,14 +1,17 @@
 import { AuthProvider } from "./AuthContext";
 import { LanguageProvider } from "./LanguageContext";
 import { ThemeProvider } from "./ThemeContext";
+import { ToastProvider } from "./ToastContext";
 
 function AppProviders({ children }) {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ToastProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

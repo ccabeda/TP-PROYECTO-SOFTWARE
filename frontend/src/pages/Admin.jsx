@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
+import useToastContext from "../context/useToastContext";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import getErrorMessage from "../lib/getErrorMessage";
 import { t } from "../lib/i18n";
@@ -132,6 +133,7 @@ function Admin() {
   const navigate = useNavigate();
   const { session } = useAuthContext();
   const { language } = useLanguageContext();
+  const { showToast } = useToastContext();
   const [selectedEventDate, setSelectedEventDate] = useState(null);
   const [eventForm, setEventForm] = useState(INITIAL_EVENT_FORM);
   const [sectorForms, setSectorForms] = useState([createEmptySectorForm()]);
@@ -296,13 +298,14 @@ function Admin() {
       setSelectedEventDate(null);
       setSectorForms([createEmptySectorForm()]);
       setSubmitMessage(adminBundleCreated);
+      showToast(adminBundleCreated, "success");
     } catch (error) {
-      setSubmitError(
-        getErrorMessage(
-          error,
-          "No se pudo crear el evento completo con sus sectores y butacas.",
-        ),
+      const errorMessage = getErrorMessage(
+        error,
+        "No se pudo crear el evento completo con sus sectores y butacas.",
       );
+      setSubmitError(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }
