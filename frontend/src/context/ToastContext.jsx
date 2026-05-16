@@ -1,6 +1,7 @@
 import { createContext, useCallback, useMemo, useState } from "react";
 
 const TOAST_DURATION_MS = 3600;
+const TOAST_EXIT_MS = 220;
 
 const ToastContext = createContext(null);
 ToastContext.displayName = "ToastContext";
@@ -11,6 +12,7 @@ function buildToast(message, type, duration) {
     message,
     type,
     duration,
+    isClosing: false,
   };
 }
 
@@ -18,7 +20,15 @@ function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
   const dismissToast = useCallback((toastId) => {
-    setToasts((current) => current.filter((toast) => toast.id !== toastId));
+    setToasts((current) =>
+      current.map((toast) =>
+        toast.id === toastId ? { ...toast, isClosing: true } : toast,
+      ),
+    );
+
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((toast) => toast.id !== toastId));
+    }, TOAST_EXIT_MS);
   }, []);
 
   const showToast = useCallback(
@@ -53,7 +63,12 @@ function ToastProvider({ children }) {
       {children}
       <div className="toast-stack" aria-live="polite" aria-atomic="true">
         {toasts.map((toast) => (
-          <div key={toast.id} className={`toast-card toast-card-${toast.type}`}>
+          <div
+            key={toast.id}
+            className={`toast-card toast-card-${toast.type} ${
+              toast.isClosing ? "is-closing" : ""
+            }`}
+          >
             <span className="toast-card-copy">{toast.message}</span>
             <button
               type="button"

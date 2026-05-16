@@ -261,6 +261,12 @@ select {
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.14);
   backdrop-filter: blur(12px);
   pointer-events: auto;
+  animation: toast-enter 0.28s ease forwards;
+  transform-origin: top right;
+}
+
+.toast-card.is-closing {
+  animation: toast-exit 0.22s ease forwards;
 }
 
 .toast-card-copy {
@@ -334,6 +340,28 @@ select {
   background: rgba(31, 49, 88, 0.94);
   border-color: rgba(157, 188, 255, 0.18);
   color: #d8e4ff;
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
 }
 
 @media (max-width: 640px) {
