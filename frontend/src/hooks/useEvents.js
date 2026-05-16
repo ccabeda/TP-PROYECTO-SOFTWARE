@@ -3,10 +3,16 @@ import { getEvents } from "../services/eventsService";
 import getErrorMessage from "../lib/getErrorMessage";
 
 function useEvents(filters = {}) {
-  const { eventDate = "", name = "" } = filters;
+  const { eventDate = "", name = "", page = 1, pageSize = 12 } = filters;
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    page: 1,
+    pageSize,
+    totalPages: 0,
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -18,9 +24,15 @@ function useEvents(filters = {}) {
       }
 
       try {
-        const nextEvents = await getEvents({ eventDate, name });
+        const result = await getEvents({ eventDate, name, page, pageSize });
         if (isMounted) {
-          setEvents(nextEvents);
+          setEvents(result.items);
+          setPagination({
+            totalCount: result.totalCount,
+            page: result.page,
+            pageSize: result.pageSize,
+            totalPages: result.totalPages,
+          });
         }
       } catch (loadError) {
         if (isMounted) {
@@ -28,6 +40,12 @@ function useEvents(filters = {}) {
             getErrorMessage(loadError, "No se pudieron cargar los eventos."),
           );
           setEvents([]);
+          setPagination({
+            totalCount: 0,
+            page,
+            pageSize,
+            totalPages: 0,
+          });
         }
       } finally {
         if (isMounted) {
@@ -41,9 +59,9 @@ function useEvents(filters = {}) {
     return () => {
       isMounted = false;
     };
-  }, [eventDate, name]);
+  }, [eventDate, name, page, pageSize]);
 
-  return { events, isLoading, error };
+  return { events, isLoading, error, ...pagination };
 }
 
 export default useEvents;

@@ -31,6 +31,10 @@ export const homeLandingTranslations = {
     datePlaceholder: "Elegir fecha",
     dateFilterLabel: "Filtrar eventos por fecha",
     emptyEvents: "No hay eventos para mostrar.",
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
+    pageIndicator: "Página {page} de {totalPages}",
+    eventsCount: "{count} eventos",
   },
   en: {
     badge: "Live events",
@@ -64,5 +68,9 @@ export const homeLandingTranslations = {
     datePlaceholder: "Pick a date",
     dateFilterLabel: "Filter events by date",
     emptyEvents: "There are no events to show.",
+    previousPage: "Previous",
+    nextPage: "Next",
+    pageIndicator: "Page {page} of {totalPages}",
+    eventsCount: "{count} events",
   },
 };

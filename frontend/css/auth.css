@@ -315,6 +315,11 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.page.dark .password-toggle-icon {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(17%) saturate(510%)
+    hue-rotate(337deg) brightness(102%) contrast(92%);
+}
+
 .language-selector {
   display: inline-flex;
   align-items: center;

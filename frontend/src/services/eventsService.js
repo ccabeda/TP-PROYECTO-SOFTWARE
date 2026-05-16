@@ -12,6 +12,14 @@ function buildEventQuery(filters = {}) {
     query.set("eventDate", filters.eventDate);
   }
 
+  if (Number.isInteger(filters.page) && filters.page > 0) {
+    query.set("page", String(filters.page));
+  }
+
+  if (Number.isInteger(filters.pageSize) && filters.pageSize > 0) {
+    query.set("pageSize", String(filters.pageSize));
+  }
+
   return query.toString() ? `?${query}` : "";
 }
 
@@ -47,8 +55,25 @@ async function fetchJson(path, options) {
 export async function getEvents(filters = {}) {
   const data = await fetchJson(`/events${buildEventQuery(filters)}`);
   const items = Array.isArray(data) ? data : data?.items ?? [];
+  const sortedItems = items.map(mapEventDto).sort(sortEventsByDate);
 
-  return items.map(mapEventDto).sort(sortEventsByDate);
+  if (Array.isArray(data)) {
+    return {
+      items: sortedItems,
+      totalCount: sortedItems.length,
+      page: 1,
+      pageSize: sortedItems.length,
+      totalPages: sortedItems.length > 0 ? 1 : 0,
+    };
+  }
+
+  return {
+    items: sortedItems,
+    totalCount: data?.totalCount ?? sortedItems.length,
+    page: data?.page ?? 1,
+    pageSize: data?.pageSize ?? sortedItems.length,
+    totalPages: data?.totalPages ?? (sortedItems.length > 0 ? 1 : 0),
+  };
 }
 
 export async function getEventById(id) {
