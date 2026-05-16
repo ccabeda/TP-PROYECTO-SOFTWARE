@@ -196,12 +196,6 @@ dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE
 6. levantar la API:
 
 ```powershell
-dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
-```
-
-Si se quiere abrir Swagger directamente con el perfil configurado del proyecto:
-
-```powershell
 dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj --launch-profile https
 ```
 
