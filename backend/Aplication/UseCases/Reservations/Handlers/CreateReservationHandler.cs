@@ -96,14 +96,19 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             seat.Version += 1;
         }
 
-        private static Reservation BuildReservation(int userId, Guid seatId) => new()
+        private static Reservation BuildReservation(int userId, Guid seatId)
         {
-            UserId = userId,
-            SeatId = seatId,
-            Status = "Pending",
-            ReservedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(5)
-        };
+            var reservedAt = DateTime.UtcNow;
+
+            return new Reservation
+            {
+                UserId = userId,
+                SeatId = seatId,
+                Status = "Pending",
+                ReservedAt = reservedAt,
+                ExpiresAt = reservedAt.AddMinutes(5)
+            };
+        }
 
         private async Task PersistReservation(Seat seat, Reservation reservation)
         {

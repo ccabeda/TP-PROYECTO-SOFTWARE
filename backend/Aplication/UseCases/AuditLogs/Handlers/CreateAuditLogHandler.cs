@@ -1,7 +1,7 @@
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
-using TP_PROYECTO_SOFTWARE.Domain.Models;
+using TP_PROYECTO_SOFTWARE.Domain.Factories;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers
 {
@@ -16,15 +16,12 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Handlers
 
         public async Task Handle(CreateAuditLogCommand command)
         {
-            var auditLog = new AuditLog
-            {
-                UserId = command.UserId,
-                Action = command.Action,
-                EntityType = command.EntityType,
-                EntityId = command.EntityId,
-                Details = command.Details,
-                CreatedAt = DateTime.UtcNow
-            };
+            var auditLog = AuditLogFactory.Create(
+                command.UserId,
+                command.Action,
+                command.EntityType,
+                command.EntityId,
+                command.Details);
 
             await _repositoryAuditLogCommand.Create(auditLog);
             await _repositoryAuditLogCommand.Save();
