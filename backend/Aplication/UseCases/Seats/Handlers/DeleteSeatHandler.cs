@@ -3,6 +3,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
@@ -63,8 +64,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "DeleteSeat",
-                EntityType = "Seat",
+                Action = AuditActions.DeleteSeat,
+                EntityType = AuditEntityTypes.Seat,
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca eliminada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });

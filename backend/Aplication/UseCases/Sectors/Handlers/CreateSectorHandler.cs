@@ -7,6 +7,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
@@ -76,8 +77,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "CreateSector",
-                EntityType = "Sector",
+                Action = AuditActions.CreateSector,
+                EntityType = AuditEntityTypes.Sector,
                 EntityId = sector.Id.ToString(),
                 Details = $"Sector creado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}"
             });

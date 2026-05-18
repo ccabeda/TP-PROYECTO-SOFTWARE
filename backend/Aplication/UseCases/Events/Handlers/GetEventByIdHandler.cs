@@ -5,6 +5,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Queries;
 using System;
 using System.Linq;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 {
@@ -40,9 +41,9 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             }
 
             var hasAvailableSeats = allSeats.Any(seat =>
-                string.Equals(seat.Status, "Available", StringComparison.OrdinalIgnoreCase));
+                string.Equals(seat.Status, SeatStatuses.Available, StringComparison.OrdinalIgnoreCase));
 
-            return hasAvailableSeats ? eventEntity.Status : "SoldOut";
+            return hasAvailableSeats ? eventEntity.Status : EventDisplayStatuses.SoldOut;
         }
     }
 }

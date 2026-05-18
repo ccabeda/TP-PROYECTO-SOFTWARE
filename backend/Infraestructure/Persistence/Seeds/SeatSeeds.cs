@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Infraestructure.Persistence.Seeds;
@@ -24,7 +25,7 @@ public static class SeatSeeds
                         SectorId = sectorId,
                         RowIdentifier = row,
                         SeatNumber = seatNumber,
-                        Status = "Available",
+                        Status = SeatStatuses.Available,
                         Version = 1
                     });
 

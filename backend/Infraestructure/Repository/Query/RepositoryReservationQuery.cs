@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 
@@ -20,11 +21,11 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<Reservation?> GetActiveBySeatId(Guid seatId) => await _context.Reservations
             .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.SeatId == seatId && r.Status == "Pending" && r.ExpiresAt > DateTime.UtcNow);
+            .FirstOrDefaultAsync(r => r.SeatId == seatId && r.Status == ReservationStatuses.Pending && r.ExpiresAt > DateTime.UtcNow);
 
         public async Task<List<Reservation>> GetExpiredPendingReservations(DateTime utcNow) => await _context.Reservations
             .Include(r => r.Seat)
-            .Where(r => r.Status == "Pending" && r.ExpiresAt <= utcNow)
+            .Where(r => r.Status == ReservationStatuses.Pending && r.ExpiresAt <= utcNow)
             .ToListAsync();
 
         public async Task<bool> AnyByEventId(int eventId) => await _context.Reservations
@@ -38,7 +39,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
 
         public async Task<List<Reservation>> GetBySeatIds(List<Guid> seatIds) => await _context.Reservations
             .AsNoTracking()
-            .Where(r => seatIds.Contains(r.SeatId) && r.Status == "Pending" && r.ExpiresAt > DateTime.UtcNow)
+            .Where(r => seatIds.Contains(r.SeatId) && r.Status == ReservationStatuses.Pending && r.ExpiresAt > DateTime.UtcNow)
             .ToListAsync();
 
         public async Task<List<Reservation>> GetPaidByUserId(int userId) => await _context.Reservations
@@ -46,7 +47,7 @@ namespace TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query
             .Include(r => r.Seat)
                 .ThenInclude(seat => seat.Sector)
                     .ThenInclude(sector => sector.Event)
-            .Where(r => r.UserId == userId && r.Status == "Paid")
+            .Where(r => r.UserId == userId && r.Status == ReservationStatuses.Paid)
             .ToListAsync();
     }
 }

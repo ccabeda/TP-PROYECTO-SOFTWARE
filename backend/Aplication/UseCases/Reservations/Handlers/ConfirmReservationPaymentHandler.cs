@@ -7,6 +7,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
@@ -74,13 +75,13 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private async Task ValidateReservationIsPending(ConfirmReservationPaymentCommand command, Reservation reservation, Seat seat)
         {
-            if (reservation.Status == "Pending" && reservation.ExpiresAt <= DateTime.UtcNow)
+            if (reservation.Status == ReservationStatuses.Pending && reservation.ExpiresAt <= DateTime.UtcNow)
             {
-                reservation.Status = "Expired";
+                reservation.Status = ReservationStatuses.Expired;
 
-                if (seat.Status == "Reserved")
+                if (seat.Status == SeatStatuses.Reserved)
                 {
-                    seat.Status = "Available";
+                    seat.Status = SeatStatuses.Available;
                     seat.Version += 1;
                     await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
                 }
@@ -94,7 +95,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 throw new InvalidOperationException("La reserva expiró. Selecciona otra butaca.");
             }
 
-            if (reservation.Status != "Pending")
+            if (reservation.Status != ReservationStatuses.Pending)
             {
                 await CreateRejectedPaymentAuditLog(
                     reservation.UserId,
@@ -109,7 +110,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private async Task ValidateSeatIsReserved(Reservation reservation, Seat seat)
         {
-            if (seat.Status != "Reserved")
+            if (seat.Status != SeatStatuses.Reserved)
             {
                 await CreateRejectedPaymentAuditLog(
                     reservation.UserId,
@@ -121,12 +122,12 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private static void MarkReservationAsPaid(Reservation reservation)
         {
-            reservation.Status = "Paid";
+            reservation.Status = ReservationStatuses.Paid;
         }
 
         private static void MarkSeatAsSold(Seat seat)
         {
-            seat.Status = "Sold";
+            seat.Status = SeatStatuses.Sold;
             seat.Version += 1;
         }
 
@@ -141,8 +142,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = reservation.UserId,
-                Action = "ConfirmReservationPayment",
-                EntityType = "Reservation",
+                Action = AuditActions.ConfirmReservationPayment,
+                EntityType = AuditEntityTypes.Reservation,
                 EntityId = reservation.Id.ToString(),
                 Details = $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}"
             });
@@ -153,8 +154,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "ConfirmReservationPaymentRejected",
-                EntityType = "Reservation",
+                Action = AuditActions.ConfirmReservationPaymentRejected,
+                EntityType = AuditEntityTypes.Reservation,
                 EntityId = reservationId,
                 Details = details
             });

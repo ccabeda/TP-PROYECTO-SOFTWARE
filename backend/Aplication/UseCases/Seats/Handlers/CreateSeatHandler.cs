@@ -8,6 +8,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
@@ -59,7 +60,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                 SectorId = sector.Id,
                 RowIdentifier = normalizedRowIdentifier,
                 SeatNumber = command.SeatNumber,
-                Status = "Available",
+                Status = SeatStatuses.Available,
                 Version = 1
             };
 
@@ -68,8 +69,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = command.UserId,
-                Action = "CreateSeat",
-                EntityType = "Seat",
+                Action = AuditActions.CreateSeat,
+                EntityType = AuditEntityTypes.Seat,
                 EntityId = seat.Id.ToString(),
                 Details = $"Butaca creada. SectorId={seat.SectorId}, RowIdentifier={seat.RowIdentifier}, SeatNumber={seat.SeatNumber}, Status={seat.Status}"
             });

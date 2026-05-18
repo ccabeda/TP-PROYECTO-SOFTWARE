@@ -2,6 +2,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations
 {
@@ -32,12 +33,12 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations
 
             foreach (var reservation in expiredReservations)
             {
-                reservation.Status = "Expired";
+                reservation.Status = ReservationStatuses.Expired;
 
                 var seat = reservation.Seat;
-                if (seat.Status == "Reserved")
+                if (seat.Status == SeatStatuses.Reserved)
                 {
-                    seat.Status = "Available";
+                    seat.Status = SeatStatuses.Available;
                     seat.Version += 1;
                     await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
                 }
@@ -54,8 +55,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = reservation.UserId,
-                Action = "ExpireReservation",
-                EntityType = "Reservation",
+                Action = AuditActions.ExpireReservation,
+                EntityType = AuditEntityTypes.Reservation,
                 EntityId = reservation.Id.ToString(),
                 Details = $"Reserva expirada. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ExpiresAt={reservation.ExpiresAt:O}"
             });

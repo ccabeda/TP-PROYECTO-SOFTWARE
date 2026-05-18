@@ -6,6 +6,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
@@ -77,8 +78,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = null,
-                Action = "CreateUser",
-                EntityType = "User",
+                Action = AuditActions.CreateUser,
+                EntityType = AuditEntityTypes.User,
                 EntityId = user.Id.ToString(),
                 Details = $"Usuario creado. UserId={user.Id}, Email={user.Email}, Name={user.Name}, Role={role}"
             });

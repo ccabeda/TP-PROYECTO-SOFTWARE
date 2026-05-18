@@ -6,6 +6,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
@@ -83,7 +84,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
         private async Task EnsureSeatIsAvailable(int userId, Guid seatId, Seat seat)
         {
             var activeReservation = await _repositoryReservationQuery.GetActiveBySeatId(seatId);
-            if (seat.Status != "Available" || activeReservation is not null)
+            if (seat.Status != SeatStatuses.Available || activeReservation is not null)
             {
                 await CreateRejectedReservationAuditLog(userId, seat, activeReservation is not null);
                 throw new InvalidOperationException("La butaca no se encuentra disponible.");
@@ -92,7 +93,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private static void MarkSeatAsReserved(Seat seat)
         {
-            seat.Status = "Reserved";
+            seat.Status = SeatStatuses.Reserved;
             seat.Version += 1;
         }
 
@@ -104,7 +105,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             {
                 UserId = userId,
                 SeatId = seatId,
-                Status = "Pending",
+                Status = ReservationStatuses.Pending,
                 ReservedAt = reservedAt,
                 ExpiresAt = reservedAt.AddMinutes(5)
             };
@@ -121,8 +122,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "CreateReservation",
-                EntityType = "Reservation",
+                Action = AuditActions.CreateReservation,
+                EntityType = AuditEntityTypes.Reservation,
                 EntityId = reservation.Id.ToString(),
                 Details = $"Reserva creada. SeatId={seatId}, UserId={userId}, Status={reservation.Status}, ExpiresAt={reservation.ExpiresAt:O}"
             });
@@ -133,8 +134,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "CreateReservationRejected",
-                EntityType = "Seat",
+                Action = AuditActions.CreateReservationRejected,
+                EntityType = AuditEntityTypes.Seat,
                 EntityId = seat.Id.ToString(),
                 Details = $"Intento de reserva rechazado. UserId={userId}, SeatId={seat.Id}, Status={seat.Status}, HasActiveReservation={hasActiveReservation}"
             });
@@ -145,8 +146,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "CreateReservationRejectedConcurrency",
-                EntityType = "Seat",
+                Action = AuditActions.CreateReservationRejectedConcurrency,
+                EntityType = AuditEntityTypes.Seat,
                 EntityId = seatId.ToString(),
                 Details = $"Intento de reserva rechazado por concurrencia. UserId={userId}, SeatId={seatId}"
             });

@@ -5,6 +5,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
@@ -68,8 +69,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "CreateEvent",
-                EntityType = "Event",
+                Action = AuditActions.CreateEvent,
+                EntityType = AuditEntityTypes.Event,
                 EntityId = eventEntity.Id.ToString(),
                 Details = $"Evento creado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, Status={eventEntity.Status}, ImageUrl={eventEntity.ImageUrl}, DescriptionLength={eventEntity.Description?.Length ?? 0}"
             });

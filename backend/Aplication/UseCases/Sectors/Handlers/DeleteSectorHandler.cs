@@ -3,6 +3,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
 {
@@ -81,8 +82,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "DeleteSector",
-                EntityType = "Sector",
+                Action = AuditActions.DeleteSector,
+                EntityType = AuditEntityTypes.Sector,
                 EntityId = sector.Id.ToString(),
                 Details = $"Sector eliminado. EventId={sector.EventId}, Name={sector.Name}, Price={sector.Price}, Capacity={sector.Capacity}, DeletedSeats={deletedSeatsCount}"
             });

@@ -8,6 +8,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Seats;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
@@ -81,7 +82,7 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
                         SectorId = sectorId,
                         RowIdentifier = row,
                         SeatNumber = seatNumber,
-                        Status = "Available",
+                        Status = SeatStatuses.Available,
                         Version = 1
                     });
                 }
@@ -101,8 +102,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Seats.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = command.UserId,
-                Action = "CreateSeatsBulk",
-                EntityType = "Sector",
+                Action = AuditActions.CreateSeatsBulk,
+                EntityType = AuditEntityTypes.Sector,
                 EntityId = command.SectorId.ToString(),
                 Details = $"Creación masiva de butacas. SectorId={sectorId}, RowCount={command.RowCount}, GeneratedRows={string.Join(",", generatedRows)}, SeatsPerRow={command.SeatsPerRow}, TotalCreated={seatsToCreate.Count}"
             });

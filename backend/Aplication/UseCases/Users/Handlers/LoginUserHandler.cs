@@ -5,6 +5,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
 using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
@@ -75,8 +76,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = user.Id,
-                Action = "LoginUser",
-                EntityType = "User",
+                Action = AuditActions.LoginUser,
+                EntityType = AuditEntityTypes.User,
                 EntityId = user.Id.ToString(),
                 Details = $"Login exitoso. UserId={user.Id}, Email={user.Email}, Role={role}"
             });
@@ -87,8 +88,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "LoginUserRejected",
-                EntityType = "User",
+                Action = AuditActions.LoginUserRejected,
+                EntityType = AuditEntityTypes.User,
                 EntityId = userId?.ToString() ?? (email ?? string.Empty),
                 Details = $"Login rechazado. UserId={userId?.ToString() ?? "null"}, Email={email ?? string.Empty}, Reason={reason}"
             });

@@ -3,6 +3,7 @@ using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Commands;
+using TP_PROYECTO_SOFTWARE.Domain.Constants;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
 {
@@ -91,8 +92,8 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Handlers
             await _createAuditLogHandler.Handle(new CreateAuditLogCommand
             {
                 UserId = userId,
-                Action = "DeleteEvent",
-                EntityType = "Event",
+                Action = AuditActions.DeleteEvent,
+                EntityType = AuditEntityTypes.Event,
                 EntityId = eventEntity.Id.ToString(),
                 Details = $"Evento eliminado. Name={eventEntity.Name}, Venue={eventEntity.Venue}, EventDate={eventEntity.EventDate:O}, DeletedSectors={deletedSectorsCount}, DeletedSeats={deletedSeatsCount}"
             });
