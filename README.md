@@ -183,17 +183,30 @@ Notas:
 
 ### Prueba desde cero
 
+Checklist previo:
+- confirmar que la instancia de SQL Server del equipo exista y coincida con `Server=...`
+- definir `Jwt:Key` antes de levantar la API
+- elegir un nombre de base nuevo, por ejemplo `TicketingDb_Profesor`
+- apuntar `ConnectionStrings:Connection` a esa base nueva
+- compilar primero la solución para validar dependencias y configuración
+
 1. definir `Jwt:Key` con User Secrets o variable de entorno
 2. usar una base nueva o vacía en SQL Server
 3. configurar la cadena de conexión en `backend/API/appsettings.json` o `appsettings.Development.json`
 4. guardar el archivo si se cambió el nombre de la base
-5. ejecutar migraciones:
+5. compilar:
+
+```powershell
+dotnet build TP-PROYECTO-SOFTWARE.sln
+```
+
+6. ejecutar migraciones:
 
 ```powershell
 dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
-6. levantar la API:
+7. levantar la API:
 
 ```powershell
 dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj --launch-profile https
@@ -202,7 +215,12 @@ dotnet run --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj --launch-profil
 Si el navegador no se abre automáticamente, ingresar manualmente a:
 - `https://localhost:7176/swagger`
 
-7. levantar el frontend:
+8. verificar que la API quedó bien levantada:
+- abrir `https://localhost:7176/swagger`
+- probar `GET /api/v1/events`
+- resultado esperado: responde `200 OK` y devuelve `1` evento semilla
+
+9. levantar el frontend:
 
 ```powershell
 cd frontend
@@ -210,16 +228,17 @@ npm install
 npm run dev
 ```
 
-8. si se quiere acceder al panel admin, registrar el usuario:
+10. si se quiere acceder al panel admin, registrar el usuario:
 - `admintest@test.com`
 
 Notas:
 - si la base está vacía, la API carga automáticamente el dataset semilla base al iniciar
 - las seeds base incluyen:
   - `1` evento
-  - `2` sectores
-  - `50` butacas por sector
+- `2` sectores
+- `50` butacas por sector
 - si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
+- si aparece un error indicando datos semilla incompletos, la base quedó en un estado parcial; usar una base nueva o vaciarla y volver a correr migraciones
 - ese mail queda con rol `Admin` automáticamente por configuración
 
 ### Script idempotente
