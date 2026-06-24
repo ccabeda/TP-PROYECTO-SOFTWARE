@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using TP_PROYECTO_SOFTWARE.API.BackgroundServices;
 using TP_PROYECTO_SOFTWARE.API.Configuration;
 using TP_PROYECTO_SOFTWARE.API.Security;
 using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
@@ -104,6 +105,7 @@ public static class DependencyInjection
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddFluentValidationAutoValidation();
+        services.AddHostedService<ReservationExpirationBackgroundService>();
 
         return services;
     }
