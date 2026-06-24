@@ -20,12 +20,12 @@ public class ReservationExpirationBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await ExpirePendingReservations(stoppingToken);
+            await RunExpirationCycle(stoppingToken);
             await Task.Delay(ExecutionInterval, stoppingToken);
         }
     }
 
-    private async Task ExpirePendingReservations(CancellationToken stoppingToken)
+    private async Task RunExpirationCycle(CancellationToken stoppingToken)
     {
         try
         {
