@@ -2,12 +2,13 @@ using AutoMapper;
 using TP_PROYECTO_SOFTWARE.Aplication.Exceptions;
 using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
 using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
+using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
 using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Constants;
+using TP_PROYECTO_SOFTWARE.Domain.Factories;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
@@ -16,23 +17,29 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
     {
         private readonly IRepositoryReservationQuery _repositoryReservationQuery;
         private readonly IRepositorySeatQuery _repositorySeatQuery;
-        private readonly IUnitOfWorkReservationCommand _unitOfWorkReservationCommand;
-        private readonly ICreateAuditLogHandler _createAuditLogHandler;
+        private readonly IRepositoryReservationCommand _repositoryReservationCommand;
+        private readonly IRepositorySeatCommand _repositorySeatCommand;
+        private readonly IRepositoryAuditLogCommand _repositoryAuditLogCommand;
+        private readonly IApplicationUnitOfWork _unitOfWork;
         private readonly IReservationExpirationService _reservationExpirationService;
         private readonly IMapper _mapper;
 
         public ConfirmReservationPaymentHandler(
             IRepositoryReservationQuery repositoryReservationQuery,
             IRepositorySeatQuery repositorySeatQuery,
-            IUnitOfWorkReservationCommand unitOfWorkReservationCommand,
-            ICreateAuditLogHandler createAuditLogHandler,
+            IRepositoryReservationCommand repositoryReservationCommand,
+            IRepositorySeatCommand repositorySeatCommand,
+            IRepositoryAuditLogCommand repositoryAuditLogCommand,
+            IApplicationUnitOfWork unitOfWork,
             IReservationExpirationService reservationExpirationService,
             IMapper mapper)
         {
             _repositoryReservationQuery = repositoryReservationQuery;
             _repositorySeatQuery = repositorySeatQuery;
-            _unitOfWorkReservationCommand = unitOfWorkReservationCommand;
-            _createAuditLogHandler = createAuditLogHandler;
+            _repositoryReservationCommand = repositoryReservationCommand;
+            _repositorySeatCommand = repositorySeatCommand;
+            _repositoryAuditLogCommand = repositoryAuditLogCommand;
+            _unitOfWork = unitOfWork;
             _reservationExpirationService = reservationExpirationService;
             _mapper = mapper;
         }
@@ -51,9 +58,20 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
             MarkReservationAsPaid(reservation);
             MarkSeatAsSold(seat);
 
-            await PersistPaymentConfirmation(reservation, seat);
-            await _unitOfWorkReservationCommand.Save();
-            await CreateAuditLog(reservation, seat);
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                await PersistPaymentConfirmation(reservation, seat);
+                await CreateAuditLog(reservation, seat);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
 
             return _mapper.Map<ReservationGetDTO>(reservation);
         }
@@ -83,15 +101,14 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
                 {
                     seat.Status = SeatStatuses.Available;
                     seat.Version += 1;
-                    await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+                    await _repositorySeatCommand.Update(seat);
                 }
 
-                await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
+                await _repositoryReservationCommand.Update(reservation);
                 await CreateRejectedPaymentAuditLog(
                     command.CurrentUserId,
                     reservation.Id.ToString(),
                     $"Intento de pago rechazado por expiración. ReservationId={reservation.Id}, ExpiresAt={reservation.ExpiresAt:O}, CurrentTime={DateTime.UtcNow:O}");
-                await _unitOfWorkReservationCommand.Save();
                 throw new InvalidOperationException("La reserva expiró. Selecciona otra butaca.");
             }
 
@@ -133,32 +150,33 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Handlers
 
         private async Task PersistPaymentConfirmation(Reservation reservation, Seat seat)
         {
-            await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
-            await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+            await _repositoryReservationCommand.Update(reservation);
+            await _repositorySeatCommand.Update(seat);
         }
 
         private async Task CreateAuditLog(Reservation reservation, Seat seat)
         {
-            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
-            {
-                UserId = reservation.UserId,
-                Action = AuditActions.ConfirmReservationPayment,
-                EntityType = AuditEntityTypes.Reservation,
-                EntityId = reservation.Id.ToString(),
-                Details = $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}"
-            });
+            var auditLog = AuditLogFactory.Create(
+                reservation.UserId,
+                AuditActions.ConfirmReservationPayment,
+                AuditEntityTypes.Reservation,
+                reservation.Id.ToString(),
+                $"Pago confirmado. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ReservationStatus={reservation.Status}, SeatStatus={seat.Status}");
+
+            await _repositoryAuditLogCommand.Create(auditLog);
         }
 
         private async Task CreateRejectedPaymentAuditLog(int userId, string reservationId, string details)
         {
-            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
-            {
-                UserId = userId,
-                Action = AuditActions.ConfirmReservationPaymentRejected,
-                EntityType = AuditEntityTypes.Reservation,
-                EntityId = reservationId,
-                Details = details
-            });
+            var auditLog = AuditLogFactory.Create(
+                userId,
+                AuditActions.ConfirmReservationPaymentRejected,
+                AuditEntityTypes.Reservation,
+                reservationId,
+                details);
+
+            await _repositoryAuditLogCommand.Create(auditLog);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

@@ -9,7 +9,7 @@ using TP_PROYECTO_SOFTWARE.Domain.Models;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Command;
 using TP_PROYECTO_SOFTWARE.Infraestructure.Repository.Query;
-using TP_PROYECTO_SOFTWARE.Infraestructure.UnitOfWork;
+using TP_PROYECTO_SOFTWARE.Infraestructure.Transaction;
 
 namespace TP_PROYECTO_SOFTWARE.Infraestructure;
 
@@ -48,7 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IRepositorySectorCommand, RepositorySectorCommand>();
         services.AddScoped<IRepositoryAuditLogCommand, RepositoryAuditLogCommand>();
         services.AddScoped<IRepositoryUserCommand, RepositoryUserCommand>();
-        services.AddScoped<IUnitOfWorkReservationCommand, UnitOfWorkReservationCommand>();
+        services.AddScoped<IApplicationUnitOfWork, UnitOfWork>();
 
         return services;
     }

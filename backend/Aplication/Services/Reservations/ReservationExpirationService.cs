@@ -1,25 +1,31 @@
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
+using TP_PROYECTO_SOFTWARE.Aplication.IRepository.ICommand;
 using TP_PROYECTO_SOFTWARE.Aplication.IRepository.IQuery;
 using TP_PROYECTO_SOFTWARE.Aplication.IUnitOfWork;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Commands;
 using TP_PROYECTO_SOFTWARE.Domain.Constants;
+using TP_PROYECTO_SOFTWARE.Domain.Factories;
 
 namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations
 {
     public class ReservationExpirationService : IReservationExpirationService
     {
         private readonly IRepositoryReservationQuery _repositoryReservationQuery;
-        private readonly IUnitOfWorkReservationCommand _unitOfWorkReservationCommand;
-        private readonly ICreateAuditLogHandler _createAuditLogHandler;
+        private readonly IRepositoryReservationCommand _repositoryReservationCommand;
+        private readonly IRepositorySeatCommand _repositorySeatCommand;
+        private readonly IRepositoryAuditLogCommand _repositoryAuditLogCommand;
+        private readonly IApplicationUnitOfWork _unitOfWork;
 
         public ReservationExpirationService(
             IRepositoryReservationQuery repositoryReservationQuery,
-            IUnitOfWorkReservationCommand unitOfWorkReservationCommand,
-            ICreateAuditLogHandler createAuditLogHandler)
+            IRepositoryReservationCommand repositoryReservationCommand,
+            IRepositorySeatCommand repositorySeatCommand,
+            IRepositoryAuditLogCommand repositoryAuditLogCommand,
+            IApplicationUnitOfWork unitOfWork)
         {
             _repositoryReservationQuery = repositoryReservationQuery;
-            _unitOfWorkReservationCommand = unitOfWorkReservationCommand;
-            _createAuditLogHandler = createAuditLogHandler;
+            _repositoryReservationCommand = repositoryReservationCommand;
+            _repositorySeatCommand = repositorySeatCommand;
+            _repositoryAuditLogCommand = repositoryAuditLogCommand;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task ExpirePendingReservations()
@@ -40,26 +46,26 @@ namespace TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations
                 {
                     seat.Status = SeatStatuses.Available;
                     seat.Version += 1;
-                    await _unitOfWorkReservationCommand.RepositorySeatCommand.Update(seat);
+                    await _repositorySeatCommand.Update(seat);
                 }
 
-                await _unitOfWorkReservationCommand.RepositoryReservationCommand.Update(reservation);
+                await _repositoryReservationCommand.Update(reservation);
                 await CreateExpirationAuditLog(reservation, seat);
             }
 
-            await _unitOfWorkReservationCommand.Save();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         private async Task CreateExpirationAuditLog(Domain.Models.Reservation reservation, Domain.Models.Seat seat)
         {
-            await _createAuditLogHandler.Handle(new CreateAuditLogCommand
-            {
-                UserId = reservation.UserId,
-                Action = AuditActions.ExpireReservation,
-                EntityType = AuditEntityTypes.Reservation,
-                EntityId = reservation.Id.ToString(),
-                Details = $"Reserva expirada. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ExpiresAt={reservation.ExpiresAt:O}"
-            });
+            var auditLog = AuditLogFactory.Create(
+                reservation.UserId,
+                AuditActions.ExpireReservation,
+                AuditEntityTypes.Reservation,
+                reservation.Id.ToString(),
+                $"Reserva expirada. ReservationId={reservation.Id}, SeatId={seat.Id}, UserId={reservation.UserId}, ExpiresAt={reservation.ExpiresAt:O}");
+
+            await _repositoryAuditLogCommand.Create(auditLog);
         }
     }
 }
