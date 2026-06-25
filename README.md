@@ -103,7 +103,9 @@ Configuración pública:
   "Cors": {
     "AllowedOrigins": [
       "http://localhost:5173",
-      "http://127.0.0.1:5173"
+      "http://127.0.0.1:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5174"
     ]
   },
   "ReservationSettings": {
@@ -121,6 +123,7 @@ Configuración pública:
 
 Notas de configuración:
 - `Cors:AllowedOrigins` define qué frontends pueden llamar a la API desde el navegador.
+- si Vite levanta el frontend en otro puerto, agregar ese origen a `Cors:AllowedOrigins` y reiniciar la API.
 - `ReservationSettings:ExpirationMinutes` define cuánto dura una reserva pendiente antes de expirar.
 - `Jwt:RefreshTokenDays` define cuántos días puede renovarse la sesión sin volver a pedir usuario y contraseña.
 - Las reservas vencidas se liberan con un background job que corre en la API y también se validan en flujos críticos.
