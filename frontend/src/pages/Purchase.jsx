@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell";
+import PurchaseSummary from "../components/purchase/PurchaseSummary";
+import PurchaseVenueMap from "../components/purchase/PurchaseVenueMap";
+import SeatSelectionPanel from "../components/purchase/SeatSelectionPanel";
 import useAuthContext from "../context/useAuthContext";
 import useLanguageContext from "../context/useLanguageContext";
 import useToastContext from "../context/useToastContext";
@@ -16,13 +19,6 @@ import { createReservation, getReservationById } from "../services/checkoutServi
 
 const SERVICE_FEE_RATE = 0.12;
 const SEAT_MAP_REFRESH_INTERVAL_MS = 10_000;
-const SECTOR_SLOT_POSITIONS = [
-  { position: "left-front", tone: "tone-1" },
-  { position: "center-front", tone: "tone-2" },
-  { position: "right-front", tone: "tone-3" },
-  { position: "left-back", tone: "tone-4" },
-  { position: "right-back", tone: "tone-5" },
-];
 
 function getPriceLocale(language) {
   return language === "en" ? "en-US" : "es-AR";
@@ -75,16 +71,6 @@ function getSelectedSeatLabel(seat) {
   }
 
   return `${seat.rowIdentifier}${seat.seatNumber}`;
-}
-
-function shouldRefreshSeatsAfterReservationError(errorMessage) {
-  const normalizedMessage = errorMessage.trim().toLowerCase();
-
-  return (
-    normalizedMessage.includes("expir") ||
-    normalizedMessage.includes("disponible") ||
-    normalizedMessage.includes("reservad")
-  );
 }
 
 function Purchase() {
@@ -173,8 +159,6 @@ function Purchase() {
       visibleSectors.find((sector) => sector.id === resolvedSelectedSectorId) ?? null,
     [resolvedSelectedSectorId, visibleSectors]
   );
-  const groupedSeats = useMemo(() => groupSeatsByRow(seats), [seats]);
-  const sectorSlots = useMemo(() => buildSectorSlots(visibleSectors), [visibleSectors]);
   const selectedSeat = useMemo(
     () => seats.find((seat) => seat.id === selectedSeatId) ?? null,
     [seats, selectedSeatId]
@@ -185,6 +169,25 @@ function Purchase() {
     : purchaseSelectedSeatReady;
   const serviceFee = selectedSector ? Math.round(selectedSector.price * SERVICE_FEE_RATE) : 0;
   const finalPrice = selectedSector ? selectedSector.price + serviceFee : 0;
+  const summaryLabels = {
+    selectedSeat: purchaseSelectedSeatLabel,
+    selectedSeatEmpty: purchaseSelectedSeatEmpty,
+    basePrice: purchaseBasePriceLabel,
+    fee: purchaseFeeLabel,
+    finalPrice: purchaseFinalPriceLabel,
+    selectSectorFirst: purchaseSelectSectorFirst,
+  };
+  const seatPanelLabels = {
+    selectSectorFirst: purchaseSelectSectorFirst,
+    seatsEmpty: purchaseSeatsEmpty,
+    seatsLoading: purchaseSeatsLoading,
+    legendAvailable: purchaseLegendAvailable,
+    legendMine: purchaseLegendMine,
+    legendReserved: purchaseLegendReserved,
+    legendSold: purchaseLegendSold,
+    continueButton: purchaseContinueButton,
+    reservingButton: purchaseReservingButton,
+  };
 
   useEffect(() => {
     if (sectors.length === 0) {
@@ -293,7 +296,7 @@ function Purchase() {
         purchaseSelectSeatWarning,
       );
 
-      if (shouldRefreshSeatsAfterReservationError(errorMessage)) {
+      if (reservationError.status === 409) {
         setSelectedSeatId(null);
         refreshSeats();
       }
@@ -319,266 +322,61 @@ function Purchase() {
         </div>
 
         <section className="purchase-top-layout">
-          <section className="purchase-card purchase-map-card">
-            <h2>{purchaseMapTitle}</h2>
-            <p className="event-detail-copy">{purchaseMapCopy}</p>
+          <PurchaseVenueMap
+            title={purchaseMapTitle}
+            copy={purchaseMapCopy}
+            isLoading={isLoadingSectors || isFilteringSectors ? detailSectorsLoading : ""}
+            error={sectorsError}
+            emptyMessage={purchaseSectorsEmpty}
+            sectors={visibleSectors}
+            selectedSectorId={resolvedSelectedSectorId}
+            stageLabel={seatStageLabel}
+            formatPrice={formatPrice}
+            onSelectSector={(sectorId) => {
+              setSelectedSectorId(sectorId);
+              setSelectedSeatId(null);
+              setSeatWarning("");
+            }}
+          />
 
-            {isLoadingSectors || isFilteringSectors ? (
-              <p className="event-detail-copy">{detailSectorsLoading}</p>
-            ) : sectorsError ? (
-              <p className="event-detail-copy">{sectorsError}</p>
-            ) : visibleSectors.length === 0 ? (
-              <p className="event-detail-copy">{purchaseSectorsEmpty}</p>
-            ) : (
-              <div className="purchase-venue-map">
-                <div className="purchase-venue-stage">{seatStageLabel}</div>
-                <div className="purchase-venue-grid">
-                  {sectorSlots.map((slot) => (
-                    <button
-                      type="button"
-                      key={slot.key}
-                      className={`purchase-venue-slot purchase-venue-slot-${slot.position} purchase-venue-slot-${slot.tone} ${
-                        slot.sector ? "has-sector" : "is-empty"
-                      } ${slot.sector?.id === resolvedSelectedSectorId ? "is-selected" : ""}`}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        if (!slot.sector) {
-                          return;
-                        }
-
-                        setSelectedSectorId(slot.sector.id);
-                        setSelectedSeatId(null);
-                        setSeatWarning("");
-                      }}
-                      disabled={!slot.sector}
-                    >
-                      {slot.sector ? (
-                        <>
-                          <strong>{slot.sector.name}</strong>
-                          <span>{formatPrice(slot.sector.price)}</span>
-                        </>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-
-          <aside className="purchase-card purchase-summary-card">
-            <h2>{purchaseSummaryTitle}</h2>
-            <p className="event-detail-copy">{purchaseSummaryCopy}</p>
-
-            {selectedSector ? (
-              <div className="purchase-summary-box">
-                <span className="purchase-seat-map-label">{selectedSector.name}</span>
-
-                <div className="purchase-selected-seat-card">
-                  <div className="purchase-selected-seat-copy">
-                    <span>{purchaseSelectedSeatLabel}</span>
-                    <strong>
-                      {selectedSeatLabel || purchaseSelectedSeatEmpty}
-                    </strong>
-                  </div>
-                  {selectedSeat ? (
-                    <span
-                      className={`purchase-selected-seat-status ${
-                        selectedSeat.reservedByCurrentUser
-                          ? "is-mine"
-                          : "is-ready"
-                      }`}
-                    >
-                      {selectedSeatStateLabel}
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="purchase-summary-lines">
-                  <div className="purchase-summary-line">
-                    <span>{purchaseBasePriceLabel}</span>
-                    <strong>{formatPrice(selectedSector.price)}</strong>
-                  </div>
-                  <div className="purchase-summary-line">
-                    <span>{purchaseFeeLabel}</span>
-                    <strong>{formatPrice(serviceFee)}</strong>
-                  </div>
-                  <div className="purchase-summary-line purchase-summary-line-total">
-                    <span>{purchaseFinalPriceLabel}</span>
-                    <strong>{formatPrice(finalPrice)}</strong>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="event-detail-copy">{purchaseSelectSectorFirst}</p>
-            )}
-          </aside>
+          <PurchaseSummary
+            title={purchaseSummaryTitle}
+            copy={purchaseSummaryCopy}
+            selectedSector={selectedSector}
+            selectedSeat={selectedSeat}
+            selectedSeatLabel={selectedSeatLabel}
+            selectedSeatStateLabel={selectedSeatStateLabel}
+            labels={summaryLabels}
+            serviceFee={serviceFee}
+            finalPrice={finalPrice}
+            formatPrice={formatPrice}
+          />
         </section>
 
-        <section className="purchase-card purchase-seats-panel">
-          <h2>{purchaseSeatsTitle}</h2>
-          <p className="event-detail-copy">{purchaseSeatsCopy}</p>
-
-          {!resolvedSelectedSectorId ? (
-            <p className="event-detail-copy">{purchaseSelectSectorFirst}</p>
-          ) : seatsError ? (
-            <p className="event-detail-copy">{seatsError}</p>
-          ) : !isLoadingSeats && seats.length === 0 ? (
-            <p className="event-detail-copy">{purchaseSeatsEmpty}</p>
-          ) : (
-            <div className={`purchase-seat-map-shell ${isLoadingSeats ? "is-loading" : ""}`}>
-              {selectedSector ? (
-                <div className="purchase-seat-map-header">
-                  <div>
-                    <span className="purchase-seat-map-label">{selectedSector.name}</span>
-                    {selectedSeat ? (
-                      <strong>{selectedSeatLabel}</strong>
-                    ) : null}
-                  </div>
-                  {selectedSeat ? (
-                    <span
-                      className={`purchase-seat-focus-badge ${
-                        selectedSeat.reservedByCurrentUser ? "is-mine" : "is-ready"
-                      }`}
-                    >
-                      {selectedSeatStateLabel}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {isLoadingSeats ? (
-                <p className="purchase-seat-loading">{purchaseSeatsLoading}</p>
-              ) : null}
-
-              <div className="seat-legend">
-                <span className="seat-legend-item">
-                  <i className="seat-legend-swatch seat-legend-available" />
-                  {purchaseLegendAvailable}
-                </span>
-                <span className="seat-legend-item">
-                  <i className="seat-legend-swatch seat-legend-mine" />
-                  {purchaseLegendMine}
-                </span>
-                <span className="seat-legend-item">
-                  <i className="seat-legend-swatch seat-legend-reserved" />
-                  {purchaseLegendReserved}
-                </span>
-                <span className="seat-legend-item">
-                  <i className="seat-legend-swatch seat-legend-sold" />
-                  {purchaseLegendSold}
-                </span>
-              </div>
-
-              <div className="seat-map seat-map-inline">
-                {Object.entries(groupedSeats).map(([row, rowSeats]) => (
-                  <div className="seat-row" key={row}>
-                    <div className="seat-row-grid">
-                      {rowSeats.map((seat) => (
-                        <button
-                          type="button"
-                          key={seat.id}
-                          className={`seat-chip seat-chip-${getSeatVisualStatus(seat)} ${
-                            seat.id === selectedSeatId ? "is-selected" : ""
-                          }`}
-                          disabled={!isSeatSelectable(seat)}
-                          title={`${row}${seat.seatNumber} - ${getSeatStatusLabel(seat.status, language)}`}
-                          onClick={() => {
-                            setSelectedSeatId(seat.id);
-                            setSeatWarning("");
-                          }}
-                        >
-                          {row}{seat.seatNumber}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="purchase-seat-actions">
-                {seatWarning ? (
-                  <p className="purchase-seat-warning">{seatWarning}</p>
-                ) : null}
-                <button
-                  type="button"
-                  className="button button-primary purchase-continue-button"
-                  onClick={handleContinue}
-                  disabled={isReservingSeat}
-                >
-                  {isReservingSeat ? purchaseReservingButton : purchaseContinueButton}
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
+        <SeatSelectionPanel
+          title={purchaseSeatsTitle}
+          copy={purchaseSeatsCopy}
+          selectedSector={selectedSector}
+          selectedSeat={selectedSeat}
+          selectedSeatId={selectedSeatId}
+          selectedSeatLabel={selectedSeatLabel}
+          selectedSeatStateLabel={selectedSeatStateLabel}
+          seats={seats}
+          seatsError={seatsError}
+          isLoadingSeats={isLoadingSeats}
+          language={language}
+          labels={seatPanelLabels}
+          seatWarning={seatWarning}
+          isReservingSeat={isReservingSeat}
+          onSelectSeat={(seatId) => {
+            setSelectedSeatId(seatId);
+            setSeatWarning("");
+          }}
+          onContinue={handleContinue}
+        />
       </section>
     </AppShell>
   );
 }
 
 export default Purchase;
-
-function groupSeatsByRow(seats) {
-  return seats.reduce((groups, seat) => {
-    const row = seat.rowIdentifier || "?";
-
-    if (!groups[row]) {
-      groups[row] = [];
-    }
-
-    groups[row].push(seat);
-    return groups;
-  }, {});
-}
-
-function normalizeSeatStatus(status) {
-  const normalized = status?.trim().toLowerCase();
-
-  if (normalized === "reserved") {
-    return "reserved";
-  }
-
-  if (normalized === "sold") {
-    return "sold";
-  }
-
-  return "available";
-}
-
-function getSeatStatusLabel(status, language) {
-  const normalized = normalizeSeatStatus(status);
-
-  if (normalized === "reserved") {
-    return t(language, "home.seatReserved");
-  }
-
-  if (normalized === "sold") {
-    return t(language, "home.seatSold");
-  }
-
-  return t(language, "home.seatAvailable");
-}
-
-function isSeatSelectable(seat) {
-  const normalized = normalizeSeatStatus(seat.status);
-  return normalized === "available" || (normalized === "reserved" && seat.reservedByCurrentUser);
-}
-
-function getSeatVisualStatus(seat) {
-  const normalized = normalizeSeatStatus(seat.status);
-
-  if (normalized === "reserved" && seat.reservedByCurrentUser) {
-    return "mine";
-  }
-
-  return normalized;
-}
-
-function buildSectorSlots(sectors) {
-  return SECTOR_SLOT_POSITIONS.map(({ position, tone }, index) => ({
-    key: position,
-    position,
-    tone,
-    sector: sectors[index] ?? null,
-  }));
-}

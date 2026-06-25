@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../lib/api";
+import { createApiError } from "./apiError";
 
 function buildAuthJsonHeaders(token) {
   return {
@@ -61,36 +62,14 @@ async function handleJsonResponse(response) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const validationMessage = getValidationMessage(data);
-    const errorMessage =
-      validationMessage ??
-      data?.message ??
-      data?.detail ??
-      data?.title ??
-      "No se pudo procesar la compra. Verifica la API e intenta de nuevo.";
-
-    throw new Error(
-      errorMessage
+    throw createApiError(
+      response,
+      data,
+      "No se pudo procesar la compra. Verifica la API e intenta de nuevo.",
     );
   }
 
   return data;
-}
-
-function getValidationMessage(data) {
-  if (!data?.errors || typeof data.errors !== "object") {
-    return null;
-  }
-
-  const firstErrorGroup = Object.values(data.errors).find(
-    (messages) => Array.isArray(messages) && messages.length > 0,
-  );
-
-  if (!firstErrorGroup) {
-    return null;
-  }
-
-  return firstErrorGroup[0] ?? null;
 }
 
 function normalizeReservationDates(reservation) {

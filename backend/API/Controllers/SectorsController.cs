@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.API.Helpers;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.SectorDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Commands;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Sectors.Queries;
+using TP_PROYECTO_SOFTWARE.Application.DTOs.SectorDTOs;
+using TP_PROYECTO_SOFTWARE.Application.IHandlers;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Sectors.Commands;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Sectors.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {

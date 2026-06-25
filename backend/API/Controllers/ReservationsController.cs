@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.API.Helpers;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.ReservationDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Commands;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Reservations.Queries;
+using TP_PROYECTO_SOFTWARE.Application.DTOs.ReservationDTOs;
+using TP_PROYECTO_SOFTWARE.Application.IHandlers;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Reservations.Commands;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Reservations.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {

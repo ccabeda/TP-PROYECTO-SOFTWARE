@@ -1,58 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import getErrorMessage from "../lib/getErrorMessage";
 import { getSeatsBySectorId } from "../services/eventsService";
 
 function useSeats(sectorId) {
-  const [seats, setSeats] = useState([]);
-  const [isLoading, setIsLoading] = useState(Boolean(sectorId));
-  const [error, setError] = useState("");
-  const [refreshIndex, setRefreshIndex] = useState(0);
-
-  useEffect(() => {
-    if (!sectorId) {
-      return undefined;
-    }
-
-    let isMounted = true;
-
-    async function loadSeats() {
-      if (isMounted) {
-        setIsLoading(true);
-        setError("");
-      }
-
-      try {
-        const nextSeats = await getSeatsBySectorId(sectorId);
-        if (isMounted) {
-          setSeats(nextSeats);
-        }
-      } catch (loadError) {
-        if (isMounted) {
-          setError(getErrorMessage(loadError, "No se pudieron cargar las butacas."));
-          setSeats([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadSeats();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [refreshIndex, sectorId]);
+  const seatsQuery = useQuery({
+    queryKey: ["seats", sectorId],
+    queryFn: () => getSeatsBySectorId(sectorId),
+    enabled: Boolean(sectorId),
+  });
 
   const refreshSeats = useCallback(() => {
-    setRefreshIndex((current) => current + 1);
-  }, []);
+    void seatsQuery.refetch();
+  }, [seatsQuery]);
 
   return {
-    seats: sectorId ? seats : [],
-    isLoading: sectorId ? isLoading : false,
-    error: sectorId ? error : "",
+    seats: sectorId ? seatsQuery.data ?? [] : [],
+    isLoading: sectorId ? seatsQuery.isLoading : false,
+    error: sectorId && seatsQuery.error
+      ? getErrorMessage(seatsQuery.error, "No se pudieron cargar las butacas.")
+      : "",
     refreshSeats,
   };
 }

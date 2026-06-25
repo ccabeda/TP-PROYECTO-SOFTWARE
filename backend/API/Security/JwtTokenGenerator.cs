@@ -1,9 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
+using TP_PROYECTO_SOFTWARE.Application.ISecurity;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
 
 namespace TP_PROYECTO_SOFTWARE.API.Security
@@ -48,6 +49,18 @@ namespace TP_PROYECTO_SOFTWARE.API.Security
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public string HashRefreshToken(string refreshToken)
+        {
+            var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
+            return Convert.ToBase64String(hashBytes);
         }
 
         public string ResolvePrimaryRole(IEnumerable<string> roles)

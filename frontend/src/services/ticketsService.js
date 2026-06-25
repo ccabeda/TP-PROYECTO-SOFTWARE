@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../lib/api";
+import { createApiError } from "./apiError";
 
 function buildAuthHeaders(token) {
   return {
@@ -44,9 +45,10 @@ async function handleJsonResponse(response) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      data?.message ??
-        "No se pudieron cargar tus entradas. Verifica la API e intenta de nuevo.",
+    throw createApiError(
+      response,
+      data,
+      "No se pudieron cargar tus entradas. Verifica la API e intenta de nuevo.",
     );
   }
 

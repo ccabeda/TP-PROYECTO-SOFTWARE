@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../lib/api";
+import { createApiError } from "./apiError";
 
 const AUTH_STORAGE_KEY = "ticketing_auth";
 const JSON_HEADERS = {
@@ -26,6 +27,22 @@ function getStoredSessionValue() {
     window.localStorage.getItem(AUTH_STORAGE_KEY) ??
     window.sessionStorage.getItem(AUTH_STORAGE_KEY)
   );
+}
+
+function getStoredSessionStorage() {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  if (window.localStorage.getItem(AUTH_STORAGE_KEY)) {
+    return window.localStorage;
+  }
+
+  if (window.sessionStorage.getItem(AUTH_STORAGE_KEY)) {
+    return window.sessionStorage;
+  }
+
+  return null;
 }
 
 function parseStoredSession(rawSession) {
@@ -76,11 +93,49 @@ export async function getCurrentUser() {
   });
 
   if (response.status === 401) {
+    const refreshedSession = await refreshSession();
+    if (!refreshedSession?.token) {
+      clearSession();
+      return null;
+    }
+
+    const retryResponse = await fetch(`${API_BASE_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${refreshedSession.token}`,
+      },
+    });
+
+    if (retryResponse.status === 401) {
+      clearSession();
+      return null;
+    }
+
+    return handleJsonResponse(retryResponse);
+  }
+
+  return handleJsonResponse(response);
+}
+
+export async function refreshSession() {
+  const session = getSession();
+  if (!session?.refreshToken) {
+    return null;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users/refresh-token`, {
+    method: "POST",
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ refreshToken: session.refreshToken }),
+  });
+
+  if (!response.ok) {
     clearSession();
     return null;
   }
 
-  return handleJsonResponse(response);
+  const nextSession = await handleJsonResponse(response);
+  saveSessionInCurrentStorage(nextSession);
+  return nextSession;
 }
 
 export function saveSession(session, rememberMe = true) {
@@ -96,6 +151,16 @@ export function saveSession(session, rememberMe = true) {
   }
 
   storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+}
+
+function saveSessionInCurrentStorage(session) {
+  if (!session) {
+    return;
+  }
+
+  const storage = getStoredSessionStorage() ?? getPersistentStorage(true);
+  clearSession();
+  storage?.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
 }
 
 export function getSession() {
@@ -115,17 +180,31 @@ export function clearSession() {
   window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
 }
 
-export function logoutUser() {
-  clearSession();
+export async function logoutUser() {
+  const token = getToken();
+
+  try {
+    if (token) {
+      await fetch(`${API_BASE_URL}/users/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+  } finally {
+    clearSession();
+  }
 }
 
 async function handleJsonResponse(response) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      data?.message ??
-        "No se pudo conectar con la API. Verifica el backend e intenta de nuevo.",
+    throw createApiError(
+      response,
+      data,
+      "No se pudo conectar con la API. Verifica el backend e intenta de nuevo.",
     );
   }
 

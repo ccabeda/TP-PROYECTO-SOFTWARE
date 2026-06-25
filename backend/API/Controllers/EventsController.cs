@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.API.Helpers;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.EventDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Commands;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Events.Queries;
+using TP_PROYECTO_SOFTWARE.Application.DTOs.EventDTOs;
+using TP_PROYECTO_SOFTWARE.Application.IHandlers;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Events.Commands;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Events.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
@@ -38,7 +38,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Listado de eventos")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<EventGetDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Application.DTOs.PagedResultDTO<EventGetDTO>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetEvents([FromQuery] string? name, [FromQuery] DateTime? eventDate, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var result = await _getEventsHandler.Handle(new GetEventsQuery

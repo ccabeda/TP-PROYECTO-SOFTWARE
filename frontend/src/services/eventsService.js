@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../lib/api";
+import { createApiError } from "./apiError";
 import { getToken } from "./authService";
 
 function buildEventQuery(filters = {}) {
@@ -148,9 +149,10 @@ async function handleJsonResponse(response) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      data?.message ??
-        "No se pudieron cargar los eventos. Verifica el backend e intenta de nuevo.",
+    throw createApiError(
+      response,
+      data,
+      "No se pudieron cargar los eventos. Verifica el backend e intenta de nuevo.",
     );
   }
 

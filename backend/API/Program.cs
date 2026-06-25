@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using TP_PROYECTO_SOFTWARE.API;
 using TP_PROYECTO_SOFTWARE.API.Middleware;
-using TP_PROYECTO_SOFTWARE.Aplication;
+using TP_PROYECTO_SOFTWARE.Application;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
-using TP_PROYECTO_SOFTWARE.Infraestructure;
+using TP_PROYECTO_SOFTWARE.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

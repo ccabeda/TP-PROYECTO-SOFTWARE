@@ -1,4 +1,4 @@
-using TP_PROYECTO_SOFTWARE.Aplication.Services.Reservations;
+using TP_PROYECTO_SOFTWARE.Application.Services.Reservations;
 
 namespace TP_PROYECTO_SOFTWARE.API.BackgroundServices;
 

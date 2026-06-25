@@ -1,16 +1,18 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using TP_PROYECTO_SOFTWARE.Aplication.Exceptions;
+using TP_PROYECTO_SOFTWARE.Application.Exceptions;
 
 namespace TP_PROYECTO_SOFTWARE.API.Middleware
 {
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -41,7 +43,11 @@ namespace TP_PROYECTO_SOFTWARE.API.Middleware
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, StatusCodes.Status500InternalServerError, ex.Message);
+                _logger.LogError(ex, "Error no controlado al procesar la solicitud.");
+                await HandleExceptionAsync(
+                    context,
+                    StatusCodes.Status500InternalServerError,
+                    "Ocurrió un error interno. Intente nuevamente más tarde.");
             }
         }
 

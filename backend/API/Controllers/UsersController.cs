@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TP_PROYECTO_SOFTWARE.API.Helpers;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.UserDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Commands;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.Users.Queries;
+using TP_PROYECTO_SOFTWARE.Application.DTOs.UserDTOs;
+using TP_PROYECTO_SOFTWARE.Application.IHandlers;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Users.Commands;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.Users.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
@@ -20,6 +20,8 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         private readonly IGetUserByIdHandler _getUserByIdHandler;
         private readonly ICreateUserHandler _createUserHandler;
         private readonly ILoginUserHandler _loginUserHandler;
+        private readonly IRefreshUserTokenHandler _refreshUserTokenHandler;
+        private readonly ILogoutUserHandler _logoutUserHandler;
         private readonly IMapper _mapper;
 
         public UsersController(
@@ -28,6 +30,8 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             IGetUserByIdHandler getUserByIdHandler,
             ICreateUserHandler createUserHandler,
             ILoginUserHandler loginUserHandler,
+            IRefreshUserTokenHandler refreshUserTokenHandler,
+            ILogoutUserHandler logoutUserHandler,
             IMapper mapper)
         {
             _getUsersHandler = getUsersHandler;
@@ -35,6 +39,8 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             _getUserByIdHandler = getUserByIdHandler;
             _createUserHandler = createUserHandler;
             _loginUserHandler = loginUserHandler;
+            _refreshUserTokenHandler = refreshUserTokenHandler;
+            _logoutUserHandler = logoutUserHandler;
             _mapper = mapper;
         }
 
@@ -42,7 +48,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Listado de usuarios")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<UserGetDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Application.DTOs.PagedResultDTO<UserGetDTO>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUsers([FromQuery] string? name, [FromQuery] string? email, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var query = new GetUsersQuery
@@ -113,6 +119,34 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
             var command = _mapper.Map<LoginUserCommand>(userLoginDTO);
             var result = await _loginUserHandler.Handle(command);
             return Ok(result);
+        }
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        [SwaggerOperation(Summary = "Renueva el token JWT usando refresh token")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Unauthorized")]
+        [ProducesResponseType(typeof(UserLoginResponseDTO), StatusCodes.Status200OK)]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDTO refreshTokenDTO)
+        {
+            var command = _mapper.Map<RefreshUserTokenCommand>(refreshTokenDTO);
+            var result = await _refreshUserTokenHandler.Handle(command);
+            return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        [SwaggerOperation(Summary = "Cierra sesión e invalida el refresh token")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "No Content")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Unauthorized")]
+        public async Task<IActionResult> Logout()
+        {
+            await _logoutUserHandler.Handle(new LogoutUserCommand
+            {
+                UserId = UserClaimsHelper.GetRequiredCurrentUserId(User)
+            });
+
+            return NoContent();
         }
     }
 }

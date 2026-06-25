@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using TP_PROYECTO_SOFTWARE.Aplication.DTOs.AuditLogDTOs;
-using TP_PROYECTO_SOFTWARE.Aplication.IHandlers;
-using TP_PROYECTO_SOFTWARE.Aplication.UseCases.AuditLogs.Queries;
+using TP_PROYECTO_SOFTWARE.Application.DTOs.AuditLogDTOs;
+using TP_PROYECTO_SOFTWARE.Application.IHandlers;
+using TP_PROYECTO_SOFTWARE.Application.UseCases.AuditLogs.Queries;
 
 namespace TP_PROYECTO_SOFTWARE.API.Controllers
 {
@@ -23,7 +23,7 @@ namespace TP_PROYECTO_SOFTWARE.API.Controllers
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Listado de auditoría")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success")]
-        [ProducesResponseType(typeof(Aplication.DTOs.PagedResultDTO<AuditLogGetDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Application.DTOs.PagedResultDTO<AuditLogGetDTO>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAuditLogs([FromQuery] int? userId, [FromQuery] string? search, [FromQuery] DateTime? date, [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var result = await _getAuditLogsHandler.Handle(new GetAuditLogsQuery

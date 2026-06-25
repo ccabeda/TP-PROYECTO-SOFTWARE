@@ -25,8 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aplication\TP-PROYECTO-SOFTWARE.Aplication.csproj" />
-    <ProjectReference Include="..\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj" />
+    <ProjectReference Include="..\Application\TP-PROYECTO-SOFTWARE.Application.csproj" />
+    <ProjectReference Include="..\Infrastructure\TP-PROYECTO-SOFTWARE.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

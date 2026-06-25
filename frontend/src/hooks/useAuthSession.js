@@ -41,11 +41,12 @@ function useAuthSession() {
         }
 
         if (isMounted) {
-          setSession(mergeSessionWithCurrentUser(currentSession, currentUser));
+          const latestSession = getSession() ?? currentSession;
+          setSession(mergeSessionWithCurrentUser(latestSession, currentUser));
           setIsReady(true);
         }
       } catch {
-        logoutUser();
+        void logoutUser();
         if (isMounted) {
           setSession(null);
           setIsReady(true);
@@ -65,7 +66,7 @@ function useAuthSession() {
   }
 
   function clearSession() {
-    logoutUser();
+    void logoutUser();
     setSession(null);
   }
 

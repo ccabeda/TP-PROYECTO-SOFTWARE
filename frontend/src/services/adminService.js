@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../lib/api";
+import { createApiError } from "./apiError";
 
 const JSON_HEADERS = {
   "Content-Type": "application/json",
@@ -28,7 +29,8 @@ async function deleteWithAuth(path, token) {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudo revertir la creación administrativa.");
+    const data = await response.json().catch(() => null);
+    throw createApiError(response, data, "No se pudo revertir la creación administrativa.");
   }
 }
 
@@ -184,28 +186,12 @@ async function handleJsonResponse(response) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const validationMessage = getValidationMessage(data);
-
-    throw new Error(
-      data?.message ??
-        validationMessage ??
-        data?.detail ??
-        data?.title ??
-        "No se pudo completar la operación administrativa. Verifica la API e intenta de nuevo.",
+    throw createApiError(
+      response,
+      data,
+      "No se pudo completar la operación administrativa. Verifica la API e intenta de nuevo.",
     );
   }
 
   return data;
-}
-
-function getValidationMessage(data) {
-  if (!data?.errors || typeof data.errors !== "object") {
-    return null;
-  }
-
-  const firstErrorList = Object.values(data.errors).find(
-    (value) => Array.isArray(value) && value.length > 0,
-  );
-
-  return Array.isArray(firstErrorList) ? firstErrorList[0] : null;
 }

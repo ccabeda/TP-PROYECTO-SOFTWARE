@@ -19,8 +19,8 @@ Sistema de ticketing de eventos con:
 
 La solución sigue una arquitectura por capas dentro de `backend`:
 - `backend/Domain`
-- `backend/Aplication`
-- `backend/Infraestructure`
+- `backend/Application`
+- `backend/Infrastructure`
 - `backend/API`
 
 ## Stack
@@ -40,6 +40,7 @@ La solución sigue una arquitectura por capas dentro de `backend`:
 - React
 - Vite
 - React Router
+- TanStack Query
 - Bootstrap
 - React DatePicker
 
@@ -47,8 +48,8 @@ La solución sigue una arquitectura por capas dentro de `backend`:
 
 ### Backend
 - `backend/Domain`: entidades del sistema
-- `backend/Aplication`: DTOs, interfaces, validaciones y casos de uso
-- `backend/Infraestructure`: DbContext, migraciones, seeds y repositorios
+- `backend/Application`: DTOs, interfaces, validaciones y casos de uso
+- `backend/Infrastructure`: DbContext, migraciones, seeds y repositorios
 - `backend/API`: controllers, configuración, middleware y Swagger
 
 ### Frontend
@@ -93,10 +94,20 @@ Configuración pública:
 {
   "Jwt": {
     "Issuer": "TP_PROYECTO_SOFTWARE.API",
-    "Audience": "TP_PROYECTO_SOFTWARE.Client"
+    "Audience": "TP_PROYECTO_SOFTWARE.Client",
+    "RefreshTokenDays": 7
   },
   "AuthorizationSettings": {
     "AdminEmails": [ "admintest@test.com" ]
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173"
+    ]
+  },
+  "ReservationSettings": {
+    "ExpirationMinutes": 5
   },
   "TicketingRules": {
     "MaxSectorsPerEvent": 5,
@@ -107,6 +118,12 @@ Configuración pública:
   }
 }
 ```
+
+Notas de configuración:
+- `Cors:AllowedOrigins` define qué frontends pueden llamar a la API desde el navegador.
+- `ReservationSettings:ExpirationMinutes` define cuánto dura una reserva pendiente antes de expirar.
+- `Jwt:RefreshTokenDays` define cuántos días puede renovarse la sesión sin volver a pedir usuario y contraseña.
+- Las reservas vencidas se liberan con un background job que corre en la API y también se validan en flujos críticos.
 
 La clave JWT no se guarda en el repo.
 
@@ -124,6 +141,17 @@ $env:Jwt__Key="TP-Proyecto-Software-Jwt-Key-Local-2026-Segura"
 
 Nota:
 - la `Jwt:Key` debe tener al menos `32` caracteres para que `HS256` funcione correctamente
+- si la cadena de conexión tuviera usuario/contraseña, no debe versionarse en `appsettings.json`; usar User Secrets o variable de entorno:
+
+```powershell
+dotnet user-secrets --project backend\API\TP-PROYECTO-SOFTWARE.API.csproj set "ConnectionStrings:Connection" "Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True"
+```
+
+o:
+
+```powershell
+$env:ConnectionStrings__Connection="Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True"
+```
 
 Para verificar que quedó cargada:
 
@@ -137,6 +165,25 @@ Notas:
 - las reservas, `Mis entradas` y el pago requieren usuario autenticado
 - el usuario cuyo mail esté en `AdminEmails` recibe rol `Admin`
 - los endpoints administrativos requieren JWT con rol `Admin`
+- el login devuelve un JWT de acceso y un refresh token para renovar la sesión sin pedir credenciales otra vez
+- `POST /api/v1/users/refresh-token` rota el refresh token y devuelve una sesión nueva
+- `POST /api/v1/users/logout` invalida el refresh token guardado en la base y cierra la sesión real
+
+### Primer usuario admin
+
+El sistema no guarda una contraseña de admin en el repo. Para obtener el primer admin:
+
+1. Configurar el mail admin en `AuthorizationSettings:AdminEmails`.
+2. Levantar backend y frontend.
+3. Registrarse desde el frontend con ese mismo email.
+4. Reiniciar la API o volver a levantarla.
+5. Al iniciar, `InitializeAuthorizationAsync` crea los roles si faltan y asigna `Admin` a los usuarios cuyo email esté en `AdminEmails`.
+
+Con la configuración por defecto, el mail admin esperado es:
+
+```txt
+admintest@test.com
+```
 
 ## Configuración del frontend
 
@@ -169,11 +216,11 @@ dotnet build TP-PROYECTO-SOFTWARE.sln
 Para aplicar las migraciones existentes:
 
 ```powershell
-dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet ef database update --project backend\Infrastructure\TP-PROYECTO-SOFTWARE.Infrastructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
 Notas:
-- las migraciones ya están creadas en `backend\Infraestructure\Migrations`
+- las migraciones ya están creadas en `backend\Infrastructure\Migrations`
 - la migración inicial actual es `20260514213906_InitialCreate`
 - el proyecto incluye seeds base
 - este flujo está pensado para una base nueva o vacía
@@ -203,7 +250,7 @@ dotnet build TP-PROYECTO-SOFTWARE.sln
 6. ejecutar migraciones:
 
 ```powershell
-dotnet ef database update --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet ef database update --project backend\Infrastructure\TP-PROYECTO-SOFTWARE.Infrastructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
 7. levantar la API:
@@ -228,8 +275,9 @@ npm install
 npm run dev
 ```
 
-10. si se quiere acceder al panel admin, registrar el usuario:
-- `admintest@test.com`
+10. si se quiere acceder al panel admin, registrar el usuario configurado en `AuthorizationSettings:AdminEmails`:
+- por defecto: `admintest@test.com`
+11. reiniciar la API para que el inicializador asigne el rol `Admin` a ese email
 
 Notas:
 - si la base está vacía, la API carga automáticamente el dataset semilla base al iniciar
@@ -239,14 +287,14 @@ Notas:
 - `50` butacas por sector
 - si aparece un error tipo `There is already an object named 'EVENT' in the database`, se está intentando aplicar la migración inicial sobre una base vieja; cambiar el nombre de la base o borrar esa base y recrearla
 - si aparece un error indicando datos semilla incompletos, la base quedó en un estado parcial; usar una base nueva o vaciarla y volver a correr migraciones
-- ese mail queda con rol `Admin` automáticamente por configuración
+- ese mail queda con rol `Admin` automáticamente por configuración al iniciar la API
 
 ### Script idempotente
 
 También se puede generar un script SQL idempotente de EF Core con:
 
 ```powershell
-dotnet ef migrations script --idempotent --project backend\Infraestructure\TP-PROYECTO-SOFTWARE.Infraestructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
+dotnet ef migrations script --idempotent --project backend\Infrastructure\TP-PROYECTO-SOFTWARE.Infrastructure.csproj --startup-project backend\API\TP-PROYECTO-SOFTWARE.API.csproj
 ```
 
 Ese script:

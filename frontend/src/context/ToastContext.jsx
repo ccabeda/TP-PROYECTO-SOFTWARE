@@ -68,13 +68,14 @@ function ToastProvider({ children }) {
             className={`toast-card toast-card-${toast.type} ${
               toast.isClosing ? "is-closing" : ""
             }`}
+            role={toast.type === "error" ? "alert" : "status"}
           >
             <span className="toast-card-copy">{toast.message}</span>
             <button
               type="button"
               className="toast-card-close"
               onClick={() => dismissToast(toast.id)}
-              aria-label="Dismiss"
+              aria-label="Cerrar notificación"
             >
               ×
             </button>

@@ -1517,6 +1517,15 @@
   transform: perspective(120px) rotateX(-10deg) translateY(-1px);
 }
 
+.seat-chip:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.08),
+    0 0 0 4px rgba(163, 59, 32, 0.26),
+    0 12px 24px rgba(53, 28, 18, 0.18);
+  transform: perspective(120px) rotateX(-10deg) translateY(-1px);
+}
+
 .seat-chip.is-selected {
   transform: perspective(120px) rotateX(-10deg) translateY(-2px);
   box-shadow:

@@ -9,9 +9,9 @@ using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using TP_PROYECTO_SOFTWARE.API.BackgroundServices;
 using TP_PROYECTO_SOFTWARE.API.Configuration;
 using TP_PROYECTO_SOFTWARE.API.Security;
-using TP_PROYECTO_SOFTWARE.Aplication.ISecurity;
+using TP_PROYECTO_SOFTWARE.Application.ISecurity;
 using TP_PROYECTO_SOFTWARE.Domain.Models;
-using TP_PROYECTO_SOFTWARE.Infraestructure.Persistence;
+using TP_PROYECTO_SOFTWARE.Infrastructure.Persistence;
 
 namespace TP_PROYECTO_SOFTWARE.API;
 
@@ -65,23 +65,13 @@ public static class DependencyInjection
         var jwtKey = configuration.GetRequiredJwtKey();
         var jwtIssuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer no configurado.");
         var jwtAudience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience no configurado.");
-        var localFrontendOrigins = new[]
-        {
-            "http://127.0.0.1:5500",
-            "http://localhost:5500",
-            "http://127.0.0.1:5501",
-            "http://localhost:5501",
-            "http://127.0.0.1:5173",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://localhost:3000"
-        };
+        var allowedOrigins = configuration.GetRequiredCorsOrigins();
 
         services.AddCors(options =>
         {
             options.AddPolicy(FrontendDevPolicy, policy =>
             {
-                policy.WithOrigins(localFrontendOrigins)
+                policy.WithOrigins(allowedOrigins)
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
@@ -144,7 +134,7 @@ public static class DependencyInjection
     public static async Task InitializeDatabaseAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AplicationDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         await dbContext.Database.MigrateAsync();
         await ReferenceDataInitializer.InitializeAsync(dbContext);

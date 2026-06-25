@@ -1,55 +1,20 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import getErrorMessage from "../lib/getErrorMessage";
 import { getSectorsByEventId } from "../services/eventsService";
 
 function useSectors(eventId) {
-  const [sectors, setSectors] = useState([]);
-  const [isLoading, setIsLoading] = useState(Boolean(eventId));
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!eventId) {
-      return undefined;
-    }
-
-    let isMounted = true;
-
-    async function loadSectors() {
-      if (isMounted) {
-        setIsLoading(true);
-        setError("");
-      }
-
-      try {
-        const nextSectors = await getSectorsByEventId(eventId);
-        if (isMounted) {
-          setSectors(nextSectors);
-        }
-      } catch (loadError) {
-        if (isMounted) {
-          setError(
-            getErrorMessage(loadError, "No se pudieron cargar los sectores."),
-          );
-          setSectors([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadSectors();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [eventId]);
+  const sectorsQuery = useQuery({
+    queryKey: ["sectors", eventId],
+    queryFn: () => getSectorsByEventId(eventId),
+    enabled: Boolean(eventId),
+  });
 
   return {
-    sectors: eventId ? sectors : [],
-    isLoading: eventId ? isLoading : false,
-    error: eventId ? error : "",
+    sectors: eventId ? sectorsQuery.data ?? [] : [],
+    isLoading: eventId ? sectorsQuery.isLoading : false,
+    error: eventId && sectorsQuery.error
+      ? getErrorMessage(sectorsQuery.error, "No se pudieron cargar los sectores.")
+      : "",
   };
 }
 

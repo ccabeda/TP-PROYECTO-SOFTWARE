@@ -1,67 +1,26 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getEvents } from "../services/eventsService";
 import getErrorMessage from "../lib/getErrorMessage";
 
 function useEvents(filters = {}) {
   const { eventDate = "", name = "", page = 1, pageSize = 12 } = filters;
-  const [events, setEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [pagination, setPagination] = useState({
-    totalCount: 0,
-    page: 1,
-    pageSize,
-    totalPages: 0,
+  const eventsQuery = useQuery({
+    queryKey: ["events", { eventDate, name, page, pageSize }],
+    queryFn: () => getEvents({ eventDate, name, page, pageSize }),
   });
+  const result = eventsQuery.data;
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadEvents() {
-      if (isMounted) {
-        setIsLoading(true);
-        setError("");
-      }
-
-      try {
-        const result = await getEvents({ eventDate, name, page, pageSize });
-        if (isMounted) {
-          setEvents(result.items);
-          setPagination({
-            totalCount: result.totalCount,
-            page: result.page,
-            pageSize: result.pageSize,
-            totalPages: result.totalPages,
-          });
-        }
-      } catch (loadError) {
-        if (isMounted) {
-          setError(
-            getErrorMessage(loadError, "No se pudieron cargar los eventos."),
-          );
-          setEvents([]);
-          setPagination({
-            totalCount: 0,
-            page,
-            pageSize,
-            totalPages: 0,
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadEvents();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [eventDate, name, page, pageSize]);
-
-  return { events, isLoading, error, ...pagination };
+  return {
+    events: result?.items ?? [],
+    isLoading: eventsQuery.isLoading,
+    error: eventsQuery.error
+      ? getErrorMessage(eventsQuery.error, "No se pudieron cargar los eventos.")
+      : "",
+    totalCount: result?.totalCount ?? 0,
+    page: result?.page ?? page,
+    pageSize: result?.pageSize ?? pageSize,
+    totalPages: result?.totalPages ?? 0,
+  };
 }
 
 export default useEvents;
