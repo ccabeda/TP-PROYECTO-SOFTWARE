@@ -19,6 +19,7 @@ namespace TP_PROYECTO_SOFTWARE.Infrastructure.Repository.Query
         {
             var query = _context.Events
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(e => e.Sectors)
                     .ThenInclude(s => s.Seats)
                 .Where(e => e.EventDate >= DateTime.UtcNow)
@@ -64,6 +65,7 @@ namespace TP_PROYECTO_SOFTWARE.Infrastructure.Repository.Query
 
         public async Task<Event?> GetById(int id) => await _context.Events
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(e => e.Sectors)
                 .ThenInclude(s => s.Seats)
             .FirstOrDefaultAsync(e => e.Id == id);
